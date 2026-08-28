@@ -1,0 +1,151 @@
+using System.Text;
+using CustomerSupport.Api.Infrastructure;
+using CustomerSupport.Api.Services;
+using CustomerSupport.Application;
+using CustomerSupport.Application.Common.Interfaces;
+using CustomerSupport.Infrastructure;
+using CustomerSupport.Infrastructure.Persistence;
+using CustomerSupport.Infrastructure.Persistence.Interceptors;
+using CustomerSupport.Infrastructure.Persistence.Seed;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
+using Serilog;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// --- Logging -----------------------------------------------------------------------------------
+builder.Host.UseSerilog((context, config) => config
+    .ReadFrom.Configuration(context.Configuration)
+    .Enrich.FromLogContext());
+
+// --- Layers ------------------------------------------------------------------------------------
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
+
+// --- Request context ---------------------------------------------------------------------------
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUserService>();
+builder.Services.AddScoped<IAuditContextAccessor, AuditContextAccessor>();
+
+// --- Authentication ----------------------------------------------------------------------------
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Jwt:Key is not configured. Set it via user-secrets or the environment.");
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+
+            // No leeway: an expired token is expired. The refresh flow exists for this.
+            ClockSkew = TimeSpan.Zero,
+        };
+
+        // The live-chat and notification hubs pass the token as a query parameter, because the
+        // browser WebSocket API cannot set an Authorization header.
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            },
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+// --- CORS: the Angular dev server and the deployed front end ------------------------------------
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? ["http://localhost:4200"];
+
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
+    .WithOrigins(allowedOrigins)
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials()));
+
+// --- MVC, errors and API docs -------------------------------------------------------------------
+builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddOpenApi();
+
+builder.Services.AddRequestLocalization(options =>
+{
+    // Arabic is the default culture; the Accept-Language header or the ?culture= query overrides it.
+    options.SetDefaultCulture("ar")
+        .AddSupportedCultures("ar", "en")
+        .AddSupportedUICultures("ar", "en");
+});
+
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>("database");
+
+var app = builder.Build();
+
+// --- Pipeline ----------------------------------------------------------------------------------
+app.UseExceptionHandler();
+app.UseSerilogRequestLogging();
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+}
+else
+{
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseRequestLocalization();
+app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+app.MapHealthChecks("/health");
+
+// --- Migrate and seed --------------------------------------------------------------------------
+// Applying migrations at startup suits a single-instance deployment. For multi-instance, run
+// `dotnet ef database update` in the release pipeline instead and set Database:AutoMigrate to false.
+if (app.Configuration.GetValue("Database:AutoMigrate", app.Environment.IsDevelopment()))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    if (db.Database.IsSqlite())
+    {
+        // The committed migrations are SQL Server specific (they create sequences). For the
+        // development-only SQLite database, build the schema straight from the model instead —
+        // it is a throwaway file, so there is no migration history worth keeping.
+        await db.Database.EnsureCreatedAsync();
+    }
+    else
+    {
+        await db.Database.MigrateAsync();
+    }
+
+    var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+    await seeder.SeedAsync();
+}
+
+await app.RunAsync();

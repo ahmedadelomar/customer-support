@@ -1,0 +1,159 @@
+@if (loading()) {
+  <div class="space-y-4">
+    <div class="h-8 w-64 animate-pulse rounded bg-slate-200"></div>
+    <div class="card h-40 animate-pulse"></div>
+  </div>
+} @else if (notFound() || !customer()) {
+  <app-empty-state titleKey="customers.notFound" descriptionKey="customers.notFoundHint" icon="⚠">
+    <a class="btn-secondary" routerLink="/agent/customers">{{ 'common.back' | translate }}</a>
+  </app-empty-state>
+} @else {
+  <app-page-header [titleKey]="'customers.detail'">
+    <a
+      *hasPermission="permissions.customers.update"
+      class="btn-primary"
+      [routerLink]="['/agent/customers', customer()!.id, 'edit']"
+    >
+      {{ 'common.edit' | translate }}
+    </a>
+    <a class="btn-secondary" routerLink="/agent/customers">{{ 'common.back' | translate }}</a>
+  </app-page-header>
+
+  <!-- Identity header -->
+  <div class="card mb-5 flex flex-wrap items-start gap-4 p-5">
+    <span
+      class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xl font-semibold text-brand-700"
+      aria-hidden="true"
+    >
+      {{ displayName().charAt(0) }}
+    </span>
+
+    <div class="min-w-0 flex-1">
+      <div class="flex flex-wrap items-center gap-2">
+        <h2 class="text-lg font-semibold text-slate-900">{{ displayName() }}</h2>
+        <span class="chip" [class]="statusChipClasses()">{{ statusLabelKey() | translate }}</span>
+        @if (customer()!.tier) {
+          <span class="chip border-amber-200 bg-amber-50 text-amber-700">{{ customer()!.tier }}</span>
+        }
+      </div>
+
+      <p class="mt-1 text-sm text-slate-500">
+        {{ customer()!.code }} · {{ 'enums.customerType.' + customer()!.type | translate }}
+      </p>
+
+      @if (customer()!.isBlocked && customer()!.blockedReason) {
+        <p class="mt-2 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          {{ 'customers.blockedReason' | translate }}: {{ customer()!.blockedReason }}
+        </p>
+      }
+    </div>
+
+    <dl class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+      <div>
+        <dt class="text-xs text-slate-500">{{ 'customers.columns.email' | translate }}</dt>
+        <dd class="text-slate-800">{{ customer()!.primaryEmail || '—' }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs text-slate-500">{{ 'customers.columns.phone' | translate }}</dt>
+        <dd class="text-slate-800">{{ customer()!.primaryPhone || '—' }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs text-slate-500">{{ 'customers.fields.preferredLanguage' | translate }}</dt>
+        <dd class="text-slate-800">{{ 'common.language.' + customer()!.preferredLanguage | translate }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs text-slate-500">{{ 'customers.fields.createdAt' | translate }}</dt>
+        <dd class="text-slate-800">{{ customer()!.createdAt | date: 'mediumDate' : undefined : locale() }}</dd>
+      </div>
+    </dl>
+  </div>
+
+  <!-- Summary tiles -->
+  <div class="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <app-state-card labelKey="customers.stats.totalTickets" icon="✉" [value]="customer()!.totalTicketCount" />
+    <app-state-card
+      labelKey="customers.stats.openTickets"
+      icon="◷"
+      [value]="customer()!.openTicketCount"
+      badgeClasses="bg-amber-50 text-amber-700"
+    />
+    <app-state-card
+      labelKey="customers.stats.satisfaction"
+      icon="★"
+      [value]="customer()!.satisfactionScore ?? '—'"
+      badgeClasses="bg-emerald-50 text-emerald-700"
+    />
+    <app-state-card labelKey="customers.stats.notes" icon="❐" [value]="customer()!.noteCount" />
+  </div>
+
+  <!-- Tabs -->
+  <div class="mb-4 flex gap-1 border-b border-slate-200" role="tablist">
+    @for (tab of tabs; track tab.key) {
+      <button
+        type="button"
+        role="tab"
+        class="-mb-px border-b-2 px-4 py-2 text-sm"
+        [class]="
+          activeTab() === tab.key
+            ? 'border-brand-700 font-medium text-brand-700'
+            : 'border-transparent text-slate-500 hover:text-slate-800'
+        "
+        [attr.aria-selected]="activeTab() === tab.key"
+        (click)="selectTab(tab.key)"
+      >
+        {{ tab.labelKey | translate }}
+      </button>
+    }
+  </div>
+
+  @switch (activeTab()) {
+    @case ('contacts') {
+      @if (contactGroups().length === 0) {
+        <div class="card">
+          <app-empty-state titleKey="customers.contacts.empty" icon="☎" />
+        </div>
+      } @else {
+        <div class="grid gap-4 md:grid-cols-2">
+          @for (group of contactGroups(); track group.type) {
+            <section class="card p-4">
+              <h3 class="mb-3 text-sm font-medium text-slate-700">{{ group.labelKey | translate }}</h3>
+
+              <ul class="space-y-2">
+                @for (contact of group.items; track contact.id) {
+                  <li class="flex flex-wrap items-center gap-2 text-sm">
+                    <span class="text-slate-800">{{ contact.value }}</span>
+
+                    @if (contact.label) {
+                      <span class="text-xs text-slate-400">({{ contact.label }})</span>
+                    }
+                    @if (contact.isPrimary) {
+                      <span class="chip border-brand-200 bg-brand-50 text-brand-700">
+                        {{ 'customers.contacts.primary' | translate }}
+                      </span>
+                    }
+                    @if (contact.isVerified) {
+                      <span class="chip border-emerald-200 bg-emerald-50 text-emerald-700">
+                        {{ 'customers.contacts.verified' | translate }}
+                      </span>
+                    }
+                    @if (!contact.allowNotifications) {
+                      <span class="chip border-slate-200 bg-slate-100 text-slate-600">
+                        {{ 'customers.contacts.optedOut' | translate }}
+                      </span>
+                    }
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+        </div>
+      }
+    }
+    @default {
+      <!-- Interaction history, notes and tickets each land here from their own story. -->
+      <div class="card">
+        <app-empty-state titleKey="common.comingSoon" descriptionKey="customers.tabPending" icon="◌" />
+      </div>
+    }
+  }
+}

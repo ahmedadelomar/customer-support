@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Brand tokens. `BrandingService` overwrites these at runtime from the API so a tenant theme
+ * needs no rebuild. Values here are the shipped defaults.
+ */
+:root {
+  --brand-50: #f5f3ff;
+  --brand-100: #ede9fe;
+  --brand-500: #7c3aed;
+  --brand-600: #6d28d9;
+  --brand-700: #5b2c8d;
+  --brand-900: #3b1e5c;
+  --accent-50: #ecfeff;
+  --accent-600: #0e7490;
+}
+
+html,
+body {
+  @apply h-full bg-slate-50 text-slate-900 antialiased;
+}
+
+/* Direction is set on <html> by LanguageService. Logical properties then handle mirroring,
+   so components need no separate RTL stylesheet. */
+[dir='rtl'] {
+  font-family: 'Tajawal', 'Inter', system-ui, sans-serif;
+}
+
+/* Utility layer shared by every feature so form and table styling stays consistent. */
+@layer components {
+  .form-label {
+    @apply mb-1 block text-sm font-medium text-slate-700;
+  }
+
+  /* Ring uses a solid token rather than an opacity modifier: the brand colours resolve from CSS
+     custom properties, which Tailwind cannot compute an alpha channel against. */
+  .form-control {
+    @apply block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm
+           placeholder:text-slate-400 focus:border-brand-500 focus:outline-none
+           focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100;
+  }
+
+  .form-error {
+    @apply mt-1 text-xs text-rose-600;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm
+           font-medium transition disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-700 text-white hover:bg-brand-600;
+  }
+
+  .btn-secondary {
+    @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
+  }
+
+  .btn-danger {
+    @apply btn bg-rose-600 text-white hover:bg-rose-500;
+  }
+
+  .card {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium;
+  }
+}

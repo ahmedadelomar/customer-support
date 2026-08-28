@@ -1,0 +1,209 @@
+{
+  "app": {
+    "name": "Customer Support CRM"
+  },
+  "common": {
+    "search": "Search",
+    "all": "All",
+    "yes": "Yes",
+    "no": "No",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "back": "Back",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+    "actions": "Actions",
+    "menu": "Menu",
+    "dismiss": "Dismiss",
+    "previous": "Previous",
+    "next": "Next",
+    "pagination": "Pagination",
+    "showingRange": "Showing {{from}}–{{to}} of {{total}}",
+    "noResults": "No results found.",
+    "clearFilters": "Clear filters",
+    "switchLanguage": "العربية",
+    "unknown": "Unknown",
+    "comingSoon": "Coming soon",
+    "fixValidationErrors": "Please correct the highlighted fields.",
+    "language": {
+      "ar": "Arabic",
+      "en": "English"
+    }
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "tickets": "Tickets",
+    "customers": "Customers",
+    "tasks": "Tasks & Reminders",
+    "knowledgeBase": "Knowledge Base",
+    "quickReplies": "Quick Replies",
+    "reports": "Reports",
+    "slaAutomation": "SLA & Automation",
+    "channels": "Channels",
+    "users": "Users & Roles",
+    "settings": "Settings",
+    "groups": {
+      "work": "Work",
+      "knowledge": "Knowledge",
+      "insights": "Insights",
+      "administration": "Administration"
+    }
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "signInSubtitle": "Sign in to your support workspace",
+    "userName": "Username",
+    "password": "Password",
+    "logout": "Sign out",
+    "invalidCredentials": "The username or password is incorrect."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back, {{name}}.",
+    "tiles": {
+      "assigned": "Assigned to me",
+      "dueToday": "Due today",
+      "breaching": "Approaching SLA breach",
+      "resolvedThisWeek": "Resolved this week"
+    }
+  },
+  "customers": {
+    "title": "Customers",
+    "subtitle": "Profiles, contact details and interaction history",
+    "detail": "Customer profile",
+    "create": "New customer",
+    "edit": "Edit customer",
+    "created": "Customer created.",
+    "updated": "Customer updated.",
+    "deleted": "Customer deleted.",
+    "empty": "No customers match these filters.",
+    "notFound": "Customer not found",
+    "notFoundHint": "It may have been deleted, or you may not have access to it.",
+    "searchPlaceholder": "Search by name, code, email or phone",
+    "confirmDelete": "Delete {{name}}? This cannot be undone.",
+    "blockedReason": "Blocked reason",
+    "tabPending": "This tab is delivered by its own story.",
+    "columns": {
+      "code": "Code",
+      "name": "Name",
+      "type": "Type",
+      "email": "Email",
+      "phone": "Phone",
+      "status": "Status",
+      "openTickets": "Open tickets",
+      "lastInteraction": "Last interaction"
+    },
+    "fields": {
+      "displayNameEn": "Display name (English)",
+      "displayNameAr": "Display name (Arabic)",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "companyName": "Company name",
+      "nationalIdOrCr": "National ID / CR number",
+      "tier": "Tier",
+      "preferredLanguage": "Preferred language",
+      "preferredChannel": "Preferred channel",
+      "createdAt": "Created"
+    },
+    "sections": {
+      "identity": "Identity",
+      "contact": "Contact details",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "blocked": "Blocked"
+    },
+    "filters": {
+      "allTypes": "All types",
+      "allStatuses": "All statuses",
+      "hasOpenTickets": "Has open tickets",
+      "noOpenTickets": "No open tickets"
+    },
+    "stats": {
+      "total": "Total customers",
+      "activeOnPage": "Active on this page",
+      "withOpenTickets": "With open tickets",
+      "totalTickets": "Total tickets",
+      "openTickets": "Open tickets",
+      "satisfaction": "Satisfaction",
+      "notes": "Notes"
+    },
+    "tabs": {
+      "contacts": "Contact details",
+      "history": "Interaction history",
+      "notes": "Notes & attachments",
+      "tickets": "Tickets"
+    },
+    "contacts": {
+      "empty": "No contact details recorded yet.",
+      "primary": "Primary",
+      "verified": "Verified",
+      "optedOut": "Notifications off",
+      "manageOnDetail": "Contact details are managed on the customer profile page."
+    },
+    "validation": {
+      "contactRequired": "Provide at least an email address or a phone number.",
+      "companyNameRequired": "A company name is required for company and government customers.",
+      "blockedReasonRequired": "A reason is required when blocking a customer."
+    }
+  },
+  "tickets": {
+    "title": "Tickets"
+  },
+  "validation": {
+    "required": "This field is required.",
+    "email": "Enter a valid email address.",
+    "phone": "Enter 7 to 15 digits, optionally starting with +."
+  },
+  "errors": {
+    "network": "Cannot reach the server. Check your connection and try again.",
+    "badRequest": "The request could not be processed.",
+    "forbidden": "You do not have permission to perform this action.",
+    "forbiddenTitle": "Access denied",
+    "notFound": "The requested item was not found.",
+    "notFoundTitle": "Page not found",
+    "conflict": "This action conflicts with the current state.",
+    "unexpected": "Something went wrong. Please try again."
+  },
+  "enums": {
+    "customerType": {
+      "0": "Individual",
+      "1": "Company",
+      "2": "Government"
+    },
+    "contactType": {
+      "0": "Email",
+      "1": "Mobile",
+      "2": "Phone",
+      "3": "WhatsApp",
+      "4": "Address",
+      "5": "Website",
+      "6": "Other"
+    },
+    "channel": {
+      "0": "Email",
+      "1": "WhatsApp",
+      "2": "Live chat",
+      "3": "SMS",
+      "4": "Web form",
+      "5": "Customer portal",
+      "6": "Phone",
+      "7": "API",
+      "8": "Internal"
+    },
+    "ticketStatusKind": {
+      "0": "New",
+      "1": "Open",
+      "2": "Pending",
+      "3": "On hold",
+      "4": "Resolved",
+      "5": "Closed",
+      "6": "Cancelled"
+    }
+  }
+}

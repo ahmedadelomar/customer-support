@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
+    <PackageReference Include="MediatR" Version="12.4.1" />
+    <!--
+      EF Core is referenced here deliberately. IAppDbContext exposes DbSet<T> and handlers use the
+      async LINQ operators (ToListAsync, FirstOrDefaultAsync) and EF.Functions. This is the standard
+      Clean Architecture trade-off: Application depends on the EF *abstractions*, not on a provider —
+      the SQL Server provider stays in Infrastructure, so the database engine remains swappable.
+    -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.11" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CustomerSupport.Domain\CustomerSupport.Domain.csproj" />
+  </ItemGroup>
+</Project>

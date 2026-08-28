@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <!--
+      Identity's token providers (used for email confirmation and password reset) and the
+      DataProtection APIs live in the ASP.NET Core shared framework, not in a NuGet package.
+      A plain class library needs this explicit reference to see them.
+    -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.11" />
+    <!-- Development convenience only: lets a developer run with no database server installed. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.11">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.13.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CustomerSupport.Application\CustomerSupport.Application.csproj" />
+  </ItemGroup>
+</Project>

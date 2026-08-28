@@ -1,0 +1,109 @@
+<app-page-header titleKey="customers.title" subtitleKey="customers.subtitle">
+  <a *hasPermission="permissions.customers.create" class="btn-primary" routerLink="/agent/customers/new">
+    {{ 'customers.create' | translate }}
+  </a>
+</app-page-header>
+
+<!-- Header KPIs -->
+<div class="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+  <app-state-card
+    labelKey="customers.stats.total"
+    icon="☺"
+    [value]="totalCount()"
+    [loading]="loading()"
+    badgeClasses="bg-brand-50 text-brand-700"
+  />
+  <app-state-card
+    labelKey="customers.stats.activeOnPage"
+    icon="✓"
+    [value]="activeCount()"
+    [loading]="loading()"
+    badgeClasses="bg-emerald-50 text-emerald-700"
+  />
+  <app-state-card
+    labelKey="customers.stats.withOpenTickets"
+    icon="✉"
+    [value]="withOpenTicketsCount()"
+    [loading]="loading()"
+    badgeClasses="bg-accent-50 text-accent-600"
+  />
+</div>
+
+<!-- Filter bar -->
+<div class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+  <div class="min-w-56 flex-1">
+    <label class="form-label" for="customer-search">{{ 'common.search' | translate }}</label>
+    <app-search-input
+      [value]="searchTerm()"
+      placeholderKey="customers.searchPlaceholder"
+      (search)="onSearch($event)"
+    />
+  </div>
+
+  <div class="min-w-40">
+    <label class="form-label" for="customer-type">{{ 'customers.columns.type' | translate }}</label>
+    <select
+      id="customer-type"
+      class="form-control"
+      [ngModel]="typeFilter()"
+      (ngModelChange)="typeFilter.set($event); onFilterChange()"
+    >
+      @for (option of typeOptions; track option.value) {
+        <option [value]="option.value">{{ option.labelKey | translate }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="min-w-40">
+    <label class="form-label" for="customer-status">{{ 'customers.columns.status' | translate }}</label>
+    <select
+      id="customer-status"
+      class="form-control"
+      [ngModel]="statusFilter()"
+      (ngModelChange)="statusFilter.set($event); onFilterChange()"
+    >
+      @for (option of statusOptions; track option.value) {
+        <option [value]="option.value">{{ option.labelKey | translate }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="min-w-44">
+    <label class="form-label" for="customer-open-tickets">
+      {{ 'customers.columns.openTickets' | translate }}
+    </label>
+    <select
+      id="customer-open-tickets"
+      class="form-control"
+      [ngModel]="openTicketsFilter()"
+      (ngModelChange)="openTicketsFilter.set($event); onFilterChange()"
+    >
+      <option value="">{{ 'common.all' | translate }}</option>
+      <option value="true">{{ 'customers.filters.hasOpenTickets' | translate }}</option>
+      <option value="false">{{ 'customers.filters.noOpenTickets' | translate }}</option>
+    </select>
+  </div>
+
+  <button type="button" class="btn-secondary" (click)="clearFilters()">
+    {{ 'common.clearFilters' | translate }}
+  </button>
+</div>
+
+<app-data-table
+  [columns]="columns()"
+  [rows]="items()"
+  [loading]="loading()"
+  [sort]="sort()"
+  [statusConfig]="statusConfig()"
+  [skeletonRows]="pageSize()"
+  emptyMessageKey="customers.empty"
+  (sortChange)="onSortChange($event)"
+  (rowClick)="openCustomer($event)"
+/>
+
+<app-pagination
+  [page]="page()"
+  [pageSize]="pageSize()"
+  [totalCount]="totalCount()"
+  (pageChange)="onPageChange($event)"
+/>

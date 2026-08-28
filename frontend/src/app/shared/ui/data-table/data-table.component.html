@@ -1,0 +1,211 @@
+<!-- Desktop: real table. Wrapped so wide content scrolls inside the card, never the page body. -->
+<div class="card hidden overflow-x-auto md:block">
+  <table class="w-full min-w-[48rem] text-sm">
+    <thead class="border-b border-slate-200 bg-slate-50">
+      <tr>
+        @for (column of desktopColumns(); track column.id) {
+          <th
+            scope="col"
+            class="px-4 py-3 text-start font-medium text-slate-600"
+            [ngClass]="[column.widthClass ?? '', column.alignEnd ? 'text-end' : '']"
+            [attr.aria-sort]="
+              sort()?.sortBy === column.id
+                ? sort()?.sortDescending
+                  ? 'descending'
+                  : 'ascending'
+                : null
+            "
+          >
+            @if (column.sortable) {
+              <button
+                type="button"
+                class="inline-flex items-center gap-1 hover:text-slate-900"
+                (click)="onHeaderClick(column)"
+              >
+                <span>{{ column.headerKey | translate }}</span>
+                <span class="text-[10px] text-brand-600">{{ sortIcon(column) }}</span>
+              </button>
+            } @else {
+              <span>{{ column.headerKey ? (column.headerKey | translate) : '' }}</span>
+            }
+          </th>
+        }
+      </tr>
+    </thead>
+
+    <tbody class="divide-y divide-slate-100">
+      @if (loading()) {
+        @for (row of skeletonRange(); track row) {
+          <tr>
+            @for (column of desktopColumns(); track column.id) {
+              <td class="px-4 py-3">
+                <div class="h-4 w-full animate-pulse rounded bg-slate-100"></div>
+              </td>
+            }
+          </tr>
+        }
+      } @else if (rows().length === 0) {
+        <tr>
+          <td [attr.colspan]="desktopColumns().length" class="px-4 py-12 text-center text-slate-500">
+            {{ emptyMessageKey() | translate }}
+          </td>
+        </tr>
+      } @else {
+        @for (row of rows(); track row.id) {
+          <tr class="hover:bg-slate-50" (click)="rowClick.emit(row)">
+            @for (column of desktopColumns(); track column.id) {
+              <td class="px-4 py-3" [ngClass]="column.alignEnd ? 'text-end' : ''">
+                @switch (column.type) {
+                  @case ('actions') {
+                    <div class="relative flex justify-end">
+                      @if (visibleActions(row).length) {
+                        <button
+                          type="button"
+                          class="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                          [attr.aria-label]="'common.actions' | translate"
+                          [attr.aria-expanded]="openMenuRowId() === row.id"
+                          (click)="toggleMenu(row, $event)"
+                        >
+                          &#8942;
+                        </button>
+                      }
+
+                      @if (openMenuRowId() === row.id) {
+                        <div
+                          class="absolute top-full z-20 mt-1 min-w-44 rounded-lg border border-slate-200 bg-white py-1 shadow-lg end-0"
+                          role="menu"
+                        >
+                          @for (action of visibleActions(row); track action.labelKey) {
+                            <button
+                              type="button"
+                              role="menuitem"
+                              class="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 disabled:opacity-40"
+                              [ngClass]="action.danger ? 'text-rose-600' : 'text-slate-700'"
+                              [disabled]="action.disabled ? action.disabled(row) : false"
+                              (click)="runAction(action, row, $event)"
+                            >
+                              {{ action.labelKey | translate }}
+                            </button>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                  @case ('status') {
+                    <span class="chip" [ngClass]="statusFor(column, row).chipClasses">
+                      <span
+                        class="h-1.5 w-1.5 rounded-full"
+                        [ngClass]="statusFor(column, row).dotClasses"
+                      ></span>
+                      {{ statusFor(column, row).labelKey | translate }}
+                    </span>
+                  }
+                  @case ('date') {
+                    {{ (dateValue(column, row) | date: 'mediumDate' : undefined : locale()) ?? '—' }}
+                  }
+                  @case ('datetime') {
+                    {{ (dateValue(column, row) | date: 'short' : undefined : locale()) ?? '—' }}
+                  }
+                  @case ('number') {
+                    {{ (numericValue(column, row) | number: '1.0-2' : locale()) ?? '—' }}
+                  }
+                  @case ('boolean') {
+                    <span class="chip" [ngClass]="booleanValue(column, row) ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-600'">
+                      {{ (booleanValue(column, row) ? 'common.yes' : 'common.no') | translate }}
+                    </span>
+                  }
+                  @case ('custom') {
+                    <ng-container
+                      [ngTemplateOutlet]="column.template ?? null"
+                      [ngTemplateOutletContext]="{ $implicit: row }"
+                    />
+                  }
+                  @default {
+                    {{ cellValue(column, row) }}
+                  }
+                }
+              </td>
+            }
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>
+
+<!-- Mobile: the same rows as stacked cards. -->
+<div class="flex flex-col gap-3 md:hidden">
+  @if (loading()) {
+    @for (row of skeletonRange(); track row) {
+      <div class="card space-y-2 p-4">
+        <div class="h-4 w-1/2 animate-pulse rounded bg-slate-100"></div>
+        <div class="h-3 w-full animate-pulse rounded bg-slate-100"></div>
+      </div>
+    }
+  } @else if (rows().length === 0) {
+    <div class="card p-8 text-center text-sm text-slate-500">
+      {{ emptyMessageKey() | translate }}
+    </div>
+  } @else {
+    @for (row of rows(); track row.id) {
+      <div class="card p-4" (click)="rowClick.emit(row)">
+        <div class="mb-2 flex items-start justify-between gap-2">
+          <span class="font-medium text-slate-900">
+            {{ cellValue(mobileColumns()[0], row) }}
+          </span>
+
+          @if (visibleActions(row).length) {
+            <div class="relative">
+              <button
+                type="button"
+                class="rounded p-1.5 text-slate-500 hover:bg-slate-100"
+                [attr.aria-label]="'common.actions' | translate"
+                (click)="toggleMenu(row, $event)"
+              >
+                &#8942;
+              </button>
+
+              @if (openMenuRowId() === row.id) {
+                <div
+                  class="absolute top-full z-20 mt-1 min-w-44 rounded-lg border border-slate-200 bg-white py-1 shadow-lg end-0"
+                  role="menu"
+                >
+                  @for (action of visibleActions(row); track action.labelKey) {
+                    <button
+                      type="button"
+                      role="menuitem"
+                      class="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50"
+                      [ngClass]="action.danger ? 'text-rose-600' : 'text-slate-700'"
+                      (click)="runAction(action, row, $event)"
+                    >
+                      {{ action.labelKey | translate }}
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <dl class="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+          @for (column of mobileColumns().slice(1); track column.id) {
+            <div>
+              <dt class="text-xs text-slate-500">{{ column.headerKey | translate }}</dt>
+              <dd class="text-slate-800">
+                @if (column.type === 'status') {
+                  <span class="chip" [ngClass]="statusFor(column, row).chipClasses">
+                    {{ statusFor(column, row).labelKey | translate }}
+                  </span>
+                } @else if (column.type === 'date') {
+                  {{ (dateValue(column, row) | date: 'mediumDate' : undefined : locale()) ?? '—' }}
+                } @else {
+                  {{ cellValue(column, row) }}
+                }
+              </dd>
+            </div>
+          }
+        </dl>
+      </div>
+    }
+  }
+</div>

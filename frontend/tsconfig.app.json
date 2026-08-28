@@ -1,0 +1,22 @@
+/* Application (browser) TypeScript configuration.
+ * To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html.
+ * To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options.
+ *
+ * Note: there is deliberately no `outDir`. The `@angular/build:application` builder controls output
+ * (see `outputPath` in angular.json -> dist/); a tsconfig `outDir` is ignored by the build and only
+ * causes a stray `out-tsc/` folder when an editor or a bare `tsc` run type-checks the project.
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    /* Browser-only app: no Node APIs are used, so no @types/node.
+       Keeping it out means server-only code cannot compile in by accident. */
+    "types": []
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/*.spec.ts"
+  ]
+}

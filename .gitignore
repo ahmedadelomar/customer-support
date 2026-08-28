@@ -1,17 +1,40 @@
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+#
+# NOTE: this is a MONOREPO (frontend/ + backend/). Patterns must NOT be anchored with a leading
+# slash, or they only match at the repository root and miss frontend/node_modules, backend/**/bin,
+# and so on.
 
-# Compiled output
-/dist
-/tmp
-/out-tsc
-/bazel-out
+# ---------- Node / Angular ----------
+node_modules/
+dist/
+out-tsc/
+bazel-out/
+.angular/
+npm-debug.log*
+yarn-error.log*
+.sass-cache/
+connect.lock
+coverage/
+libpeerconnection.log
+testem.log
+typings/
+__screenshots__/
 
-# Node
-/node_modules
-npm-debug.log
-yarn-error.log
+# ---------- .NET ----------
+bin/
+obj/
+TestResults/
+*.user
+*.suo
+*.userprefs
+*.received.*
+.vs/
 
-# IDEs and editors
+# Local/secret configuration — never commit
+appsettings.*.local.json
+secrets.json
+
+# ---------- IDEs and editors ----------
 .idea/
 .project
 .classpath
@@ -19,6 +42,7 @@ yarn-error.log
 *.launch
 .settings/
 *.sublime-workspace
+.history/*
 
 # Visual Studio Code
 .vscode/*
@@ -26,18 +50,28 @@ yarn-error.log
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-.history/*
 
-# Miscellaneous
-/.angular/cache
-.sass-cache/
-/connect.lock
-/coverage
-/libpeerconnection.log
-testem.log
-/typings
-__screenshots__/
-
-# System files
+# ---------- System files ----------
 .DS_Store
 Thumbs.db
+
+# Managed by squad-kit — do not edit this block
+.squad/secrets.yaml
+.squad/stories/**/attachments/
+.squad/.trash/
+.squad/.last-run.json
+.squad/.last-copy-prompt.md
+.squad/runs/
+# End squad-kit block
+
+# ---------- Local dev artifacts ----------
+*.dev.db
+*.dev.db-shm
+*.dev.db-wal
+api.log
+api.err.log
+web.log
+web.err.log
+
+# ---------- Excluded from this repository by request ----------
+ARCHITECTURE.md

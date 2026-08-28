@@ -1,0 +1,188 @@
+<app-page-header [titleKey]="isEdit() ? 'customers.edit' : 'customers.create'">
+  <a class="btn-secondary" routerLink="/agent/customers">{{ 'common.back' | translate }}</a>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-96 animate-pulse"></div>
+} @else {
+  <form class="card p-5" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <fieldset class="mb-6">
+      <legend class="mb-3 text-sm font-semibold text-slate-800">
+        {{ 'customers.sections.identity' | translate }}
+      </legend>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div>
+          <label class="form-label" for="type">{{ 'customers.columns.type' | translate }} *</label>
+          <select id="type" class="form-control" formControlName="type">
+            @for (option of customerTypes; track option.value) {
+              <option [value]="option.value">{{ option.labelKey | translate }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="form-label" for="tier">{{ 'customers.fields.tier' | translate }}</label>
+          <input id="tier" type="text" class="form-control" formControlName="tier" />
+        </div>
+
+        <div>
+          <label class="form-label" for="displayNameEn">
+            {{ 'customers.fields.displayNameEn' | translate }} *
+          </label>
+          <input id="displayNameEn" type="text" class="form-control" formControlName="displayNameEn" />
+          @if (showError('displayNameEn')) {
+            <p class="form-error">
+              {{ form.get('displayNameEn')?.errors?.['server'] ?? ('validation.required' | translate) }}
+            </p>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="displayNameAr">
+            {{ 'customers.fields.displayNameAr' | translate }} *
+          </label>
+          <input
+            id="displayNameAr"
+            type="text"
+            class="form-control"
+            dir="rtl"
+            formControlName="displayNameAr"
+          />
+          @if (showError('displayNameAr')) {
+            <p class="form-error">
+              {{ form.get('displayNameAr')?.errors?.['server'] ?? ('validation.required' | translate) }}
+            </p>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="firstName">{{ 'customers.fields.firstName' | translate }}</label>
+          <input id="firstName" type="text" class="form-control" formControlName="firstName" />
+        </div>
+
+        <div>
+          <label class="form-label" for="lastName">{{ 'customers.fields.lastName' | translate }}</label>
+          <input id="lastName" type="text" class="form-control" formControlName="lastName" />
+        </div>
+
+        <div>
+          <label class="form-label" for="companyName">
+            {{ 'customers.fields.companyName' | translate }}
+          </label>
+          <input id="companyName" type="text" class="form-control" formControlName="companyName" />
+          @if (form.errors?.['companyNameRequired'] && form.touched) {
+            <p class="form-error">{{ 'customers.validation.companyNameRequired' | translate }}</p>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="nationalIdOrCr">
+            {{ 'customers.fields.nationalIdOrCr' | translate }}
+          </label>
+          <input id="nationalIdOrCr" type="text" class="form-control" formControlName="nationalIdOrCr" />
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="mb-6">
+      <legend class="mb-3 text-sm font-semibold text-slate-800">
+        {{ 'customers.sections.contact' | translate }}
+      </legend>
+
+      @if (isEdit()) {
+        <p class="mb-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+          {{ 'customers.contacts.manageOnDetail' | translate }}
+        </p>
+      }
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div>
+          <label class="form-label" for="email">{{ 'customers.columns.email' | translate }}</label>
+          <input id="email" type="email" class="form-control" formControlName="email" dir="ltr" />
+          @if (showError('email')) {
+            <p class="form-error">
+              {{ form.get('email')?.errors?.['server'] ?? ('validation.email' | translate) }}
+            </p>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="phone">{{ 'customers.columns.phone' | translate }}</label>
+          <input id="phone" type="tel" class="form-control" formControlName="phone" dir="ltr" />
+          @if (showError('phone')) {
+            <p class="form-error">
+              {{ form.get('phone')?.errors?.['server'] ?? ('validation.phone' | translate) }}
+            </p>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="preferredLanguage">
+            {{ 'customers.fields.preferredLanguage' | translate }} *
+          </label>
+          <select id="preferredLanguage" class="form-control" formControlName="preferredLanguage">
+            <option value="ar">{{ 'common.language.ar' | translate }}</option>
+            <option value="en">{{ 'common.language.en' | translate }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="form-label" for="preferredChannel">
+            {{ 'customers.fields.preferredChannel' | translate }} *
+          </label>
+          <select id="preferredChannel" class="form-control" formControlName="preferredChannel">
+            @for (option of channels; track option.value) {
+              <option [value]="option.value">{{ option.labelKey | translate }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (form.errors?.['contactRequired'] && form.touched) {
+        <p class="form-error">{{ 'customers.validation.contactRequired' | translate }}</p>
+      }
+    </fieldset>
+
+    @if (isEdit()) {
+      <fieldset class="mb-6">
+        <legend class="mb-3 text-sm font-semibold text-slate-800">
+          {{ 'customers.sections.status' | translate }}
+        </legend>
+
+        <div class="flex flex-wrap items-start gap-6">
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" formControlName="isActive" class="h-4 w-4" />
+            {{ 'customers.status.active' | translate }}
+          </label>
+
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" formControlName="isBlocked" class="h-4 w-4" />
+            {{ 'customers.status.blocked' | translate }}
+          </label>
+
+          @if (form.get('isBlocked')?.value) {
+            <div class="min-w-64 flex-1">
+              <label class="form-label" for="blockedReason">
+                {{ 'customers.blockedReason' | translate }} *
+              </label>
+              <input id="blockedReason" type="text" class="form-control" formControlName="blockedReason" />
+              @if (form.errors?.['blockedReasonRequired'] && form.touched) {
+                <p class="form-error">{{ 'customers.validation.blockedReasonRequired' | translate }}</p>
+              }
+            </div>
+          }
+        </div>
+      </fieldset>
+    }
+
+    <div class="flex justify-end gap-2 border-t border-slate-200 pt-4">
+      <button type="button" class="btn-secondary" (click)="cancel()">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button type="submit" class="btn-primary" [disabled]="saving()">
+        {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+      </button>
+    </div>
+  </form>
+}

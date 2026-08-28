@@ -1,0 +1,86 @@
+<div class="flex min-h-screen bg-slate-50">
+  <!-- Backdrop for the mobile drawer -->
+  @if (sidebarOpen()) {
+    <div
+      class="fixed inset-0 z-30 bg-slate-900/40 lg:hidden"
+      (click)="closeSidebar()"
+      aria-hidden="true"
+    ></div>
+  }
+
+  <!-- Side navigation. `start-0` and `-translate-x` flip automatically under dir="rtl". -->
+  <aside
+    class="fixed inset-y-0 z-40 flex w-64 flex-col border-e border-slate-200 bg-white transition-transform lg:static lg:translate-x-0 start-0"
+    [ngClass]="sidebarOpen() ? 'translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full lg:!translate-x-0'"
+  >
+    <div class="flex h-16 items-center gap-2 border-b border-slate-200 px-4">
+      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-700 text-sm font-bold text-white">
+        CS
+      </span>
+      <span class="truncate font-semibold text-slate-900">{{ 'app.name' | translate }}</span>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto px-2 py-4">
+      @for (group of navigation(); track group.labelKey) {
+        <p class="px-3 pb-1 pt-3 text-xs font-medium uppercase tracking-wide text-slate-400">
+          {{ group.labelKey | translate }}
+        </p>
+
+        @for (item of group.items; track item.route) {
+          <a
+            class="mb-0.5 flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+            routerLinkActive="bg-brand-50 text-brand-700 font-medium"
+            [routerLink]="item.route"
+            (click)="closeSidebar()"
+          >
+            <span class="w-4 text-center opacity-70" aria-hidden="true">{{ item.icon }}</span>
+            <span class="truncate">{{ item.labelKey | translate }}</span>
+          </a>
+        }
+      }
+    </nav>
+  </aside>
+
+  <div class="flex min-w-0 flex-1 flex-col">
+    <header class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-200 bg-white px-4">
+      <button
+        type="button"
+        class="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
+        [attr.aria-label]="'common.menu' | translate"
+        [attr.aria-expanded]="sidebarOpen()"
+        (click)="toggleSidebar()"
+      >
+        ☰
+      </button>
+
+      <div class="flex-1"></div>
+
+      <button
+        type="button"
+        class="btn-secondary px-3 py-1.5"
+        (click)="toggleLanguage()"
+        [attr.aria-label]="'common.switchLanguage' | translate"
+      >
+        {{ language() === 'ar' ? 'English' : 'العربية' }}
+      </button>
+
+      <div class="flex items-center gap-2 ps-2">
+        <span
+          class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700"
+          aria-hidden="true"
+        >
+          {{ displayName().charAt(0) }}
+        </span>
+        <span class="hidden text-sm text-slate-700 sm:inline">{{ displayName() }}</span>
+      </div>
+
+      <button type="button" class="btn-secondary px-3 py-1.5" (click)="logout()">
+        {{ 'auth.logout' | translate }}
+      </button>
+    </header>
+
+    <main class="flex-1 p-4 sm:p-6">
+      <router-outlet />
+    </main>
+  </div>
+</div>

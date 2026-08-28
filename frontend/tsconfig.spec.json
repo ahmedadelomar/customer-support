@@ -1,0 +1,15 @@
+/* Unit-test TypeScript configuration (Karma + Jasmine).
+ * Same reasoning as tsconfig.app.json: no `outDir`, since the test builder controls output.
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "jasmine"
+    ]
+  },
+  "include": [
+    "src/**/*.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}
