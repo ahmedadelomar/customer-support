@@ -402,11 +402,16 @@
       "notifyGeneric": "Any existing watchers will be notified."
     },
     "customerPanel": {
-      "code": "Code",
       "tier": "Tier",
+      "preferredLanguage": "Preferred language",
+      "preferredChannel": "Preferred channel",
       "openTickets": "Open tickets",
-      "viewProfile": "View profile",
-      "blocked": "Blocked"
+      "otherOpenTickets": "Other open tickets",
+      "moreOpenTickets": "+{{count}} more",
+      "optedOut": "Notifications opted out",
+      "satisfaction": "Satisfaction {{score}}/5",
+      "lastInteraction": "Last contact {{time}}",
+      "viewProfile": "View profile"
     },
     "merge": {
       "action": "Merge",

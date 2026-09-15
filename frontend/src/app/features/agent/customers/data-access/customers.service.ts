@@ -8,6 +8,7 @@ import type {
   CustomerDetail,
   CustomerListItem,
   CustomerQuery,
+  InlinePatchCustomerRequest,
   UpdateCustomerRequest,
 } from './interfaces/customer.interface';
 
@@ -39,6 +40,11 @@ export class CustomersService {
 
   update(request: UpdateCustomerRequest): Observable<void> {
     return this.#http.put<void>(`${this.#baseUrl}/${request.id}`, request);
+  }
+
+  /** The ticket screen's customer panel inline edit — display names, preferred language/channel, tier only. */
+  inlinePatch(request: InlinePatchCustomerRequest): Observable<void> {
+    return this.#http.patch<void>(`${this.#baseUrl}/${request.id}/inline`, request);
   }
 
   delete(id: string): Observable<void> {

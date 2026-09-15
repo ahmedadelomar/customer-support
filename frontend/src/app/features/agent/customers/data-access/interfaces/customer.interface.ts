@@ -94,3 +94,17 @@ export interface UpdateCustomerRequest extends Omit<CreateCustomerRequest, 'emai
   isBlocked: boolean;
   blockedReason?: string;
 }
+
+/**
+ * Request body for the ticket screen's customer panel inline edit; matches
+ * `InlinePatchCustomerCommand`. Deliberately narrower than `UpdateCustomerRequest` — only the fields
+ * an agent legitimately corrects in flow.
+ */
+export interface InlinePatchCustomerRequest {
+  id: string;
+  displayNameEn: string;
+  displayNameAr: string;
+  preferredLanguage: string;
+  preferredChannel: ChannelKey;
+  tier?: string;
+}

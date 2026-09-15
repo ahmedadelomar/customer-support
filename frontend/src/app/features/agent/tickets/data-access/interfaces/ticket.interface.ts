@@ -1,5 +1,6 @@
 import type { ChannelKey, TicketStatusKind } from '../../../../../core/models/enums';
 import type { PagedQuery } from '../../../../../core/models/api.models';
+import type { CustomerContact } from '../../../customers/data-access/interfaces/contact.interface';
 
 export interface TicketListItem {
   id: string;
@@ -61,16 +62,49 @@ export interface TicketStatistics {
   breachedCount: number;
 }
 
-export interface TicketCustomerSummary {
+/** One of the customer's other open tickets, shown on the panel so duplicates are obvious. */
+export interface CustomerPanelOtherTicket {
   id: string;
-  code: string;
+  number: string;
+  subject: string;
+  statusNameEn: string;
+  statusNameAr: string;
+  statusColorHex: string;
+}
+
+/** A pinned customer note, trimmed to what the panel shows. */
+export interface CustomerPanelNote {
+  id: string;
+  body: string;
+  authorNameEn: string | null;
+  authorNameAr: string | null;
+  createdAt: string;
+}
+
+/**
+ * Everything the ticket screen's customer panel needs, arriving with the ticket in one response.
+ * `canViewFull` is false when the caller lacks `customers.view` — every field below it is then just
+ * a default, and the panel must show only the display name.
+ */
+export interface CustomerPanel {
+  id: string;
   displayNameEn: string;
   displayNameAr: string;
+  canViewFull: boolean;
+  code: string;
   tier: string | null;
-  primaryEmail: string | null;
-  primaryPhone: string | null;
+  preferredLanguage: string;
+  preferredChannel: ChannelKey;
   isBlocked: boolean;
+  blockedReason: string | null;
+  satisfactionScore: number | null;
+  lastInteractionAt: string | null;
   openTicketCount: number;
+  contacts: CustomerContact[];
+  otherOpenTickets: CustomerPanelOtherTicket[];
+  otherOpenTicketCount: number;
+  pinnedNotes: CustomerPanelNote[];
+  canEdit: boolean;
 }
 
 export interface TicketTag {
@@ -85,7 +119,7 @@ export interface TicketDetail {
   subject: string;
   description: string;
   language: string;
-  customer: TicketCustomerSummary;
+  customer: CustomerPanel;
   categoryId: string;
   categoryNameEn: string;
   categoryNameAr: string;

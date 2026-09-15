@@ -1,13 +1,14 @@
 using CustomerSupport.Application.Common.Exceptions;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Security;
+using CustomerSupport.Application.Customers.Dtos;
 using CustomerSupport.Application.Tickets.Dtos;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace CustomerSupport.Application.Tickets.Queries;
 
-/// <summary>Full ticket, its customer summary and its properties, for the detail screen.</summary>
+/// <summary>Full ticket, its customer panel and its properties, for the detail screen.</summary>
 [RequirePermission(Permissions.Tickets.View)]
 public record GetTicketByIdQuery(Guid Id) : IRequest<TicketDetailDto>;
 
@@ -27,8 +28,7 @@ public class GetTicketByIdQueryHandler(IAppDbContext db, ICurrentUser currentUse
             .FirstOrDefaultAsync(c => c.Id == ticket.CustomerId, cancellationToken)
             ?? throw new NotFoundException(nameof(Domain.Customers.Customer), ticket.CustomerId);
 
-        var openTicketCount = await db.Tickets
-            .CountAsync(t => t.CustomerId == customer.Id && !t.Status.IsTerminal, cancellationToken);
+        var customerPanel = await BuildCustomerPanelAsync(customer, ticket.Id, cancellationToken);
 
         var category = await db.TicketCategories.AsNoTracking()
             .FirstAsync(c => c.Id == ticket.CategoryId, cancellationToken);
@@ -52,18 +52,7 @@ public class GetTicketByIdQueryHandler(IAppDbContext db, ICurrentUser currentUse
             Subject = ticket.Subject,
             Description = ticket.Description,
             Language = ticket.Language,
-            Customer = new TicketCustomerSummaryDto
-            {
-                Id = customer.Id,
-                Code = customer.Code,
-                DisplayNameEn = customer.DisplayName.En,
-                DisplayNameAr = customer.DisplayName.Ar,
-                Tier = customer.Tier,
-                PrimaryEmail = customer.PrimaryEmail,
-                PrimaryPhone = customer.PrimaryPhone,
-                IsBlocked = customer.IsBlocked,
-                OpenTicketCount = openTicketCount,
-            },
+            Customer = customerPanel,
             CategoryId = category.Id,
             CategoryNameEn = category.Name.En,
             CategoryNameAr = category.Name.Ar,
@@ -111,6 +100,112 @@ public class GetTicketByIdQueryHandler(IAppDbContext db, ICurrentUser currentUse
             CanAssign = currentUser.HasPermission(Permissions.Tickets.Assign),
             CanChangeStatus = currentUser.HasPermission(Permissions.Tickets.ChangeStatus),
             CanEscalate = currentUser.HasPermission(Permissions.Tickets.Escalate),
+        };
+    }
+
+    /// <summary>
+    /// Builds the ticket screen's customer panel (Agent Dashboard / Customer information) — identity,
+    /// tier, blocked state, contacts, other open tickets and pinned notes, all in this one query so
+    /// the ticket screen never fires a second round trip for it. Populated only when the caller holds
+    /// <c>customers.view</c>; otherwise only the display name is returned, per the story's own
+    /// degrade-rather-than-error rule — this lives in the projection, not the controller, so no future
+    /// caller of this query can accidentally bypass the gate.
+    /// </summary>
+    private async Task<CustomerPanelDto> BuildCustomerPanelAsync(
+        Domain.Customers.Customer customer, Guid currentTicketId, CancellationToken ct)
+    {
+        var canViewFull = currentUser.HasPermission(Permissions.Customers.View);
+
+        if (!canViewFull)
+        {
+            return new CustomerPanelDto
+            {
+                Id = customer.Id,
+                DisplayNameEn = customer.DisplayName.En,
+                DisplayNameAr = customer.DisplayName.Ar,
+                CanViewFull = false,
+            };
+        }
+
+        var openTicketCount = await db.Tickets
+            .CountAsync(t => t.CustomerId == customer.Id && !t.Status.IsTerminal, ct);
+
+        var otherOpenTicketsQuery = db.Tickets.AsNoTracking()
+            .Where(t => t.CustomerId == customer.Id && t.Id != currentTicketId && !t.Status.IsTerminal);
+
+        var otherOpenTicketCount = await otherOpenTicketsQuery.CountAsync(ct);
+
+        var otherOpenTickets = await otherOpenTicketsQuery
+            .OrderByDescending(t => t.CreatedAt)
+            .Take(5)
+            .Select(t => new CustomerPanelOtherTicketDto
+            {
+                Id = t.Id,
+                Number = t.Number,
+                Subject = t.Subject,
+                StatusNameEn = t.Status.Name.En,
+                StatusNameAr = t.Status.Name.Ar,
+                StatusColorHex = t.Status.ColorHex,
+            })
+            .ToListAsync(ct);
+
+        var contacts = await db.CustomerContacts.AsNoTracking()
+            .Where(c => c.CustomerId == customer.Id)
+            .OrderByDescending(c => c.IsPrimary)
+            .Select(c => new CustomerContactDto
+            {
+                Id = c.Id,
+                Type = c.Type,
+                Value = c.Value,
+                Label = c.Label,
+                IsPrimary = c.IsPrimary,
+                IsVerified = c.IsVerified,
+                AllowNotifications = c.AllowNotifications,
+                CountryCode = c.CountryCode,
+                City = c.City,
+                AddressLine = c.AddressLine,
+                PostalCode = c.PostalCode,
+            })
+            .ToListAsync(ct);
+
+        var pinnedNoteRows = await db.CustomerNotes.AsNoTracking()
+            .Where(n => n.CustomerId == customer.Id && n.IsPinned)
+            .OrderByDescending(n => n.CreatedAt)
+            .Select(n => new { n.Id, n.Body, n.CreatedById, n.CreatedAt })
+            .ToListAsync(ct);
+
+        var authorIds = pinnedNoteRows.Where(n => n.CreatedById is not null).Select(n => n.CreatedById!.Value).Distinct();
+        var authorNames = await userNames.ResolveAsync(authorIds, ct);
+
+        var pinnedNotes = pinnedNoteRows.Select(n => new CustomerPanelNoteDto
+        {
+            Id = n.Id,
+            Body = n.Body,
+            AuthorNameEn = n.CreatedById is { } authorId && authorNames.TryGetValue(authorId, out var name) ? name.En : null,
+            AuthorNameAr = n.CreatedById is { } authorId2 && authorNames.TryGetValue(authorId2, out var name2) ? name2.Ar : null,
+            CreatedAt = n.CreatedAt,
+        }).ToList();
+
+        return new CustomerPanelDto
+        {
+            Id = customer.Id,
+            DisplayNameEn = customer.DisplayName.En,
+            DisplayNameAr = customer.DisplayName.Ar,
+            CanViewFull = true,
+            Code = customer.Code,
+            Tier = customer.Tier,
+            PreferredLanguage = customer.PreferredLanguage,
+            PreferredChannel = customer.PreferredChannel,
+            IsBlocked = customer.IsBlocked,
+            BlockedReason = customer.BlockedReason,
+            SatisfactionScore = customer.SatisfactionScore,
+            LastInteractionAt = customer.LastInteractionAt,
+            OpenTicketCount = openTicketCount,
+            Contacts = contacts,
+            OtherOpenTickets = otherOpenTickets,
+            OtherOpenTicketCount = otherOpenTicketCount,
+            PinnedNotes = pinnedNotes,
+            CanEdit = currentUser.HasPermission(Permissions.Customers.Update),
         };
     }
 }

@@ -1,51 +1,224 @@
-<div class="card space-y-4 p-4">
-  <div>
-    <p class="font-semibold text-slate-900">{{ displayName() }}</p>
-    <p class="text-xs text-slate-500">{{ customer().code }}</p>
-  </div>
+<div class="card p-4">
+  <button
+    type="button"
+    class="mb-2 flex w-full items-center justify-between gap-2 lg:hidden"
+    (click)="toggleCollapsed()"
+  >
+    <span class="font-semibold text-slate-900">{{ displayName() }}</span>
+    <span class="text-slate-400" [class.rotate-180]="!collapsed()">▾</span>
+  </button>
 
-  @if (customer().isBlocked) {
-    <span class="chip border-rose-200 bg-rose-50 text-rose-700">
-      {{ 'customers.status.blocked' | translate }}
-    </span>
-  }
+  <div [class.hidden]="collapsed()" class="space-y-4 lg:!block">
+    @if (!customer().canViewFull) {
+      <p class="font-semibold text-slate-900">{{ displayName() }}</p>
+    } @else {
+      <div class="hidden items-center justify-between gap-2 lg:flex">
+        @if (isEditing('displayNameEn') || isEditing('displayNameAr')) {
+          <input
+            class="form-control"
+            [ngModel]="draftValue()"
+            (ngModelChange)="draftValue.set($event)"
+            (keydown)="onFieldKeydown($event)"
+            (blur)="saveEdit()"
+            autofocus
+          />
+        } @else {
+          <p
+            class="truncate font-semibold text-slate-900"
+            [class.cursor-pointer]="customer().canEdit"
+            (click)="startEdit(language() === 'ar' ? 'displayNameAr' : 'displayNameEn')"
+          >
+            {{ displayName() }}
+          </p>
+        }
+        @if (saving()) {
+          <span class="shrink-0 text-xs text-slate-400">{{ 'common.saving' | translate }}</span>
+        }
+      </div>
 
-  <dl class="space-y-2 text-sm">
-    @if (customer().tier) {
-      <div class="flex justify-between gap-2">
-        <dt class="text-slate-500">{{ 'tickets.customerPanel.tier' | translate }}</dt>
-        <dd class="text-slate-800">{{ customer().tier }}</dd>
+      <p class="text-xs text-slate-500">{{ customer().code }}</p>
+
+      @if (customer().isBlocked) {
+        <div class="rounded-lg border border-rose-300 bg-rose-50 p-3">
+          <p class="flex items-center gap-1.5 text-sm font-semibold text-rose-800">
+            <span aria-hidden="true">⛔</span>
+            {{ 'customers.status.blocked' | translate }}
+          </p>
+          @if (customer().blockedReason) {
+            <p class="mt-1 text-sm text-rose-700">{{ customer().blockedReason }}</p>
+          }
+        </div>
+      }
+
+      <dl class="space-y-2 text-sm">
+        <div class="flex items-center justify-between gap-2">
+          <dt class="text-slate-500">{{ 'tickets.customerPanel.tier' | translate }}</dt>
+          <dd>
+            @if (isEditing('tier')) {
+              <input
+                class="form-control w-28"
+                [ngModel]="draftValue()"
+                (ngModelChange)="draftValue.set($event)"
+                (keydown)="onFieldKeydown($event)"
+                (blur)="saveEdit()"
+                autofocus
+              />
+            } @else {
+              <span
+                class="text-slate-800"
+                [class.cursor-pointer]="customer().canEdit"
+                (click)="startEdit('tier')"
+              >
+                {{ customer().tier || '—' }}
+              </span>
+            }
+          </dd>
+        </div>
+
+        <div class="flex items-center justify-between gap-2">
+          <dt class="text-slate-500">{{ 'tickets.customerPanel.preferredLanguage' | translate }}</dt>
+          <dd>
+            @if (isEditing('preferredLanguage')) {
+              <select
+                class="form-control"
+                [ngModel]="draftValue()"
+                (ngModelChange)="draftValue.set($event)"
+                (keydown)="onFieldKeydown($event)"
+                (blur)="saveEdit()"
+                autofocus
+              >
+                @for (option of languageOptions; track option.value) {
+                  <option [value]="option.value">{{ option.labelKey | translate }}</option>
+                }
+              </select>
+            } @else {
+              <span
+                class="text-slate-800"
+                [class.cursor-pointer]="customer().canEdit"
+                (click)="startEdit('preferredLanguage')"
+              >
+                {{ 'common.language.' + customer().preferredLanguage | translate }}
+              </span>
+            }
+          </dd>
+        </div>
+
+        <div class="flex items-center justify-between gap-2">
+          <dt class="text-slate-500">{{ 'tickets.customerPanel.preferredChannel' | translate }}</dt>
+          <dd>
+            @if (isEditing('preferredChannel')) {
+              <select
+                class="form-control"
+                [ngModel]="draftValue()"
+                (ngModelChange)="draftValue.set($event)"
+                (keydown)="onFieldKeydown($event)"
+                (blur)="saveEdit()"
+                autofocus
+              >
+                @for (option of channelOptions; track option.value) {
+                  <option [value]="option.value">{{ option.labelKey | translate }}</option>
+                }
+              </select>
+            } @else {
+              <span
+                class="text-slate-800"
+                [class.cursor-pointer]="customer().canEdit"
+                (click)="startEdit('preferredChannel')"
+              >
+                {{ channelLabelKey() | translate }}
+              </span>
+            }
+          </dd>
+        </div>
+
+        <div class="flex justify-between gap-2">
+          <dt class="text-slate-500">{{ 'tickets.customerPanel.openTickets' | translate }}</dt>
+          <dd class="font-medium text-slate-800">{{ customer().openTicketCount }}</dd>
+        </div>
+      </dl>
+
+      @if (customer().contacts.length) {
+        <div class="flex flex-wrap gap-1.5">
+          @for (contact of customer().contacts; track contact.id) {
+            @if (contactHref(contact); as href) {
+              <a class="chip border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100" [href]="href">
+                {{ contact.value }}
+                @if (!contact.allowNotifications) {
+                  <span class="ms-1 text-slate-400" [title]="'tickets.customerPanel.optedOut' | translate">🔕</span>
+                }
+              </a>
+            } @else {
+              <span class="chip border-slate-200 bg-slate-50 text-slate-700">{{ contact.value }}</span>
+            }
+          }
+        </div>
+      }
+
+      @if (customer().otherOpenTickets.length) {
+        <div class="border-t border-slate-200 pt-3">
+          <p class="mb-2 text-xs font-medium uppercase tracking-wide text-slate-400">
+            {{ 'tickets.customerPanel.otherOpenTickets' | translate }}
+          </p>
+          <ul class="space-y-1.5">
+            @for (other of customer().otherOpenTickets; track other.id) {
+              <li>
+                <a
+                  class="flex items-center gap-2 rounded-lg px-1.5 py-1 text-sm hover:bg-slate-50"
+                  [routerLink]="['/agent/tickets', other.id]"
+                >
+                  <span
+                    class="chip shrink-0"
+                    [style.borderColor]="other.statusColorHex"
+                    [style.color]="other.statusColorHex"
+                  >
+                    {{ language() === 'ar' ? other.statusNameAr : other.statusNameEn }}
+                  </span>
+                  <span class="min-w-0 flex-1 truncate text-slate-700">{{ other.subject }}</span>
+                </a>
+              </li>
+            }
+          </ul>
+          @if (customer().otherOpenTicketCount > customer().otherOpenTickets.length) {
+            <p class="mt-1 text-xs text-slate-400">
+              {{
+                'tickets.customerPanel.moreOpenTickets'
+                  | translate: { count: customer().otherOpenTicketCount - customer().otherOpenTickets.length }
+              }}
+            </p>
+          }
+        </div>
+      }
+
+      @if (customer().pinnedNotes.length) {
+        <div class="border-t border-slate-200 pt-3">
+          <p class="mb-2 text-xs font-medium uppercase tracking-wide text-slate-400">
+            {{ 'customers.notes.pinned' | translate }}
+          </p>
+          <ul class="space-y-2">
+            @for (note of customer().pinnedNotes; track note.id) {
+              <li class="rounded-lg bg-amber-50 p-2 text-sm text-amber-900">
+                <p>{{ note.body }}</p>
+                @if (authorName(note); as name) {
+                  <p class="mt-1 text-xs text-amber-700">{{ 'customers.history.by' | translate: { name } }}</p>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      <div class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-3 text-xs text-slate-500">
+        @if (customer().satisfactionScore !== null) {
+          <span>{{ 'tickets.customerPanel.satisfaction' | translate: { score: customer().satisfactionScore } }}</span>
+        }
+        @if (customer().lastInteractionAt) {
+          <span>{{ 'tickets.customerPanel.lastInteraction' | translate: { time: relativeTime(customer().lastInteractionAt!) } }}</span>
+        }
       </div>
     }
-    <div class="flex justify-between gap-2">
-      <dt class="text-slate-500">{{ 'tickets.customerPanel.openTickets' | translate }}</dt>
-      <dd class="font-medium text-slate-800">{{ customer().openTicketCount }}</dd>
-    </div>
-  </dl>
 
-  <div class="flex flex-wrap gap-1.5">
-    @if (customer().primaryEmail) {
-      <span class="chip border-slate-200 bg-slate-50 text-slate-700">{{ customer().primaryEmail }}</span>
-    }
-    @if (customer().primaryPhone) {
-      <span class="chip border-slate-200 bg-slate-50 text-slate-700">{{ customer().primaryPhone }}</span>
-    }
+    <a class="btn-secondary block text-center" [routerLink]="['/agent/customers', customer().id]">
+      {{ 'tickets.customerPanel.viewProfile' | translate }}
+    </a>
   </div>
-
-  @if (pinnedNotes().length) {
-    <div class="border-t border-slate-200 pt-3">
-      <p class="mb-2 text-xs font-medium uppercase tracking-wide text-slate-400">
-        {{ 'customers.notes.pinned' | translate }}
-      </p>
-      <ul class="space-y-2">
-        @for (note of pinnedNotes(); track note.id) {
-          <li class="rounded-lg bg-amber-50 p-2 text-sm text-amber-900">{{ note.body }}</li>
-        }
-      </ul>
-    </div>
-  }
-
-  <a class="btn-secondary block text-center" [routerLink]="['/agent/customers', customer().id]">
-    {{ 'tickets.customerPanel.viewProfile' | translate }}
-  </a>
 </div>

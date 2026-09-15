@@ -402,11 +402,16 @@
       "notifyGeneric": "سيتم إشعار أي مراقبين حاليين."
     },
     "customerPanel": {
-      "code": "الرمز",
       "tier": "الفئة",
+      "preferredLanguage": "اللغة المفضلة",
+      "preferredChannel": "قناة التواصل المفضلة",
       "openTickets": "التذاكر المفتوحة",
-      "viewProfile": "عرض الملف",
-      "blocked": "محظور"
+      "otherOpenTickets": "تذاكر مفتوحة أخرى",
+      "moreOpenTickets": "+{{count}} أخرى",
+      "optedOut": "ألغى الاشتراك في الإشعارات",
+      "satisfaction": "الرضا {{score}}/5",
+      "lastInteraction": "آخر تواصل {{time}}",
+      "viewProfile": "عرض الملف"
     },
     "merge": {
       "action": "دمج",

@@ -57,21 +57,7 @@ public record TicketStatisticsDto
     public int BreachedCount { get; init; }
 }
 
-/// <summary>Summary of the owning customer, shown in the ticket detail's left panel.</summary>
-public record TicketCustomerSummaryDto
-{
-    public Guid Id { get; init; }
-    public string Code { get; init; } = string.Empty;
-    public string DisplayNameEn { get; init; } = string.Empty;
-    public string DisplayNameAr { get; init; } = string.Empty;
-    public string? Tier { get; init; }
-    public string? PrimaryEmail { get; init; }
-    public string? PrimaryPhone { get; init; }
-    public bool IsBlocked { get; init; }
-    public int OpenTicketCount { get; init; }
-}
-
-/// <summary>Full ticket, its customer summary and property lookups, for the detail screen.</summary>
+/// <summary>Full ticket, its customer panel and property lookups, for the detail screen.</summary>
 public record TicketDetailDto
 {
     public Guid Id { get; init; }
@@ -80,7 +66,7 @@ public record TicketDetailDto
     public string Description { get; init; } = string.Empty;
     public string Language { get; init; } = "ar";
 
-    public TicketCustomerSummaryDto Customer { get; init; } = new();
+    public CustomerPanelDto Customer { get; init; } = new();
 
     public Guid CategoryId { get; init; }
     public string CategoryNameEn { get; init; } = string.Empty;

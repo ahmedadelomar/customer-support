@@ -59,6 +59,28 @@ public class CustomersController : ApiControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Patches only display names, preferred language, preferred channel and tier — the fields the
+    /// ticket screen's customer panel edits inline. Everything else stays on the full customer form.
+    /// </summary>
+    [HttpPatch("{id:guid}/inline")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> PatchInline(
+        Guid id,
+        [FromBody] InlinePatchCustomerCommand command,
+        CancellationToken ct)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest(new { message = "The route id and the body id must match." });
+        }
+
+        await Sender.Send(command, ct);
+        return NoContent();
+    }
+
     /// <summary>Soft-deletes a customer. Refused while the customer still has open tickets.</summary>
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

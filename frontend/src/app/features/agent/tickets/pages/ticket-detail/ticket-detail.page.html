@@ -43,7 +43,7 @@
   }
 
   <div class="grid gap-4 lg:grid-cols-[20%_1fr_25%]">
-    <app-customer-panel [customer]="t.customer" />
+    <app-customer-panel [customer]="t.customer" (edited)="refresh()" />
 
     <div>
       <div class="mb-3 flex gap-1 border-b border-slate-200">
