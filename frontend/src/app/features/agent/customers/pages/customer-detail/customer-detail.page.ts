@@ -11,9 +11,9 @@ import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-h
 import { StateCardComponent } from '../../../../../shared/ui/state-card/state-card.component';
 import { CustomersService } from '../../data-access/customers.service';
 import type { CustomerDetail } from '../../data-access/interfaces/customer.interface';
-import { ContactsPanelComponent } from './ui/contacts-panel/contacts-panel.component';
-import { InteractionTimelineComponent } from './ui/interaction-timeline/interaction-timeline.component';
-import { NotesPanelComponent } from './ui/notes-panel/notes-panel.component';
+import { ContactsPanelComponent } from '../../ui/contacts-panel/contacts-panel.component';
+import { InteractionTimelineComponent } from '../../ui/interaction-timeline/interaction-timeline.component';
+import { NotesPanelComponent } from '../../ui/notes-panel/notes-panel.component';
 
 /**
  * Customer profile page. The Contact details tab is `ContactsPanelComponent` (CS-102), the History

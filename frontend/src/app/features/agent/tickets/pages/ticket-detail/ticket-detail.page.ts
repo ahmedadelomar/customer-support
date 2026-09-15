@@ -8,16 +8,16 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { TicketsService } from '../../data-access/tickets.service';
 import type { TicketLookups } from '../../data-access/interfaces/ticket-lookups.interface';
 import type { OpenTaskSummary, TicketDetail } from '../../data-access/interfaces/ticket.interface';
-import { CustomerPanelComponent } from './ui/customer-panel/customer-panel.component';
-import { ConversationThreadComponent } from './ui/conversation-thread/conversation-thread.component';
-import { PropertiesPanelComponent, type OpenTasksWarningEvent } from './ui/properties-panel/properties-panel.component';
-import { MergeDialogComponent } from './ui/merge-dialog/merge-dialog.component';
-import { AssignDialogComponent } from './ui/assign-dialog/assign-dialog.component';
-import { ResolveDialogComponent } from './ui/resolve-dialog/resolve-dialog.component';
-import { EscalateDialogComponent } from './ui/escalate-dialog/escalate-dialog.component';
-import { HistoryTabComponent } from './ui/history-tab/history-tab.component';
-import { TasksPanelComponent } from './ui/tasks-panel/tasks-panel.component';
-import { OpenTasksWarningDialogComponent } from './ui/open-tasks-warning-dialog/open-tasks-warning-dialog.component';
+import { CustomerPanelComponent } from '../../ui/customer-panel/customer-panel.component';
+import { ConversationThreadComponent } from '../../ui/conversation-thread/conversation-thread.component';
+import { PropertiesPanelComponent, type OpenTasksWarningEvent } from '../../ui/properties-panel/properties-panel.component';
+import { MergeDialogComponent } from '../../ui/merge-dialog/merge-dialog.component';
+import { AssignDialogComponent } from '../../ui/assign-dialog/assign-dialog.component';
+import { ResolveDialogComponent } from '../../ui/resolve-dialog/resolve-dialog.component';
+import { EscalateDialogComponent } from '../../ui/escalate-dialog/escalate-dialog.component';
+import { HistoryTabComponent } from '../../ui/history-tab/history-tab.component';
+import { TasksPanelComponent } from '../../ui/tasks-panel/tasks-panel.component';
+import { OpenTasksWarningDialogComponent } from '../../ui/open-tasks-warning-dialog/open-tasks-warning-dialog.component';
 
 /**
  * Ticket detail screen: customer panel, conversation thread and properties panel — the three-column

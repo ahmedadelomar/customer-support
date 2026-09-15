@@ -10,8 +10,8 @@ import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-h
 import { StateCardComponent } from '../../../../../shared/ui/state-card/state-card.component';
 import { AgentDashboardService } from '../../data-access/agent-dashboard.service';
 import type { AgentDashboard } from '../../data-access/interfaces/agent-dashboard.interface';
-import { NextUpQueueComponent } from './ui/next-up-queue/next-up-queue.component';
-import { TasksSectionComponent } from './ui/tasks-section/tasks-section.component';
+import { NextUpQueueComponent } from '../../ui/next-up-queue/next-up-queue.component';
+import { TasksSectionComponent } from '../../ui/tasks-section/tasks-section.component';
 
 const REFRESH_INTERVAL_MS = 30_000;
 

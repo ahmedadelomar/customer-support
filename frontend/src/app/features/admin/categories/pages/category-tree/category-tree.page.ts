@@ -7,9 +7,9 @@ import type {
   TicketCategoryAdmin,
   TicketCategoryNode,
 } from '../../data-access/interfaces/ticket-category.interface';
-import { CategoryNodeComponent } from './ui/category-node/category-node.component';
-import { CategoryFormDialogComponent } from './ui/category-form-dialog/category-form-dialog.component';
-import { MoveCategoryDialogComponent } from './ui/move-category-dialog/move-category-dialog.component';
+import { CategoryNodeComponent } from '../../ui/category-node/category-node.component';
+import { CategoryFormDialogComponent } from '../../ui/category-form-dialog/category-form-dialog.component';
+import { MoveCategoryDialogComponent } from '../../ui/move-category-dialog/move-category-dialog.component';
 
 /**
  * Category tree editor (Ticket Management / Categories and priorities). The flat, path-ordered list

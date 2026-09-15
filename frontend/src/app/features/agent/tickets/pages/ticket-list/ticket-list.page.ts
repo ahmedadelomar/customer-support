@@ -25,7 +25,7 @@ import type {
   TicketQuery,
   TicketStatistics,
 } from '../../data-access/interfaces/ticket.interface';
-import { BulkAssignDialogComponent } from './ui/bulk-assign-dialog/bulk-assign-dialog.component';
+import { BulkAssignDialogComponent } from '../../ui/bulk-assign-dialog/bulk-assign-dialog.component';
 
 /**
  * Ticket list (Ticket Management / Create and track tickets) — the screen agents spend their day

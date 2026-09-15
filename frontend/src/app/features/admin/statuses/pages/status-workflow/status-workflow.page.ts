@@ -5,7 +5,7 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { TicketStatusesService } from '../../data-access/ticket-statuses.service';
 import type { TicketStatusAdmin } from '../../data-access/interfaces/ticket-status.interface';
-import { StatusFormDialogComponent } from './ui/status-form-dialog/status-form-dialog.component';
+import { StatusFormDialogComponent } from '../../ui/status-form-dialog/status-form-dialog.component';
 
 /**
  * Status workflow editor (Ticket Management / Status workflow and escalation). Mirrors the priority

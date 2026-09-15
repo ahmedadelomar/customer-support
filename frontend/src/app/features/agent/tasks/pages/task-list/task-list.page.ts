@@ -12,7 +12,7 @@ import { PaginationComponent } from '../../../../../shared/ui/pagination/paginat
 import { relativeTime } from '../../../../../shared/utils/relative-time';
 import { TasksService } from '../../data-access/tasks.service';
 import type { AgentTask, TaskQuery } from '../../data-access/interfaces/task.interface';
-import { TaskFormDialogComponent } from './ui/task-form-dialog/task-form-dialog.component';
+import { TaskFormDialogComponent } from '../../ui/task-form-dialog/task-form-dialog.component';
 
 /**
  * The dedicated tasks page (Agent Dashboard / Tasks and reminders). Filters for status and due

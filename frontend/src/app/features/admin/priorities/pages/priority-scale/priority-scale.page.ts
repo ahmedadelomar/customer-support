@@ -5,7 +5,7 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { TicketPrioritiesService } from '../../data-access/ticket-priorities.service';
 import type { TicketPriorityAdmin } from '../../data-access/interfaces/ticket-priority.interface';
-import { PriorityFormDialogComponent } from './ui/priority-form-dialog/priority-form-dialog.component';
+import { PriorityFormDialogComponent } from '../../ui/priority-form-dialog/priority-form-dialog.component';
 
 /**
  * Priority scale editor (Ticket Management / Categories and priorities). Ordered by `Level`, highest
