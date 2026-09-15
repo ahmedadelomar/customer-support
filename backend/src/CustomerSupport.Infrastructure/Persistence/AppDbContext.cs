@@ -68,6 +68,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<TicketWatcher> TicketWatchers => Set<TicketWatcher>();
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<TicketTag> TicketTags => Set<TicketTag>();
+    public DbSet<SavedTicketView> SavedTicketViews => Set<SavedTicketView>();
 
     // Channels
     public DbSet<Channel> Channels => Set<Channel>();

@@ -81,6 +81,7 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IContactVerificationSender, LoggingContactVerificationSender>();
         services.AddScoped<IAttachmentOwnerAuthorizer, AttachmentOwnerAuthorizer>();
+        services.AddScoped<ISlaEngine, NoOpSlaEngine>();
         services.AddSingleton<IFileStorage, LocalFileStorage>();
         services.AddSingleton<IAttachmentPolicyProvider, AttachmentPolicyProvider>();
         services.AddSingleton<IVirusScanner, NoOpVirusScanner>();

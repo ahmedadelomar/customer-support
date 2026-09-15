@@ -1,0 +1,94 @@
+<div class="card space-y-4 p-4">
+  <div class="flex items-center justify-between">
+    <h2 class="text-sm font-semibold text-slate-800">{{ 'tickets.properties.title' | translate }}</h2>
+    @if (!editing() && ticket().canUpdate) {
+      <button type="button" class="text-sm text-brand-700 hover:underline" (click)="startEdit()">
+        {{ 'common.edit' | translate }}
+      </button>
+    }
+  </div>
+
+  <div>
+    <p class="text-xs text-slate-500">{{ 'tickets.properties.status' | translate }}</p>
+    <span class="chip mt-1" [style.borderColor]="ticket().statusColorHex" [style.color]="ticket().statusColorHex">
+      {{ statusName() }}
+    </span>
+  </div>
+
+  @if (editing()) {
+    <div>
+      <label class="form-label" for="prop-category">{{ 'tickets.properties.category' | translate }}</label>
+      <select id="prop-category" class="form-control" [ngModel]="categoryId()" (ngModelChange)="categoryId.set($event)">
+        @for (option of lookups()?.categories ?? []; track option.id) {
+          <option [value]="option.id">{{ '—'.repeat(option.depth) }} {{ lang() === 'ar' ? option.nameAr : option.nameEn }}</option>
+        }
+      </select>
+    </div>
+
+    <div>
+      <label class="form-label" for="prop-priority">{{ 'tickets.properties.priority' | translate }}</label>
+      <select id="prop-priority" class="form-control" [ngModel]="priorityId()" (ngModelChange)="priorityId.set($event)">
+        @for (option of lookups()?.priorities ?? []; track option.id) {
+          <option [value]="option.id">{{ lang() === 'ar' ? option.nameAr : option.nameEn }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="flex justify-end gap-2">
+      <button type="button" class="btn-secondary" (click)="cancelEdit()">{{ 'common.cancel' | translate }}</button>
+      <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">
+        {{ (saving() ? 'common.saving' : 'tickets.properties.save') | translate }}
+      </button>
+    </div>
+  } @else {
+    <div>
+      <p class="text-xs text-slate-500">{{ 'tickets.properties.category' | translate }}</p>
+      <p class="text-sm text-slate-800">{{ categoryName() }}</p>
+    </div>
+
+    <div>
+      <p class="text-xs text-slate-500">{{ 'tickets.properties.priority' | translate }}</p>
+      <span class="chip mt-1" [style.borderColor]="ticket().priorityColorHex" [style.color]="ticket().priorityColorHex">
+        {{ priorityName() }}
+      </span>
+    </div>
+  }
+
+  <div>
+    <p class="text-xs text-slate-500">{{ 'tickets.properties.assignee' | translate }}</p>
+    <p class="text-sm text-slate-800">{{ assigneeName() ?? ('tickets.properties.noAssignee' | translate) }}</p>
+  </div>
+
+  <div>
+    <p class="text-xs text-slate-500">{{ 'tickets.properties.department' | translate }}</p>
+    <p class="text-sm text-slate-800">{{ departmentName() ?? ('tickets.properties.noDepartment' | translate) }}</p>
+  </div>
+
+  <div>
+    <p class="text-xs text-slate-500">{{ 'tickets.properties.tags' | translate }}</p>
+    @if (ticket().tags.length) {
+      <div class="mt-1 flex flex-wrap gap-1.5">
+        @for (tag of ticket().tags; track tag.id) {
+          <span class="chip" [style.borderColor]="tag.colorHex" [style.color]="tag.colorHex">{{ tag.name }}</span>
+        }
+      </div>
+    } @else {
+      <p class="text-sm text-slate-500">{{ 'tickets.properties.noTags' | translate }}</p>
+    }
+  </div>
+
+  <div class="grid grid-cols-1 gap-3 border-t border-slate-200 pt-3 text-sm">
+    <div class="flex justify-between gap-2">
+      <span class="text-slate-500">{{ 'tickets.properties.firstResponseDue' | translate }}</span>
+      <span class="text-slate-800">
+        {{ (ticket().firstResponseDueAt | date: 'short' : undefined : locale()) ?? '—' }}
+      </span>
+    </div>
+    <div class="flex justify-between gap-2">
+      <span class="text-slate-500">{{ 'tickets.properties.resolutionDue' | translate }}</span>
+      <span class="text-slate-800">
+        {{ (ticket().resolutionDueAt | date: 'short' : undefined : locale()) ?? '—' }}
+      </span>
+    </div>
+  </div>
+</div>

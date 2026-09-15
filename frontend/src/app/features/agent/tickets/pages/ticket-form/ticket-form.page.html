@@ -1,0 +1,122 @@
+<app-page-header titleKey="tickets.create">
+  <a class="btn-secondary" routerLink="/agent/tickets">{{ 'common.back' | translate }}</a>
+</app-page-header>
+
+<form class="card p-5" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <fieldset class="mb-6">
+    <legend class="mb-3 text-sm font-semibold text-slate-800">{{ 'tickets.form.customer' | translate }} *</legend>
+
+    @if (selectedCustomer(); as customer) {
+      <div class="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+        <div>
+          <p class="font-medium text-slate-900">{{ customerName(customer) }}</p>
+          <p class="text-xs text-slate-500">{{ customer.primaryEmail || customer.primaryPhone || customer.code }}</p>
+        </div>
+        <button type="button" class="btn-secondary" (click)="clearCustomer()">
+          {{ 'tickets.form.changeCustomer' | translate }}
+        </button>
+      </div>
+    } @else {
+      <div class="relative">
+        <input
+          type="search"
+          class="form-control"
+          [placeholder]="'tickets.form.customerSearchPlaceholder' | translate"
+          [ngModel]="customerSearch()"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="onCustomerSearchInput($event)"
+        />
+
+        @if (customerResults().length) {
+          <div class="absolute top-full z-10 mt-1 w-full rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+            @for (customer of customerResults(); track customer.id) {
+              <button
+                type="button"
+                class="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50"
+                (click)="selectCustomer(customer)"
+              >
+                <span class="font-medium text-slate-900">{{ customerName(customer) }}</span>
+                <span class="ms-2 text-xs text-slate-500">{{ customer.primaryEmail || customer.primaryPhone }}</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+  </fieldset>
+
+  <fieldset class="mb-6">
+    <legend class="mb-3 text-sm font-semibold text-slate-800">{{ 'tickets.detail' | translate }}</legend>
+
+    <div class="grid gap-4">
+      <div>
+        <label class="form-label" for="subject">{{ 'tickets.form.subject' | translate }} *</label>
+        <input id="subject" type="text" class="form-control" formControlName="subject" />
+        @if (showError('subject')) {
+          <p class="form-error">{{ 'validation.required' | translate }}</p>
+        }
+      </div>
+
+      <div>
+        <label class="form-label" for="description">{{ 'tickets.form.description' | translate }} *</label>
+        <textarea id="description" rows="5" class="form-control" formControlName="description"></textarea>
+        @if (showError('description')) {
+          <p class="form-error">{{ 'validation.required' | translate }}</p>
+        }
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-3">
+        <div>
+          <label class="form-label" for="categoryId">{{ 'tickets.form.category' | translate }} *</label>
+          <select id="categoryId" class="form-control" formControlName="categoryId">
+            <option value="" disabled>{{ 'tickets.form.category' | translate }}</option>
+            @for (option of categoryOptions(); track option.id) {
+              <option [value]="option.id">{{ option.label }}</option>
+            }
+          </select>
+          @if (showError('categoryId')) {
+            <p class="form-error">{{ 'validation.required' | translate }}</p>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="priorityId">{{ 'tickets.form.priority' | translate }}</label>
+          <select id="priorityId" class="form-control" formControlName="priorityId">
+            <option value="">{{ 'tickets.form.priorityAuto' | translate }}</option>
+            @for (option of lookups()?.priorities ?? []; track option.id) {
+              <option [value]="option.id">{{ option.nameEn }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="form-label" for="departmentId">{{ 'tickets.form.department' | translate }}</label>
+          <select id="departmentId" class="form-control" formControlName="departmentId">
+            <option value="">{{ 'tickets.form.departmentAuto' | translate }}</option>
+            @for (option of lookups()?.departments ?? []; track option.id) {
+              <option [value]="option.id">{{ option.nameEn }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="max-w-xs">
+        <label class="form-label" for="channel">{{ 'tickets.form.channel' | translate }} *</label>
+        <select id="channel" class="form-control" formControlName="channel">
+          @for (option of channels; track option.value) {
+            <option [value]="option.value">{{ option.labelKey | translate }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </fieldset>
+
+  <div class="flex justify-end gap-2 border-t border-slate-200 pt-4">
+    <button type="button" class="btn-secondary" (click)="cancel()">
+      {{ 'tickets.form.cancel' | translate }}
+    </button>
+    <button type="submit" class="btn-primary" [disabled]="saving()">
+      {{ (saving() ? 'common.saving' : 'tickets.form.submit') | translate }}
+    </button>
+  </div>
+</form>

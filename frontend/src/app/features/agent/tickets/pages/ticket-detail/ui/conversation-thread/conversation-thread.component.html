@@ -1,0 +1,112 @@
+<div class="card flex min-h-[24rem] flex-col p-4">
+  <div class="flex-1 space-y-3 overflow-y-auto pb-3">
+    @if (loading()) {
+      <div class="space-y-3">
+        @for (i of [1, 2, 3]; track i) {
+          <div class="h-16 animate-pulse rounded-lg bg-slate-100"></div>
+        }
+      </div>
+    } @else if (messages().length === 0) {
+      <app-empty-state titleKey="tickets.thread.empty" icon="💬" />
+    } @else {
+      @for (message of messages(); track message.id) {
+        @if (message.isInternalNote) {
+          <div class="w-full rounded-lg border border-amber-200 bg-amber-50 p-3">
+            <div class="mb-1 flex items-center gap-2 text-xs text-amber-700">
+              <span aria-hidden="true">🔒</span>
+              <span class="font-medium">{{ 'tickets.thread.internalNoteBadge' | translate }}</span>
+              <span>·</span>
+              <span>{{ message.authorDisplayName }}</span>
+              <span>·</span>
+              <span>{{ relativeTime(message.sentAt) }}</span>
+            </div>
+            <p class="whitespace-pre-wrap text-sm text-amber-900">{{ message.bodyText }}</p>
+          </div>
+        } @else {
+          <div
+            class="flex"
+            [class.justify-start]="message.direction === MessageDirection.Inbound"
+            [class.justify-end]="message.direction === MessageDirection.Outbound"
+          >
+            <div
+              class="max-w-[80%] rounded-lg p-3"
+              [class.bg-slate-100]="message.direction === MessageDirection.Inbound"
+              [class.bg-brand-50]="message.direction === MessageDirection.Outbound"
+            >
+              <div class="mb-1 flex items-center gap-2 text-xs text-slate-500">
+                <span class="font-medium text-slate-700">{{ message.authorDisplayName }}</span>
+                <span>·</span>
+                <span>{{ relativeTime(message.sentAt) }}</span>
+              </div>
+              <p class="whitespace-pre-wrap text-sm text-slate-800">{{ message.bodyText }}</p>
+
+              @if (message.attachments.length) {
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                  @for (attachment of message.attachments; track attachment.id) {
+                    <span class="chip border-slate-200 bg-white text-slate-700">📎 {{ attachment.fileName }}</span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+    }
+  </div>
+
+  @if (isTerminal()) {
+    <p class="border-t border-slate-200 pt-3 text-center text-sm text-slate-500">
+      {{ 'tickets.merge.title' | translate }}
+    </p>
+  } @else if (canReply() || canAddInternalNote()) {
+    <div class="border-t border-slate-200 pt-3">
+      <div class="mb-2 inline-flex rounded-lg border border-slate-200 bg-white p-1">
+        @if (canReply()) {
+          <button
+            type="button"
+            class="rounded-md px-3 py-1.5 text-sm font-medium"
+            [class.bg-brand-700]="mode() === 'reply'"
+            [class.text-white]="mode() === 'reply'"
+            [class.text-slate-600]="mode() !== 'reply'"
+            (click)="setMode('reply')"
+          >
+            {{ 'tickets.composer.reply' | translate }}
+          </button>
+        }
+        @if (canAddInternalNote()) {
+          <button
+            type="button"
+            class="rounded-md px-3 py-1.5 text-sm font-medium"
+            [class.bg-amber-500]="mode() === 'note'"
+            [class.text-white]="mode() === 'note'"
+            [class.text-slate-600]="mode() !== 'note'"
+            (click)="setMode('note')"
+          >
+            {{ 'tickets.composer.note' | translate }}
+          </button>
+        }
+      </div>
+
+      <textarea
+        rows="3"
+        class="form-control"
+        [class.border-amber-300]="mode() === 'note'"
+        [placeholder]="(mode() === 'reply' ? 'tickets.composer.replyPlaceholder' : 'tickets.composer.notePlaceholder') | translate"
+        [ngModel]="body()"
+        (ngModelChange)="body.set($event)"
+      ></textarea>
+
+      <div class="mt-2 flex justify-end">
+        <button
+          type="button"
+          class="btn-primary"
+          [class.bg-amber-600]="mode() === 'note'"
+          [disabled]="sending() || !body().trim()"
+          (click)="send()"
+        >
+          {{ (mode() === 'reply' ? 'tickets.composer.send' : 'tickets.composer.sendNote') | translate }}
+        </button>
+      </div>
+    </div>
+  }
+</div>

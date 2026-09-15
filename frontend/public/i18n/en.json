@@ -217,7 +217,123 @@
     }
   },
   "tickets": {
-    "title": "Tickets"
+    "title": "Tickets",
+    "create": "New ticket",
+    "edit": "Edit ticket",
+    "detail": "Ticket",
+    "created": "Ticket created.",
+    "updated": "Ticket updated.",
+    "replied": "Reply sent.",
+    "noteAdded": "Internal note added.",
+    "merged": "Ticket merged.",
+    "columns": {
+      "number": "Number",
+      "subject": "Subject",
+      "customer": "Customer",
+      "category": "Category",
+      "priority": "Priority",
+      "status": "Status",
+      "assignee": "Assignee",
+      "sla": "SLA due",
+      "created": "Created"
+    },
+    "assignment": {
+      "mine": "My tickets",
+      "team": "My team",
+      "unassigned": "Unassigned",
+      "all": "All"
+    },
+    "kpis": {
+      "open": "Open",
+      "unassigned": "Unassigned",
+      "dueToday": "Due today",
+      "breached": "Breached"
+    },
+    "filters": {
+      "allStatuses": "All statuses",
+      "allPriorities": "All priorities",
+      "allCategories": "All categories",
+      "allChannels": "All channels",
+      "searchPlaceholder": "Search number, subject or customer"
+    },
+    "savedViews": {
+      "save": "Save current view",
+      "namePromptEn": "Name (English)",
+      "namePromptAr": "Name (Arabic)",
+      "shared": "Shared with my team",
+      "delete": "Delete view",
+      "empty": "No saved views yet."
+    },
+    "unassignedLabel": "Unassigned",
+    "noDueDate": "—",
+    "form": {
+      "customer": "Customer",
+      "customerSearchPlaceholder": "Search by name, email or phone",
+      "selectCustomer": "Select a customer",
+      "changeCustomer": "Change",
+      "subject": "Subject",
+      "description": "Description",
+      "category": "Category",
+      "priority": "Priority",
+      "priorityAuto": "Use category default",
+      "department": "Department",
+      "departmentAuto": "Use category default",
+      "channel": "Channel",
+      "submit": "Create ticket",
+      "cancel": "Cancel"
+    },
+    "tabs": {
+      "conversation": "Conversation",
+      "history": "History",
+      "related": "Related"
+    },
+    "composer": {
+      "reply": "Reply",
+      "note": "Internal note",
+      "replyPlaceholder": "Write a reply to the customer…",
+      "notePlaceholder": "Write a note visible to agents only…",
+      "send": "Send",
+      "sendNote": "Add note"
+    },
+    "thread": {
+      "internalNoteBadge": "Internal note",
+      "empty": "No messages yet."
+    },
+    "properties": {
+      "title": "Properties",
+      "status": "Status",
+      "priority": "Priority",
+      "category": "Category",
+      "assignee": "Assignee",
+      "department": "Department",
+      "tags": "Tags",
+      "firstResponseDue": "First response due",
+      "resolutionDue": "Resolution due",
+      "noAssignee": "Unassigned",
+      "noDepartment": "—",
+      "noTags": "No tags",
+      "save": "Save changes"
+    },
+    "customerPanel": {
+      "code": "Code",
+      "tier": "Tier",
+      "openTickets": "Open tickets",
+      "viewProfile": "View profile",
+      "blocked": "Blocked"
+    },
+    "merge": {
+      "action": "Merge",
+      "title": "Merge this ticket",
+      "target": "Target ticket number",
+      "targetHint": "The exact ticket number this one will be merged into, e.g. TCK-2026-000123.",
+      "reason": "Reason (optional)",
+      "allowCrossCustomer": "Allow merging into a ticket for a different customer",
+      "confirm": "Merge",
+      "notFound": "No ticket with that number was found."
+    },
+    "errors": {
+      "customerBlocked": "This customer is blocked and cannot raise new tickets."
+    }
   },
   "validation": {
     "required": "This field is required.",

@@ -54,6 +54,7 @@ public interface IAppDbContext
     DbSet<TicketWatcher> TicketWatchers { get; }
     DbSet<Tag> Tags { get; }
     DbSet<TicketTag> TicketTags { get; }
+    DbSet<SavedTicketView> SavedTicketViews { get; }
 
     // Channels
     DbSet<Channel> Channels { get; }

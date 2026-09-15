@@ -217,7 +217,123 @@
     }
   },
   "tickets": {
-    "title": "التذاكر"
+    "title": "التذاكر",
+    "create": "تذكرة جديدة",
+    "edit": "تعديل التذكرة",
+    "detail": "التذكرة",
+    "created": "تم إنشاء التذكرة.",
+    "updated": "تم تحديث التذكرة.",
+    "replied": "تم إرسال الرد.",
+    "noteAdded": "تمت إضافة الملاحظة الداخلية.",
+    "merged": "تم دمج التذكرة.",
+    "columns": {
+      "number": "الرقم",
+      "subject": "الموضوع",
+      "customer": "العميل",
+      "category": "الفئة",
+      "priority": "الأولوية",
+      "status": "الحالة",
+      "assignee": "المسؤول",
+      "sla": "موعد اتفاقية الخدمة",
+      "created": "تاريخ الإنشاء"
+    },
+    "assignment": {
+      "mine": "تذاكري",
+      "team": "فريقي",
+      "unassigned": "غير مسندة",
+      "all": "الكل"
+    },
+    "kpis": {
+      "open": "مفتوحة",
+      "unassigned": "غير مسندة",
+      "dueToday": "مستحقة اليوم",
+      "breached": "متجاوزة"
+    },
+    "filters": {
+      "allStatuses": "كل الحالات",
+      "allPriorities": "كل الأولويات",
+      "allCategories": "كل الفئات",
+      "allChannels": "كل القنوات",
+      "searchPlaceholder": "ابحث بالرقم أو الموضوع أو اسم العميل"
+    },
+    "savedViews": {
+      "save": "حفظ العرض الحالي",
+      "namePromptEn": "الاسم (إنجليزي)",
+      "namePromptAr": "الاسم (عربي)",
+      "shared": "مشترك مع فريقي",
+      "delete": "حذف العرض",
+      "empty": "لا توجد عروض محفوظة بعد."
+    },
+    "unassignedLabel": "غير مسندة",
+    "noDueDate": "—",
+    "form": {
+      "customer": "العميل",
+      "customerSearchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني أو الهاتف",
+      "selectCustomer": "اختر عميلاً",
+      "changeCustomer": "تغيير",
+      "subject": "الموضوع",
+      "description": "الوصف",
+      "category": "الفئة",
+      "priority": "الأولوية",
+      "priorityAuto": "استخدام افتراضي الفئة",
+      "department": "القسم",
+      "departmentAuto": "استخدام افتراضي الفئة",
+      "channel": "القناة",
+      "submit": "إنشاء التذكرة",
+      "cancel": "إلغاء"
+    },
+    "tabs": {
+      "conversation": "المحادثة",
+      "history": "السجل",
+      "related": "ذات صلة"
+    },
+    "composer": {
+      "reply": "رد",
+      "note": "ملاحظة داخلية",
+      "replyPlaceholder": "اكتب ردًا للعميل…",
+      "notePlaceholder": "اكتب ملاحظة تظهر للموظفين فقط…",
+      "send": "إرسال",
+      "sendNote": "إضافة ملاحظة"
+    },
+    "thread": {
+      "internalNoteBadge": "ملاحظة داخلية",
+      "empty": "لا توجد رسائل بعد."
+    },
+    "properties": {
+      "title": "الخصائص",
+      "status": "الحالة",
+      "priority": "الأولوية",
+      "category": "الفئة",
+      "assignee": "المسؤول",
+      "department": "القسم",
+      "tags": "الوسوم",
+      "firstResponseDue": "موعد أول رد",
+      "resolutionDue": "موعد الحل",
+      "noAssignee": "غير مسندة",
+      "noDepartment": "—",
+      "noTags": "لا توجد وسوم",
+      "save": "حفظ التغييرات"
+    },
+    "customerPanel": {
+      "code": "الرمز",
+      "tier": "الفئة",
+      "openTickets": "التذاكر المفتوحة",
+      "viewProfile": "عرض الملف",
+      "blocked": "محظور"
+    },
+    "merge": {
+      "action": "دمج",
+      "title": "دمج هذه التذكرة",
+      "target": "رقم التذكرة الهدف",
+      "targetHint": "رقم التذكرة التي ستُدمج فيها هذه التذكرة، مثل TCK-2026-000123.",
+      "reason": "السبب (اختياري)",
+      "allowCrossCustomer": "السماح بالدمج مع تذكرة عميل آخر",
+      "confirm": "دمج",
+      "notFound": "لم يتم العثور على تذكرة بهذا الرقم."
+    },
+    "errors": {
+      "customerBlocked": "هذا العميل محظور ولا يمكن فتح تذاكر جديدة له."
+    }
   },
   "validation": {
     "required": "هذا الحقل مطلوب.",

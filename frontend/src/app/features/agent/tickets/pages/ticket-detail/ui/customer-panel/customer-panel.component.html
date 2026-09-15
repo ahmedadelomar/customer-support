@@ -1,0 +1,51 @@
+<div class="card space-y-4 p-4">
+  <div>
+    <p class="font-semibold text-slate-900">{{ displayName() }}</p>
+    <p class="text-xs text-slate-500">{{ customer().code }}</p>
+  </div>
+
+  @if (customer().isBlocked) {
+    <span class="chip border-rose-200 bg-rose-50 text-rose-700">
+      {{ 'customers.status.blocked' | translate }}
+    </span>
+  }
+
+  <dl class="space-y-2 text-sm">
+    @if (customer().tier) {
+      <div class="flex justify-between gap-2">
+        <dt class="text-slate-500">{{ 'tickets.customerPanel.tier' | translate }}</dt>
+        <dd class="text-slate-800">{{ customer().tier }}</dd>
+      </div>
+    }
+    <div class="flex justify-between gap-2">
+      <dt class="text-slate-500">{{ 'tickets.customerPanel.openTickets' | translate }}</dt>
+      <dd class="font-medium text-slate-800">{{ customer().openTicketCount }}</dd>
+    </div>
+  </dl>
+
+  <div class="flex flex-wrap gap-1.5">
+    @if (customer().primaryEmail) {
+      <span class="chip border-slate-200 bg-slate-50 text-slate-700">{{ customer().primaryEmail }}</span>
+    }
+    @if (customer().primaryPhone) {
+      <span class="chip border-slate-200 bg-slate-50 text-slate-700">{{ customer().primaryPhone }}</span>
+    }
+  </div>
+
+  @if (pinnedNotes().length) {
+    <div class="border-t border-slate-200 pt-3">
+      <p class="mb-2 text-xs font-medium uppercase tracking-wide text-slate-400">
+        {{ 'customers.notes.pinned' | translate }}
+      </p>
+      <ul class="space-y-2">
+        @for (note of pinnedNotes(); track note.id) {
+          <li class="rounded-lg bg-amber-50 p-2 text-sm text-amber-900">{{ note.body }}</li>
+        }
+      </ul>
+    </div>
+  }
+
+  <a class="btn-secondary block text-center" [routerLink]="['/agent/customers', customer().id]">
+    {{ 'tickets.customerPanel.viewProfile' | translate }}
+  </a>
+</div>

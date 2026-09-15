@@ -176,3 +176,12 @@ public class TicketLookupConfiguration :
         builder.HasIndex(x => x.UserId);
     }
 }
+
+public class SavedTicketViewConfiguration : IEntityTypeConfiguration<SavedTicketView>
+{
+    public void Configure(EntityTypeBuilder<SavedTicketView> builder)
+    {
+        builder.Property(x => x.FiltersJson).IsRequired();
+        builder.HasIndex(x => new { x.OwnerId, x.DisplayOrder });
+    }
+}

@@ -1,0 +1,173 @@
+<app-page-header titleKey="tickets.title">
+  <a *hasPermission="permissions.tickets.create" class="btn-primary" routerLink="/agent/tickets/new">
+    {{ 'tickets.create' | translate }}
+  </a>
+</app-page-header>
+
+<!-- Assignment segmented control — the filter agents change most, so it is one click. -->
+<div class="mb-4 inline-flex flex-wrap rounded-lg border border-slate-200 bg-white p-1">
+  @for (tab of assignmentTabs; track tab.value) {
+    <button
+      type="button"
+      class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
+      [class]="assignment() === tab.value ? 'bg-brand-700 text-white' : 'text-slate-600 hover:bg-slate-100'"
+      (click)="selectAssignment(tab.value)"
+    >
+      {{ tab.labelKey | translate }}
+    </button>
+  }
+</div>
+
+<!-- KPI tiles -->
+<div class="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+  <app-state-card
+    labelKey="tickets.kpis.open"
+    icon="✉"
+    [value]="statistics()?.openCount ?? '—'"
+    [loading]="!statistics()"
+    badgeClasses="bg-brand-50 text-brand-700"
+  />
+  <app-state-card
+    labelKey="tickets.kpis.unassigned"
+    icon="?"
+    [value]="statistics()?.unassignedCount ?? '—'"
+    [loading]="!statistics()"
+    badgeClasses="bg-slate-100 text-slate-700"
+  />
+  <app-state-card
+    labelKey="tickets.kpis.dueToday"
+    icon="⏱"
+    [value]="statistics()?.dueTodayCount ?? '—'"
+    [loading]="!statistics()"
+    badgeClasses="bg-amber-50 text-amber-700"
+  />
+  <app-state-card
+    labelKey="tickets.kpis.breached"
+    icon="⚠"
+    [value]="statistics()?.breachedCount ?? '—'"
+    [loading]="!statistics()"
+    badgeClasses="bg-rose-50 text-rose-700"
+  />
+</div>
+
+<!-- Saved views -->
+<div class="mb-4 flex flex-wrap items-center gap-2">
+  @for (view of savedViews(); track view.id) {
+    <button type="button" class="chip border-slate-200 bg-white hover:bg-slate-50" (click)="applyView(view)">
+      {{ viewLabel(view) }}
+      <span class="ms-1 text-slate-400 hover:text-rose-600" (click)="deleteView(view, $event)">✕</span>
+    </button>
+  }
+
+  <button type="button" class="chip border-dashed border-slate-300 text-slate-500 hover:bg-slate-50" (click)="toggleSaveViewForm()">
+    + {{ 'tickets.savedViews.save' | translate }}
+  </button>
+</div>
+
+@if (showSaveViewForm()) {
+  <div class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+    <div class="min-w-48">
+      <label class="form-label" for="view-name-en">{{ 'tickets.savedViews.namePromptEn' | translate }}</label>
+      <input
+        id="view-name-en"
+        type="text"
+        class="form-control"
+        [ngModel]="newViewNameEn()"
+        (ngModelChange)="newViewNameEn.set($event)"
+      />
+    </div>
+    <div class="min-w-48">
+      <label class="form-label" for="view-name-ar">{{ 'tickets.savedViews.namePromptAr' | translate }}</label>
+      <input
+        id="view-name-ar"
+        type="text"
+        class="form-control"
+        [ngModel]="newViewNameAr()"
+        (ngModelChange)="newViewNameAr.set($event)"
+      />
+    </div>
+    <button type="button" class="btn-primary" [disabled]="savingView()" (click)="saveCurrentView()">
+      {{ 'common.save' | translate }}
+    </button>
+  </div>
+}
+
+<!-- Filter bar -->
+<div class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+  <div class="min-w-56 flex-1">
+    <label class="form-label" for="ticket-search">{{ 'common.search' | translate }}</label>
+    <app-search-input
+      [value]="searchTerm()"
+      placeholderKey="tickets.filters.searchPlaceholder"
+      (search)="onSearch($event)"
+    />
+  </div>
+
+  <div class="min-w-44">
+    <label class="form-label" for="ticket-status">{{ 'tickets.columns.status' | translate }}</label>
+    <select
+      id="ticket-status"
+      class="form-control"
+      [ngModel]="statusId()"
+      (ngModelChange)="statusId.set($event); onFilterChange()"
+    >
+      @for (option of statusOptions(); track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="min-w-44">
+    <label class="form-label" for="ticket-priority">{{ 'tickets.columns.priority' | translate }}</label>
+    <select
+      id="ticket-priority"
+      class="form-control"
+      [ngModel]="priorityId()"
+      (ngModelChange)="priorityId.set($event); onFilterChange()"
+    >
+      @for (option of priorityOptions(); track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="min-w-52">
+    <label class="form-label" for="ticket-category">{{ 'tickets.columns.category' | translate }}</label>
+    <select
+      id="ticket-category"
+      class="form-control"
+      [ngModel]="categoryId()"
+      (ngModelChange)="categoryId.set($event); onFilterChange()"
+    >
+      @for (option of categoryOptions(); track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+  </div>
+
+  <button type="button" class="btn-secondary" (click)="clearFilters()">
+    {{ 'common.clearFilters' | translate }}
+  </button>
+</div>
+
+<ng-template #slaTemplate let-row>
+  <span [class]="slaClasses(row)">{{ slaLabel(row) }}</span>
+</ng-template>
+
+<app-data-table
+  [columns]="columns()"
+  [rows]="items()"
+  [loading]="loading()"
+  [sort]="sort()"
+  [skeletonRows]="pageSize()"
+  emptyMessageKey="common.noResults"
+  (sortChange)="onSortChange($event)"
+  (rowClick)="openTicket($event)"
+/>
+
+<app-pagination
+  [page]="page()"
+  [pageSize]="pageSize()"
+  [totalCount]="totalCount()"
+  (pageChange)="onPageChange($event)"
+/>

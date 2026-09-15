@@ -60,12 +60,6 @@ public class AttachmentOwnerAuthorizer(IAppDbContext db, ICurrentUser currentUse
                await db.Customers.WhereBranchAccessible(currentUser).AnyAsync(c => c.Id == id, ct);
     }
 
-    /// <remarks>
-    /// CS-201 (ticket creation) does not exist yet, so this applies the same permission-plus-branch
-    /// rule tickets will need once that story lands, rather than a rule proven against real ticket
-    /// visibility semantics (department scoping, <c>tickets.view.all</c>). Revisit this branch when
-    /// CS-201 defines those rules for real.
-    /// </remarks>
     private async Task<bool> CanAccessTicketAsync(Guid ticketId, CancellationToken ct)
     {
         if (!currentUser.HasPermission(Permissions.Tickets.View))
@@ -73,7 +67,8 @@ public class AttachmentOwnerAuthorizer(IAppDbContext db, ICurrentUser currentUse
             return false;
         }
 
-        return await db.Tickets.WhereBranchAccessible(currentUser).AnyAsync(t => t.Id == ticketId, ct);
+        return await db.Tickets.WhereBranchAccessible(currentUser).WhereTicketVisible(currentUser)
+            .AnyAsync(t => t.Id == ticketId, ct);
     }
 
     private async Task<bool> CanAccessTicketMessageAsync(Guid messageId, CancellationToken ct)
@@ -89,7 +84,8 @@ public class AttachmentOwnerAuthorizer(IAppDbContext db, ICurrentUser currentUse
             .FirstOrDefaultAsync(ct);
 
         return ticketId is { } id &&
-               await db.Tickets.WhereBranchAccessible(currentUser).AnyAsync(t => t.Id == id, ct);
+               await db.Tickets.WhereBranchAccessible(currentUser).WhereTicketVisible(currentUser)
+                   .AnyAsync(t => t.Id == id, ct);
     }
 
     private async Task<bool> CanAccessKbArticleAsync(Guid articleId, CancellationToken ct)

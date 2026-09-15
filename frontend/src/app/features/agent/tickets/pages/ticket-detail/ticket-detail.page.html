@@ -1,0 +1,74 @@
+@if (loading()) {
+  <div class="card h-96 animate-pulse"></div>
+} @else if (notFound()) {
+  <div class="card p-8 text-center text-slate-500">{{ 'common.noResults' | translate }}</div>
+} @else if (ticket(); as t) {
+  <header class="mb-4 flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t.number }}</p>
+      <h1 class="text-xl font-semibold text-slate-900 sm:text-2xl">{{ t.subject }}</h1>
+      <p class="mt-1 text-sm text-slate-500">{{ displayName() }}</p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      @if (t.canMerge && !t.mergedIntoTicketId) {
+        <button type="button" class="btn-secondary" (click)="openMergeDialog()">
+          {{ 'tickets.merge.action' | translate }}
+        </button>
+      }
+      <a class="btn-secondary" routerLink="/agent/tickets">{{ 'common.back' | translate }}</a>
+    </div>
+  </header>
+
+  @if (t.mergedIntoTicketId) {
+    <div class="card mb-4 border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+      {{ 'tickets.merge.title' | translate }}
+    </div>
+  }
+
+  <div class="grid gap-4 lg:grid-cols-[20%_1fr_25%]">
+    <app-customer-panel [customer]="t.customer" />
+
+    <div>
+      <div class="mb-3 flex gap-1 border-b border-slate-200">
+        @for (tab of tabs; track tab.key) {
+          <button
+            type="button"
+            class="border-b-2 px-3 py-2 text-sm font-medium"
+            [class.border-brand-700]="activeTab() === tab.key"
+            [class.text-brand-700]="activeTab() === tab.key"
+            [class.border-transparent]="activeTab() !== tab.key"
+            [class.text-slate-500]="activeTab() !== tab.key"
+            (click)="selectTab(tab.key)"
+          >
+            {{ tab.labelKey | translate }}
+          </button>
+        }
+      </div>
+
+      @switch (activeTab()) {
+        @case ('conversation') {
+          <app-conversation-thread
+            [ticketId]="t.id"
+            [canReply]="t.canReply"
+            [canAddInternalNote]="t.canAddInternalNote"
+            [isTerminal]="t.isTerminal"
+            (sent)="refresh()"
+          />
+        }
+        @default {
+          <div class="card p-8 text-center text-slate-500">{{ 'common.comingSoon' | translate }}</div>
+        }
+      }
+    </div>
+
+    <app-properties-panel [ticket]="t" [lookups]="lookups()" (saved)="refresh()" />
+  </div>
+
+  <app-merge-dialog
+    [open]="mergeDialogOpen()"
+    [ticketId]="t.id"
+    (closed)="closeMergeDialog()"
+    (merged)="onMerged()"
+  />
+}
