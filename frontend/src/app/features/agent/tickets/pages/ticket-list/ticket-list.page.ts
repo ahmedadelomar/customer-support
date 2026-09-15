@@ -73,6 +73,9 @@ export class TicketListPage implements OnInit {
   readonly statusId = signal<string>('');
   readonly priorityId = signal<string>('');
   readonly categoryId = signal<string>('');
+  /** Not exposed as a visible control here — set only by an incoming link (e.g. the agent dashboard's tiles). */
+  readonly slaState = signal<'breached' | 'duesoon' | 'ontrack' | ''>('');
+  readonly dueToday = signal(false);
 
   readonly statistics = signal<TicketStatistics | null>(null);
   readonly lookups = signal<TicketLookups | null>(null);
@@ -198,6 +201,8 @@ export class TicketListPage implements OnInit {
       this.statusId.set(params.get('statusId') ?? '');
       this.priorityId.set(params.get('priorityId') ?? '');
       this.categoryId.set(params.get('categoryId') ?? '');
+      this.slaState.set((params.get('slaState') as 'breached' | 'duesoon' | 'ontrack' | null) ?? '');
+      this.dueToday.set(params.get('dueToday') === 'true');
 
       const sortBy = params.get('sortBy');
       this.sort.set(sortBy ? { sortBy, sortDescending: params.get('desc') === 'true' } : null);
@@ -215,6 +220,8 @@ export class TicketListPage implements OnInit {
       statusId: this.statusId() || undefined,
       priorityId: this.priorityId() || undefined,
       categoryId: this.categoryId() || undefined,
+      slaState: this.slaState() || undefined,
+      dueToday: this.dueToday() || undefined,
       sortBy: this.sort()?.sortBy,
       sortDescending: this.sort()?.sortDescending,
     };

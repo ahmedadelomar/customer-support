@@ -75,7 +75,16 @@
       "assigned": "Assigned to me",
       "dueToday": "Due today",
       "breaching": "Approaching SLA breach",
-      "resolvedThisWeek": "Resolved this week"
+      "breached": "Breached"
+    },
+    "queue": {
+      "title": "Next up",
+      "open": "Open",
+      "empty": "You have no assigned tickets right now.",
+      "viewTeamQueue": "View my team's unassigned queue"
+    },
+    "stats": {
+      "comparison": "You resolved {{mine}} this week · team average {{team}}"
     }
   },
   "customers": {

@@ -1,0 +1,60 @@
+<app-page-header titleKey="dashboard.title" [subtitleKey]="null" />
+
+<p class="mb-5 text-sm text-slate-600">
+  {{ 'dashboard.welcome' | translate: { name: displayName() } }}
+</p>
+
+<div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+  <a routerLink="/agent/tickets" [queryParams]="{ assignment: 'mine' }">
+    <app-state-card
+      labelKey="dashboard.tiles.assigned"
+      icon="✉"
+      [value]="tiles().assigned"
+      [loading]="loading()"
+      badgeClasses="bg-brand-50 text-brand-700"
+    />
+  </a>
+  <a routerLink="/agent/tickets" [queryParams]="{ assignment: 'mine', dueToday: true }">
+    <app-state-card
+      labelKey="dashboard.tiles.dueToday"
+      icon="◷"
+      [value]="tiles().dueToday"
+      [loading]="loading()"
+      badgeClasses="bg-amber-50 text-amber-700"
+    />
+  </a>
+  <a routerLink="/agent/tickets" [queryParams]="{ assignment: 'mine', slaState: 'duesoon' }">
+    <app-state-card
+      labelKey="dashboard.tiles.breaching"
+      icon="⚠"
+      [value]="tiles().approachingSla"
+      [loading]="loading()"
+      badgeClasses="bg-orange-50 text-orange-700"
+    />
+  </a>
+  <a routerLink="/agent/tickets" [queryParams]="{ assignment: 'mine', slaState: 'breached' }">
+    <app-state-card
+      labelKey="dashboard.tiles.breached"
+      icon="⛔"
+      [value]="tiles().breached"
+      [loading]="loading()"
+      badgeClasses="bg-rose-50 text-rose-700"
+    />
+  </a>
+</div>
+
+<div class="mt-6" *hasPermission="permissions.tickets.view">
+  <h2 class="mb-3 text-sm font-semibold text-slate-700">{{ 'dashboard.queue.title' | translate }}</h2>
+
+  @if (loading()) {
+    <div class="card h-40 animate-pulse"></div>
+  } @else {
+    <app-next-up-queue [items]="queue()" />
+  }
+</div>
+
+<div class="mt-6 card p-4 text-sm text-slate-600" *hasPermission="permissions.reports.viewAgentPerformance">
+  @if (!loading()) {
+    {{ 'dashboard.stats.comparison' | translate: { mine: stats().resolvedThisWeek, team: teamAverageRounded() } }}
+  }
+</div>

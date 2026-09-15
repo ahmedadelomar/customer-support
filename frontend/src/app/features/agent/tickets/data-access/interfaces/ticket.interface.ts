@@ -50,6 +50,8 @@ export interface TicketQuery extends PagedQuery {
   from?: string;
   to?: string;
   tag?: string;
+  /** Open tickets due before the end of today (server clock) — same definition as the dashboard tile. */
+  dueToday?: boolean;
 }
 
 export interface TicketStatistics {

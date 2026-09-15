@@ -30,6 +30,8 @@ public abstract class TicketFilterQuery : PagedQuery
     public DateTimeOffset? From { get; set; }
     public DateTimeOffset? To { get; set; }
     public Guid? Tag { get; set; }
+    /// <summary>Open tickets whose resolution is due before the end of today (server clock) — same definition the dashboard's tile and this list's own KPI tile already use.</summary>
+    public bool? DueToday { get; set; }
 }
 
 /// <summary>
@@ -203,15 +205,27 @@ public static class TicketFilters
         if (request.To is { } to) query = query.Where(t => t.CreatedAt <= to);
         if (request.Tag is { } tag) query = query.Where(t => t.Tags.Any(x => x.TagId == tag));
 
+        if (request.DueToday == true)
+        {
+            var endOfToday = DateTimeOffset.UtcNow.Date.AddDays(1);
+            query = query.Where(t => !t.Status.IsTerminal && t.ResolutionDueAt != null && t.ResolutionDueAt < endOfToday);
+        }
+
+        // Precomputed rather than inlining `DateTimeOffset.UtcNow.AddHours(2)` in the LINQ predicate
+        // below: the SQLite provider fails to translate that exact shape (a static-member-chain
+        // expression compared against a nullable column with `<=`/`>`), throwing at query-compile
+        // time with "could not be translated" — a local variable sidesteps it entirely.
+        var slaWarningThreshold = DateTimeOffset.UtcNow.AddHours(2);
+
         query = request.SlaState switch
         {
             "breached" => query.Where(t => t.IsFirstResponseBreached || t.IsResolutionBreached),
             "duesoon" => query.Where(t =>
                 !t.IsResolutionBreached && !t.IsFirstResponseBreached && !t.Status.IsTerminal &&
-                t.ResolutionDueAt != null && t.ResolutionDueAt <= DateTimeOffset.UtcNow.AddHours(2)),
+                t.ResolutionDueAt != null && t.ResolutionDueAt <= slaWarningThreshold),
             "ontrack" => query.Where(t =>
                 !t.IsResolutionBreached && !t.IsFirstResponseBreached &&
-                (t.ResolutionDueAt == null || t.ResolutionDueAt > DateTimeOffset.UtcNow.AddHours(2))),
+                (t.ResolutionDueAt == null || t.ResolutionDueAt > slaWarningThreshold)),
             _ => query,
         };
 

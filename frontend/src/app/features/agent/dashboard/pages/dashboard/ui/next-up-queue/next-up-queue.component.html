@@ -1,0 +1,45 @@
+@if (items().length === 0) {
+  <div class="card">
+    <app-empty-state titleKey="dashboard.queue.empty" icon="✓">
+      <a class="btn-secondary" routerLink="/agent/tickets" [queryParams]="{ assignment: 'unassigned' }">
+        {{ 'dashboard.queue.viewTeamQueue' | translate }}
+      </a>
+    </app-empty-state>
+  </div>
+} @else {
+  <ul class="card divide-y divide-slate-100 p-0">
+    @for (item of items(); track item.id) {
+      <li class="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
+        <a class="min-w-0 flex-1" [routerLink]="['/agent/tickets', item.id]">
+          <div class="flex items-center gap-2">
+            <span class="shrink-0 text-xs font-medium uppercase tracking-wide text-slate-400">{{ item.number }}</span>
+            <span class="truncate font-medium text-slate-800">{{ item.subject }}</span>
+          </div>
+          <p class="mt-0.5 truncate text-xs text-slate-500">{{ customerName(item) }}</p>
+        </a>
+
+        <span
+          class="chip shrink-0"
+          [style.borderColor]="item.priorityColorHex"
+          [style.color]="item.priorityColorHex"
+        >
+          {{ priorityName(item) }}
+        </span>
+
+        <span class="shrink-0 text-xs" [class]="dueBadgeClasses(item)">
+          @if (item.isResolutionBreached || item.isFirstResponseBreached) {
+            {{ 'tickets.kpis.breached' | translate }}
+          } @else if (item.resolutionDueAt) {
+            {{ relativeTime(item.resolutionDueAt) }}
+          } @else {
+            {{ 'tickets.noDueDate' | translate }}
+          }
+        </span>
+
+        <a class="btn-secondary shrink-0 px-3 py-1.5 text-xs" [routerLink]="['/agent/tickets', item.id]">
+          {{ 'dashboard.queue.open' | translate }}
+        </a>
+      </li>
+    }
+  </ul>
+}

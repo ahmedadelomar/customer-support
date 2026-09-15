@@ -28,7 +28,7 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () =>
-          import('./features/agent/dashboard/dashboard.page').then((m) => m.DashboardPage),
+          import('./features/agent/dashboard/pages/dashboard/dashboard.page').then((m) => m.DashboardPage),
         data: { titleKey: 'nav.dashboard' },
       },
       {
