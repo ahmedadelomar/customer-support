@@ -7,15 +7,17 @@ import { LanguageService } from '../../../../../core/services/language.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { TicketsService } from '../../data-access/tickets.service';
 import type { TicketLookups } from '../../data-access/interfaces/ticket-lookups.interface';
-import type { TicketDetail } from '../../data-access/interfaces/ticket.interface';
+import type { OpenTaskSummary, TicketDetail } from '../../data-access/interfaces/ticket.interface';
 import { CustomerPanelComponent } from './ui/customer-panel/customer-panel.component';
 import { ConversationThreadComponent } from './ui/conversation-thread/conversation-thread.component';
-import { PropertiesPanelComponent } from './ui/properties-panel/properties-panel.component';
+import { PropertiesPanelComponent, type OpenTasksWarningEvent } from './ui/properties-panel/properties-panel.component';
 import { MergeDialogComponent } from './ui/merge-dialog/merge-dialog.component';
 import { AssignDialogComponent } from './ui/assign-dialog/assign-dialog.component';
 import { ResolveDialogComponent } from './ui/resolve-dialog/resolve-dialog.component';
 import { EscalateDialogComponent } from './ui/escalate-dialog/escalate-dialog.component';
 import { HistoryTabComponent } from './ui/history-tab/history-tab.component';
+import { TasksPanelComponent } from './ui/tasks-panel/tasks-panel.component';
+import { OpenTasksWarningDialogComponent } from './ui/open-tasks-warning-dialog/open-tasks-warning-dialog.component';
 
 /**
  * Ticket detail screen: customer panel, conversation thread and properties panel — the three-column
@@ -35,6 +37,8 @@ import { HistoryTabComponent } from './ui/history-tab/history-tab.component';
     ResolveDialogComponent,
     EscalateDialogComponent,
     HistoryTabComponent,
+    TasksPanelComponent,
+    OpenTasksWarningDialogComponent,
   ],
   templateUrl: './ticket-detail.page.html',
 })
@@ -57,9 +61,13 @@ export class TicketDetailPage {
   readonly resolveDialogOpen = signal(false);
   readonly resolveStatusId = signal('');
   readonly escalateDialogOpen = signal(false);
+  readonly openTasksWarningOpen = signal(false);
+  readonly openTasksWarningStatusId = signal('');
+  readonly openTasksWarningTasks = signal<OpenTaskSummary[]>([]);
 
   readonly tabs = [
     { key: 'conversation', labelKey: 'tickets.tabs.conversation' },
+    { key: 'tasks', labelKey: 'tickets.tabs.tasks' },
     { key: 'history', labelKey: 'tickets.tabs.history' },
     { key: 'related', labelKey: 'tickets.tabs.related' },
   ];
@@ -153,6 +161,21 @@ export class TicketDetailPage {
 
   onEscalated(): void {
     this.escalateDialogOpen.set(false);
+    this.load();
+  }
+
+  onOpenTasksWarning(event: OpenTasksWarningEvent): void {
+    this.openTasksWarningStatusId.set(event.statusId);
+    this.openTasksWarningTasks.set(event.openTasks);
+    this.openTasksWarningOpen.set(true);
+  }
+
+  closeOpenTasksWarning(): void {
+    this.openTasksWarningOpen.set(false);
+  }
+
+  onOpenTasksResolved(): void {
+    this.openTasksWarningOpen.set(false);
     this.load();
   }
 

@@ -5,6 +5,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/auth/auth.service';
 import { PERMISSIONS } from '../../core/permissions';
 import { LanguageService } from '../../core/services/language.service';
+import { ReminderToastComponent } from './ui/reminder-toast/reminder-toast.component';
 
 /** One entry in the side navigation. `permissions` gates visibility the same way the route does. */
 interface NavItem {
@@ -27,7 +28,7 @@ interface NavGroup {
  */
 @Component({
   selector: 'app-agent-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgClass, TranslatePipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgClass, TranslatePipe, ReminderToastComponent],
   templateUrl: './agent-shell.page.html',
 })
 export class AgentShellPage {

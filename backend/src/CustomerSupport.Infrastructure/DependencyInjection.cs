@@ -104,6 +104,17 @@ public static class DependencyInjection
                 .ForJob(jobKey)
                 .WithIdentity($"{nameof(AutoCloseResolvedTicketsJob)}-trigger")
                 .WithSimpleSchedule(s => s.WithIntervalInHours(1).RepeatForever()));
+
+            // Reminder dispatch (Agent Dashboard / Tasks and reminders) — every minute.
+            // [DisallowConcurrentExecution] on the job itself is the second layer against a double
+            // send; the claim-before-dispatch update inside it is the first and the one that matters
+            // across multiple app instances, which Quartz's in-process lock does not cover.
+            var reminderJobKey = new JobKey(nameof(ReminderDispatchJob));
+            q.AddJob<ReminderDispatchJob>(opts => opts.WithIdentity(reminderJobKey));
+            q.AddTrigger(opts => opts
+                .ForJob(reminderJobKey)
+                .WithIdentity($"{nameof(ReminderDispatchJob)}-trigger")
+                .WithSimpleSchedule(s => s.WithIntervalInMinutes(1).RepeatForever()));
         });
         services.AddQuartzHostedService(opts => opts.WaitForJobsToComplete = true);
 

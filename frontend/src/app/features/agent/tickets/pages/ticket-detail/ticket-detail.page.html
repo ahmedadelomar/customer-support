@@ -72,6 +72,9 @@
             (sent)="refresh()"
           />
         }
+        @case ('tasks') {
+          <app-tasks-panel [ticketId]="t.id" />
+        }
         @case ('history') {
           <app-history-tab [ticketId]="t.id" />
         }
@@ -88,6 +91,7 @@
       (assignRequested)="openAssignDialog()"
       (resolveRequested)="openResolveDialog($event)"
       (escalateRequested)="openEscalateDialog()"
+      (openTasksWarning)="onOpenTasksWarning($event)"
     />
   </div>
 
@@ -119,5 +123,14 @@
     [departmentName]="t.departmentNameEn"
     (closed)="closeEscalateDialog()"
     (escalated)="onEscalated()"
+  />
+
+  <app-open-tasks-warning-dialog
+    [open]="openTasksWarningOpen()"
+    [ticketId]="t.id"
+    [statusId]="openTasksWarningStatusId()"
+    [openTasks]="openTasksWarningTasks()"
+    (closed)="closeOpenTasksWarning()"
+    (resolved)="onOpenTasksResolved()"
   />
 }

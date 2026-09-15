@@ -58,3 +58,7 @@
     {{ 'dashboard.stats.comparison' | translate: { mine: stats().resolvedThisWeek, team: teamAverageRounded() } }}
   }
 </div>
+
+<div class="mt-6" *hasPermission="permissions.workspace.viewOwnTasks">
+  <app-tasks-section />
+</div>

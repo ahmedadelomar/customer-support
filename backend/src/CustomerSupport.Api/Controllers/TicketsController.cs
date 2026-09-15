@@ -2,6 +2,7 @@ using CustomerSupport.Application.Common.Models;
 using CustomerSupport.Application.Tickets.Commands;
 using CustomerSupport.Application.Tickets.Dtos;
 using CustomerSupport.Application.Tickets.Queries;
+using CustomerSupport.Application.Workspace.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CustomerSupport.Api.Controllers;
@@ -247,4 +248,11 @@ public class TicketsController : ApiControllerBase
     public async Task<ActionResult<TicketTimelinePageDto>> GetTimeline(
         Guid id, [FromQuery] GetTicketTimelineQuery query, CancellationToken ct)
         => Ok(await Sender.Send(query with { TicketId = id }, ct));
+
+    /// <summary>Tasks linked to this ticket — the ticket screen's tasks panel.</summary>
+    [HttpGet("{id:guid}/tasks")]
+    [ProducesResponseType(typeof(IReadOnlyList<AgentTaskDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IReadOnlyList<AgentTaskDto>>> GetTasks(Guid id, CancellationToken ct)
+        => Ok(await Sender.Send(new GetTicketTasksQuery(id), ct));
 }

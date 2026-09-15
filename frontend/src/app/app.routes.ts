@@ -45,6 +45,13 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/agent/tickets/tickets.routes').then((m) => m.TICKET_ROUTES),
       },
+      {
+        path: 'tasks',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'nav.tasks', permissions: [PERMISSIONS.workspace.viewOwnTasks] },
+        loadChildren: () =>
+          import('./features/agent/tasks/tasks.routes').then((m) => m.TASK_ROUTES),
+      },
     ],
   },
 

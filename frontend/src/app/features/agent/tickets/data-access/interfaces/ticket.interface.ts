@@ -240,6 +240,16 @@ export interface ChangeTicketStatusRequest {
   statusId: string;
   /** Required only when the target status is Resolved-kind. */
   resolutionNote?: string;
+  /** Closes anyway despite open linked tasks, leaving them open. */
+  force?: boolean;
+  /** Closes and completes every open linked task in the same action. */
+  completeLinkedTasks?: boolean;
+}
+
+/** One line of the "you have open tasks" warning; matches `OpenTaskSummary` (backend). */
+export interface OpenTaskSummary {
+  id: string;
+  title: string;
 }
 
 export interface EscalateTicketRequest {

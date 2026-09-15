@@ -158,6 +158,11 @@ public class TokenService(
             claims.Add(new Claim("dept", departmentId.ToString()));
         }
 
+        if (!string.IsNullOrWhiteSpace(user.TimeZoneId))
+        {
+            claims.Add(new Claim("tz", user.TimeZoneId));
+        }
+
         if (user.CustomerId is { } customerId)
         {
             claims.Add(new Claim("customer_id", customerId.ToString()));

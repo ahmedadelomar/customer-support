@@ -7,7 +7,13 @@ import { LanguageService } from '../../../../../../../core/services/language.ser
 import { ToastService } from '../../../../../../../core/services/toast.service';
 import { TicketsService } from '../../../../data-access/tickets.service';
 import type { TicketLookups, TicketStatusLookup } from '../../../../data-access/interfaces/ticket-lookups.interface';
-import type { TicketDetail } from '../../../../data-access/interfaces/ticket.interface';
+import type { OpenTaskSummary, TicketDetail } from '../../../../data-access/interfaces/ticket.interface';
+
+/** Payload for `openTasksWarning` — enough for the parent to open the confirm dialog and resubmit. */
+export interface OpenTasksWarningEvent {
+  statusId: string;
+  openTasks: OpenTaskSummary[];
+}
 
 /** One status kind's group of options, for the grouped `<select>`. */
 interface StatusKindGroup {
@@ -41,6 +47,8 @@ export class PropertiesPanelComponent implements OnChanges {
   /** Emitted instead of changing the status directly, whenever the target status is Resolved-kind. */
   readonly resolveRequested = output<string>();
   readonly escalateRequested = output<void>();
+  /** Emitted when the server refuses a status change because open linked tasks exist (409). */
+  readonly openTasksWarning = output<OpenTasksWarningEvent>();
 
   readonly editing = signal(false);
   readonly saving = signal(false);
@@ -163,8 +171,22 @@ export class PropertiesPanelComponent implements OnChanges {
         this.#toast.success('tickets.properties.statusChanged');
         this.saved.emit();
       },
-      error: () => this.changingStatus.set(false),
+      error: (error: unknown) => {
+        this.changingStatus.set(false);
+        const openTasks = this.#extractOpenTasks(error);
+        if (openTasks) {
+          this.openTasksWarning.emit({ statusId: newStatusId, openTasks });
+        }
+      },
     });
+  }
+
+  #extractOpenTasks(error: unknown): OpenTaskSummary[] | null {
+    if (error && typeof error === 'object' && 'error' in error) {
+      const problem = (error as { error?: { openTasks?: OpenTaskSummary[] } }).error;
+      if (problem?.openTasks) return problem.openTasks;
+    }
+    return null;
   }
 
   openEscalateDialog(): void {

@@ -298,6 +298,7 @@
     },
     "tabs": {
       "conversation": "المحادثة",
+      "tasks": "المهام",
       "history": "السجل",
       "related": "ذات صلة"
     },
@@ -446,6 +447,12 @@
       "summary": "نجح {{succeeded}}، وفشل {{failed}}.",
       "showFailures": "عرض حالات الفشل",
       "hideFailures": "إخفاء حالات الفشل"
+    },
+    "openTasksWarning": {
+      "title": "توجد مهام مفتوحة لهذه التذكرة",
+      "description": "سيؤدي إغلاق هذه التذكرة إلى ترك المهام التالية مفتوحة ما لم تُكملها الآن.",
+      "closeAnyway": "إغلاق رغم ذلك",
+      "closeAndComplete": "إغلاق وإكمال المهام"
     }
   },
   "admin": {
@@ -564,6 +571,12 @@
       "4": "تم الحل",
       "5": "مغلقة",
       "6": "ملغاة"
+    },
+    "agentTaskStatus": {
+      "0": "معلقة",
+      "1": "قيد التنفيذ",
+      "2": "مكتملة",
+      "3": "ملغاة"
     }
   },
   "fileUpload": {
@@ -572,5 +585,51 @@
     "hint": "المسموح: {{extensions}} — حتى {{maxMb}} ميجابايت",
     "disallowedExtension": "الملفات من نوع '{{extension}}' غير مسموح بها.",
     "tooLarge": "يتجاوز هذا الملف الحد الأقصى البالغ {{maxMb}} ميجابايت."
+  },
+  "tasks": {
+    "title": "المهام",
+    "empty": "لا توجد مهام حالياً.",
+    "overdue": "متأخرة",
+    "dueAt": "الاستحقاق {{time}}",
+    "noDueDate": "لا يوجد تاريخ استحقاق",
+    "complete": "إكمال",
+    "completed": "تم إكمال المهمة.",
+    "created": "تم إنشاء المهمة.",
+    "updated": "تم تحديث المهمة.",
+    "deleted": "تم حذف المهمة.",
+    "viewAll": "عرض كل المهام",
+    "filters": {
+      "allStatuses": "كل الحالات",
+      "status": "الحالة",
+      "dueFrom": "الاستحقاق من",
+      "dueTo": "الاستحقاق إلى"
+    },
+    "form": {
+      "createTitle": "مهمة جديدة",
+      "editTitle": "تعديل المهمة",
+      "title": "العنوان",
+      "description": "الوصف",
+      "dueAt": "الاستحقاق",
+      "priority": "الأولوية",
+      "noPriority": "بدون أولوية",
+      "remindMe": "ذكّرني عند وقت الاستحقاق",
+      "remindNeedsDueDate": "حدد تاريخ استحقاق لإضافة تذكير.",
+      "assignedToMe": "مُسندة إليك"
+    },
+    "channels": {
+      "inApp": "داخل التطبيق",
+      "email": "البريد الإلكتروني",
+      "sms": "رسالة نصية"
+    }
+  },
+  "reminders": {
+    "dismiss": "إغلاق",
+    "snooze": {
+      "action": "تأجيل",
+      "tenMinutes": "10 دقائق",
+      "oneHour": "ساعة واحدة",
+      "threeHours": "3 ساعات",
+      "tomorrow": "غداً"
+    }
   }
 }

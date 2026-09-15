@@ -11,6 +11,7 @@ import { StateCardComponent } from '../../../../../shared/ui/state-card/state-ca
 import { AgentDashboardService } from '../../data-access/agent-dashboard.service';
 import type { AgentDashboard } from '../../data-access/interfaces/agent-dashboard.interface';
 import { NextUpQueueComponent } from './ui/next-up-queue/next-up-queue.component';
+import { TasksSectionComponent } from './ui/tasks-section/tasks-section.component';
 
 const REFRESH_INTERVAL_MS = 30_000;
 
@@ -32,7 +33,15 @@ const EMPTY_DASHBOARD: AgentDashboard = {
  */
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, TranslatePipe, HasPermissionDirective, PageHeaderComponent, StateCardComponent, NextUpQueueComponent],
+  imports: [
+    RouterLink,
+    TranslatePipe,
+    HasPermissionDirective,
+    PageHeaderComponent,
+    StateCardComponent,
+    NextUpQueueComponent,
+    TasksSectionComponent,
+  ],
   templateUrl: './dashboard.page.html',
 })
 export class DashboardPage {

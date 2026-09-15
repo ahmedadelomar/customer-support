@@ -25,6 +25,7 @@ public class GlobalExceptionHandler(
             DuplicateContactException => (StatusCodes.Status409Conflict, "Duplicate contact", exception.Message),
             AssignmentWarningException => (StatusCodes.Status409Conflict, "Assignment warning", exception.Message),
             StatusKindChangeWarningException => (StatusCodes.Status409Conflict, "Status kind change warning", exception.Message),
+            OpenTasksWarningException => (StatusCodes.Status409Conflict, "Open tasks warning", exception.Message),
             ForbiddenException => (StatusCodes.Status403Forbidden, "Forbidden", exception.Message),
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Unauthorized", "Authentication is required."),
             // 499 is a de-facto standard for a client-cancelled request and has no StatusCodes constant.
@@ -80,6 +81,13 @@ public class GlobalExceptionHandler(
         if (exception is StatusKindChangeWarningException kindChangeWarning)
         {
             problem.Extensions["ticketCount"] = kindChangeWarning.TicketCount;
+        }
+
+        // Lets the client list the open tasks and offer either "close anyway" (Force) or
+        // "close and complete them" (CompleteLinkedTasks) as the resubmit options.
+        if (exception is OpenTasksWarningException openTasksWarning)
+        {
+            problem.Extensions["openTasks"] = openTasksWarning.OpenTasks;
         }
 
         return await problemDetails.TryWriteAsync(new ProblemDetailsContext

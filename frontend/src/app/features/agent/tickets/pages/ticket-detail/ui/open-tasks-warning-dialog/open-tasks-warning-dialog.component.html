@@ -1,0 +1,21 @@
+<app-modal [open]="open()" titleKey="tickets.openTasksWarning.title" (closed)="close()">
+  <p class="mb-3 text-sm text-slate-600">{{ 'tickets.openTasksWarning.description' | translate }}</p>
+
+  <ul class="mb-4 space-y-1.5">
+    @for (task of openTasks(); track task.id) {
+      <li class="chip block w-full border-amber-200 bg-amber-50 text-amber-800">{{ task.title }}</li>
+    }
+  </ul>
+
+  <div class="flex flex-wrap justify-end gap-2">
+    <button type="button" class="btn-secondary" [disabled]="saving()" (click)="close()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <button type="button" class="btn-secondary" [disabled]="saving()" (click)="closeAnyway()">
+      {{ 'tickets.openTasksWarning.closeAnyway' | translate }}
+    </button>
+    <button type="button" class="btn-primary" [disabled]="saving()" (click)="closeAndComplete()">
+      {{ 'tickets.openTasksWarning.closeAndComplete' | translate }}
+    </button>
+  </div>
+</app-modal>

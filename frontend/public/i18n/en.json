@@ -298,6 +298,7 @@
     },
     "tabs": {
       "conversation": "Conversation",
+      "tasks": "Tasks",
       "history": "History",
       "related": "Related"
     },
@@ -446,6 +447,12 @@
       "summary": "{{succeeded}} succeeded, {{failed}} failed.",
       "showFailures": "Show failures",
       "hideFailures": "Hide failures"
+    },
+    "openTasksWarning": {
+      "title": "This ticket has open tasks",
+      "description": "Closing this ticket will leave the following tasks open unless you complete them now.",
+      "closeAnyway": "Close anyway",
+      "closeAndComplete": "Close and complete tasks"
     }
   },
   "admin": {
@@ -564,6 +571,12 @@
       "4": "Resolved",
       "5": "Closed",
       "6": "Cancelled"
+    },
+    "agentTaskStatus": {
+      "0": "Pending",
+      "1": "In progress",
+      "2": "Completed",
+      "3": "Cancelled"
     }
   },
   "fileUpload": {
@@ -572,5 +585,51 @@
     "hint": "Allowed: {{extensions}} — up to {{maxMb}} MB",
     "disallowedExtension": "Files of type '{{extension}}' are not allowed.",
     "tooLarge": "This file exceeds the {{maxMb}} MB limit."
+  },
+  "tasks": {
+    "title": "Tasks",
+    "empty": "No tasks right now.",
+    "overdue": "Overdue",
+    "dueAt": "Due {{time}}",
+    "noDueDate": "No due date",
+    "complete": "Complete",
+    "completed": "Task completed.",
+    "created": "Task created.",
+    "updated": "Task updated.",
+    "deleted": "Task deleted.",
+    "viewAll": "View all tasks",
+    "filters": {
+      "allStatuses": "All statuses",
+      "status": "Status",
+      "dueFrom": "Due from",
+      "dueTo": "Due to"
+    },
+    "form": {
+      "createTitle": "New task",
+      "editTitle": "Edit task",
+      "title": "Title",
+      "description": "Description",
+      "dueAt": "Due",
+      "priority": "Priority",
+      "noPriority": "No priority",
+      "remindMe": "Remind me at the due time",
+      "remindNeedsDueDate": "Set a due date to add a reminder.",
+      "assignedToMe": "Assigned to you"
+    },
+    "channels": {
+      "inApp": "In-app",
+      "email": "Email",
+      "sms": "SMS"
+    }
+  },
+  "reminders": {
+    "dismiss": "Dismiss",
+    "snooze": {
+      "action": "Snooze",
+      "tenMinutes": "10 minutes",
+      "oneHour": "1 hour",
+      "threeHours": "3 hours",
+      "tomorrow": "Tomorrow"
+    }
   }
 }

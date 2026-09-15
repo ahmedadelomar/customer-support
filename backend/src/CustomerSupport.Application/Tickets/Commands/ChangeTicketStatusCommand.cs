@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using CustomerSupport.Application.Common.Exceptions;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Security;
+using CustomerSupport.Application.Workspace.Tasks;
 using CustomerSupport.Domain.Enums;
 using CustomerSupport.Domain.Portal;
 using CustomerSupport.Domain.Tickets;
@@ -24,6 +25,10 @@ public record ChangeTicketStatusCommand : IRequest
     public Guid StatusId { get; init; }
     /// <summary>Required only when the target status is Resolved-kind.</summary>
     public string? ResolutionNote { get; init; }
+    /// <summary>Closes anyway despite open linked tasks, leaving them open. See <see cref="OpenTasksWarningException"/>.</summary>
+    public bool Force { get; init; }
+    /// <summary>Closes and completes every open linked task in the same action.</summary>
+    public bool CompleteLinkedTasks { get; init; }
 }
 
 public class ChangeTicketStatusCommandValidator : AbstractValidator<ChangeTicketStatusCommand>
@@ -71,6 +76,23 @@ public class ChangeTicketStatusCommandHandler(
             });
         }
 
+        List<Domain.Workspace.AgentTask>? openTasks = null;
+
+        if (newStatus.IsTerminal)
+        {
+            openTasks = await db.AgentTasks
+                .Where(t => t.TicketId == ticket.Id
+                    && t.Status != AgentTaskStatus.Completed && t.Status != AgentTaskStatus.Cancelled)
+                .ToListAsync(cancellationToken);
+
+            if (openTasks.Count > 0 && !request.Force && !request.CompleteLinkedTasks)
+            {
+                throw new OpenTasksWarningException(
+                    $"Ticket {ticket.Number} has {openTasks.Count} open linked task(s).",
+                    openTasks.Select(t => new OpenTaskSummary(t.Id, t.Title)).ToList());
+            }
+        }
+
         // Captured before mutating — recording the event afterwards would show the new name twice.
         var oldStatus = ticket.Status;
         var oldDisplay = oldStatus.Name.For(ticket.Language);
@@ -98,6 +120,14 @@ public class ChangeTicketStatusCommandHandler(
         if (newStatus.Kind == TicketStatusKind.Resolved)
         {
             QueueSatisfactionSurvey(ticket);
+        }
+
+        if (request.CompleteLinkedTasks && openTasks is { Count: > 0 })
+        {
+            foreach (var task in openTasks)
+            {
+                await AgentTaskCompletion.CompleteAsync(task, currentUser.UserId, db, clock, cancellationToken);
+            }
         }
 
         await db.SaveChangesAsync(cancellationToken);

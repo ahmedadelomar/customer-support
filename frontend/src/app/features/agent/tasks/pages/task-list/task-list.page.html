@@ -1,0 +1,115 @@
+<app-page-header titleKey="tasks.title" [subtitleKey]="null">
+  <button
+    type="button"
+    class="btn-primary"
+    *hasPermission="permissions.workspace.manageTasks"
+    (click)="openCreate()"
+  >
+    {{ 'tasks.form.createTitle' | translate }}
+  </button>
+</app-page-header>
+
+<div class="mb-4 flex flex-wrap items-end gap-3">
+  <div>
+    <label class="form-label" for="statusFilter">{{ 'tasks.filters.status' | translate }}</label>
+    <select
+      id="statusFilter"
+      class="form-control"
+      [ngModel]="statusFilter()"
+      (ngModelChange)="statusFilter.set($event); onFilterChange()"
+    >
+      @for (option of statusOptions; track option.value) {
+        <option [value]="option.value">{{ option.labelKey | translate }}</option>
+      }
+    </select>
+  </div>
+
+  <div>
+    <label class="form-label" for="dueFrom">{{ 'tasks.filters.dueFrom' | translate }}</label>
+    <input
+      id="dueFrom"
+      type="date"
+      class="form-control"
+      [ngModel]="dueFrom()"
+      (ngModelChange)="dueFrom.set($event); onFilterChange()"
+    />
+  </div>
+
+  <div>
+    <label class="form-label" for="dueTo">{{ 'tasks.filters.dueTo' | translate }}</label>
+    <input
+      id="dueTo"
+      type="date"
+      class="form-control"
+      [ngModel]="dueTo()"
+      (ngModelChange)="dueTo.set($event); onFilterChange()"
+    />
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="space-y-2">
+    @for (i of [1, 2, 3]; track i) {
+      <div class="card h-16 animate-pulse"></div>
+    }
+  </div>
+} @else if (items().length === 0) {
+  <div class="card">
+    <app-empty-state titleKey="tasks.empty" icon="✓" />
+  </div>
+} @else {
+  <ul class="space-y-2">
+    @for (task of items(); track task.id) {
+      <li class="card flex flex-wrap items-center gap-3 p-3">
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-2">
+            @if (task.isOverdue) {
+              <span class="chip border-rose-300 bg-rose-50 text-rose-700">⚠ {{ 'tasks.overdue' | translate }}</span>
+            }
+            <span
+              class="truncate font-medium text-slate-800"
+              [class.line-through]="task.status === AgentTaskStatus.Completed"
+            >
+              {{ task.title }}
+            </span>
+            @if (priorityName(task); as name) {
+              <span class="chip" [style.borderColor]="task.priorityColorHex" [style.color]="task.priorityColorHex">
+                {{ name }}
+              </span>
+            }
+          </div>
+          <p class="mt-0.5 text-xs text-slate-500">
+            @if (customerOrTicketLabel(task); as label) {
+              {{ label }} ·
+            }
+            @if (task.dueAt) {
+              {{ 'tasks.dueAt' | translate: { time: relativeTime(task.dueAt) } }}
+            } @else {
+              {{ 'tasks.noDueDate' | translate }}
+            }
+          </p>
+        </div>
+
+        @if (task.status !== AgentTaskStatus.Completed && task.status !== AgentTaskStatus.Cancelled) {
+          @if (task.canComplete) {
+            <button type="button" class="btn-secondary px-3 py-1.5 text-xs" (click)="complete(task)">
+              {{ 'tasks.complete' | translate }}
+            </button>
+          }
+          @if (task.canEdit) {
+            <button type="button" class="btn-secondary px-3 py-1.5 text-xs" (click)="openEdit(task)">
+              {{ 'common.edit' | translate }}
+            </button>
+            <button type="button" class="btn-secondary px-3 py-1.5 text-xs text-rose-600" (click)="delete(task)">
+              {{ 'common.delete' | translate }}
+            </button>
+          }
+        }
+      </li>
+    }
+  </ul>
+
+  <app-pagination [page]="page()" [pageSize]="pageSize" [totalCount]="totalCount()" (pageChange)="onPageChange($event)" />
+}
+
+<app-task-form-dialog [open]="formOpen()" [task]="editingTask()" (saved)="onSaved()" (closed)="closeForm()" />

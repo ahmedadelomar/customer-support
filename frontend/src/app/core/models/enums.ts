@@ -104,6 +104,14 @@ export enum TicketEventType {
   FollowUpCreated = 18,
 }
 
+export enum NotificationChannel {
+  InApp = 0,
+  Email = 1,
+  Sms = 2,
+  Push = 3,
+  WhatsApp = 4,
+}
+
 /** Translation key for an enum member, e.g. `enums.channel.1` for WhatsApp. */
 export function enumTranslationKey(group: string, value: number): string {
   return `enums.${group}.${value}`;

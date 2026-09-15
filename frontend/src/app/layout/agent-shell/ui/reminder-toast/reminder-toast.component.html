@@ -1,0 +1,46 @@
+@if (reminders().length > 0) {
+  <div class="fixed bottom-4 end-4 z-40 w-full max-w-sm space-y-2">
+    @for (reminder of reminders(); track reminder.id) {
+      <div class="card relative border-brand-200 bg-white p-3 shadow-lg">
+        <div class="flex items-start gap-2">
+          <span class="mt-0.5 text-base" aria-hidden="true">⏰</span>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium text-slate-800">{{ reminder.message }}</p>
+            <p class="mt-0.5 text-xs text-slate-400">{{ relativeTime(reminder.sentAt) }}</p>
+            @if (reminder.ticketId) {
+              <a class="text-xs font-medium text-brand-700 hover:underline" [routerLink]="['/agent/tickets', reminder.ticketId]">
+                {{ reminder.ticketNumber || reminder.ticketId }}
+              </a>
+            }
+          </div>
+        </div>
+
+        <div class="mt-2 flex items-center justify-end gap-2">
+          <div class="relative">
+            <button type="button" class="btn-secondary px-2.5 py-1 text-xs" (click)="toggleSnoozeMenu(reminder.id)">
+              {{ 'reminders.snooze.action' | translate }}
+            </button>
+
+            @if (openSnoozeMenuId() === reminder.id) {
+              <div class="absolute bottom-full end-0 z-10 mb-1 w-36 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                @for (option of snoozeOptions; track option.minutes) {
+                  <button
+                    type="button"
+                    class="block w-full px-3 py-1.5 text-start text-xs text-slate-700 hover:bg-slate-50"
+                    (click)="snooze(reminder, option.minutes)"
+                  >
+                    {{ option.labelKey | translate }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          <button type="button" class="btn-secondary px-2.5 py-1 text-xs" (click)="dismiss(reminder)">
+            {{ 'reminders.dismiss' | translate }}
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+}

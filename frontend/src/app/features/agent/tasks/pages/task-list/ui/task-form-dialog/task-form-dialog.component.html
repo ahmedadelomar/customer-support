@@ -1,0 +1,84 @@
+<app-modal [open]="open()" [titleKey]="task() ? 'tasks.form.editTitle' : 'tasks.form.createTitle'" (closed)="close()">
+  <div class="space-y-3">
+    <div>
+      <label class="form-label" for="taskTitle">{{ 'tasks.form.title' | translate }} *</label>
+      <input id="taskTitle" class="form-control" [ngModel]="title()" (ngModelChange)="title.set($event)" />
+      @if (errors()['title']; as msgs) {
+        <p class="form-error">{{ msgs[0] }}</p>
+      }
+    </div>
+
+    <div>
+      <label class="form-label" for="taskDescription">{{ 'tasks.form.description' | translate }}</label>
+      <textarea
+        id="taskDescription"
+        rows="2"
+        class="form-control"
+        [ngModel]="description()"
+        (ngModelChange)="description.set($event)"
+      ></textarea>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="form-label" for="taskDueAt">{{ 'tasks.form.dueAt' | translate }}</label>
+        <input
+          id="taskDueAt"
+          type="datetime-local"
+          class="form-control"
+          [ngModel]="dueAtLocal()"
+          (ngModelChange)="dueAtLocal.set($event)"
+        />
+      </div>
+
+      <div>
+        <label class="form-label" for="taskPriority">{{ 'tasks.form.priority' | translate }}</label>
+        <select id="taskPriority" class="form-control" [ngModel]="priorityId()" (ngModelChange)="priorityId.set($event)">
+          <option value="">{{ 'tasks.form.noPriority' | translate }}</option>
+          @for (priority of priorities(); track priority.id) {
+            <option [value]="priority.id">{{ priorityName(priority) }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    @if (!task()) {
+      <div class="rounded-lg border border-slate-200 p-3">
+        <label class="flex items-center gap-2 text-sm font-medium text-slate-700">
+          <input
+            type="checkbox"
+            [checked]="withReminder()"
+            (change)="withReminder.set($any($event.target).checked)"
+            [disabled]="!dueAtLocal()"
+          />
+          {{ 'tasks.form.remindMe' | translate }}
+        </label>
+        @if (!dueAtLocal()) {
+          <p class="mt-1 text-xs text-slate-400">{{ 'tasks.form.remindNeedsDueDate' | translate }}</p>
+        }
+
+        @if (withReminder()) {
+          <div class="mt-2 flex flex-wrap gap-3">
+            @for (option of channelOptions; track option.value) {
+              <label class="flex items-center gap-1.5 text-sm text-slate-600">
+                <input
+                  type="checkbox"
+                  [checked]="isChannelChecked(option.value)"
+                  (change)="toggleChannel(option.value, $any($event.target).checked)"
+                />
+                {{ option.labelKey | translate }}
+              </label>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button type="button" class="btn-secondary" (click)="close()">{{ 'common.cancel' | translate }}</button>
+      <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">
+        {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+      </button>
+    </div>
+  </div>
+</app-modal>

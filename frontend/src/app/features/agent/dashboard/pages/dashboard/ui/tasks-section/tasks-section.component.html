@@ -1,0 +1,44 @@
+<div class="mb-3 flex items-center justify-between">
+  <h2 class="text-sm font-semibold text-slate-700">{{ 'tasks.title' | translate }}</h2>
+  <button type="button" class="btn-secondary px-3 py-1.5 text-xs" (click)="openCreate()">
+    {{ 'tasks.form.createTitle' | translate }}
+  </button>
+</div>
+
+@if (loading()) {
+  <div class="card h-24 animate-pulse"></div>
+} @else if (items().length === 0) {
+  <div class="card">
+    <app-empty-state titleKey="tasks.empty" icon="✓" />
+  </div>
+} @else {
+  <ul class="card divide-y divide-slate-100 p-0">
+    @for (task of items(); track task.id) {
+      <li class="flex flex-wrap items-center gap-3 px-4 py-2.5 text-sm">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            @if (task.isOverdue) {
+              <span class="chip border-rose-300 bg-rose-50 text-rose-700">⚠ {{ 'tasks.overdue' | translate }}</span>
+            }
+            <span class="truncate font-medium text-slate-800">{{ task.title }}</span>
+          </div>
+          @if (task.dueAt) {
+            <p class="mt-0.5 text-xs text-slate-500">{{ 'tasks.dueAt' | translate: { time: relativeTime(task.dueAt) } }}</p>
+          }
+        </div>
+
+        @if (task.canComplete) {
+          <button type="button" class="btn-secondary shrink-0 px-3 py-1.5 text-xs" (click)="complete(task)">
+            {{ 'tasks.complete' | translate }}
+          </button>
+        }
+      </li>
+    }
+  </ul>
+
+  <a class="mt-2 inline-block text-xs font-medium text-brand-700 hover:underline" routerLink="/agent/tasks">
+    {{ 'tasks.viewAll' | translate }}
+  </a>
+}
+
+<app-task-form-dialog [open]="formOpen()" [task]="null" (saved)="onSaved()" (closed)="closeForm()" />

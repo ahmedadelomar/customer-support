@@ -15,6 +15,7 @@ public class CurrentUserService(IHttpContextAccessor accessor) : ICurrentUser
     public const string AccessibleBranchesClaimType = "branches";
     public const string DepartmentClaimType = "dept";
     public const string CustomerClaimType = "customer_id";
+    public const string TimeZoneClaimType = "tz";
 
     private ClaimsPrincipal? Principal => accessor.HttpContext?.User;
 
@@ -25,6 +26,8 @@ public class CurrentUserService(IHttpContextAccessor accessor) : ICurrentUser
 
     public Guid? BranchId =>
         Guid.TryParse(Principal?.FindFirstValue(BranchClaimType), out var id) ? id : null;
+
+    public string? TimeZoneId => Principal?.FindFirstValue(TimeZoneClaimType);
 
     public IReadOnlyCollection<Guid> AccessibleBranchIds => ParseGuidList(AccessibleBranchesClaimType);
 

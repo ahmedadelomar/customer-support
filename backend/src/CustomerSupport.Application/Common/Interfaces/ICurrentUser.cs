@@ -12,6 +12,9 @@ public interface ICurrentUser
     /// <summary>Branch the user is acting in. Scopes every tenant-aware query.</summary>
     Guid? BranchId { get; }
 
+    /// <summary>The agent's own IANA time zone, when set. Drives reminder scheduling (Agent Dashboard / Tasks and reminders).</summary>
+    string? TimeZoneId { get; }
+
     /// <summary>Branches the user may access. Empty means every branch (system administrator).</summary>
     IReadOnlyCollection<Guid> AccessibleBranchIds { get; }
     IReadOnlyCollection<Guid> DepartmentIds { get; }

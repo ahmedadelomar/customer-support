@@ -47,6 +47,20 @@ public class StatusKindChangeWarningException(string message, int ticketCount) :
     public int TicketCount { get; } = ticketCount;
 }
 
+/// <summary>One line of the "you have open tasks" warning — just enough for the confirm dialog to list them.</summary>
+public record OpenTaskSummary(Guid Id, string Title);
+
+/// <summary>
+/// Thrown when moving a ticket to a terminal status while it still has open linked tasks. Unlike
+/// <see cref="ConflictException"/>, the caller may resubmit with <c>Force = true</c> to close anyway
+/// leaving the tasks open, or <c>CompleteLinkedTasks = true</c> to close and complete them in the same action.
+/// </summary>
+public class OpenTasksWarningException(string message, IReadOnlyList<OpenTaskSummary> openTasks)
+    : Exception(message)
+{
+    public IReadOnlyList<OpenTaskSummary> OpenTasks { get; } = openTasks;
+}
+
 /// <summary>Aggregates FluentValidation failures. Surfaces as HTTP 400 with a per-field problem detail.</summary>
 public class ValidationException(IDictionary<string, string[]> errors)
     : Exception("One or more validation failures occurred.")
