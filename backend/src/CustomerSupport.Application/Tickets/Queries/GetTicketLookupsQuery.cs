@@ -79,12 +79,25 @@ public class GetTicketLookupsQueryHandler(IAppDbContext db)
             })
             .ToListAsync(cancellationToken);
 
+        var channels = await db.Channels.AsNoTracking()
+            .Where(c => c.IsEnabled)
+            .OrderBy(c => c.DisplayOrder)
+            .Select(c => new ChannelLookupDto
+            {
+                Id = c.Id,
+                Key = c.Key,
+                NameEn = c.Name.En,
+                NameAr = c.Name.Ar,
+            })
+            .ToListAsync(cancellationToken);
+
         return new TicketLookupsDto
         {
             Categories = categories,
             Priorities = priorities,
             Statuses = statuses,
             Departments = departments,
+            Channels = channels,
         };
     }
 }

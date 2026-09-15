@@ -1,4 +1,4 @@
-import type { TicketStatusKind } from '../../../../../core/models/enums';
+import type { ChannelKey, TicketStatusKind } from '../../../../../core/models/enums';
 
 export interface TicketCategoryLookup {
   id: string;
@@ -41,9 +41,18 @@ export interface DepartmentLookup {
   nameAr: string;
 }
 
+/** A real `Channel` row (not just the `ChannelKey` enum) — needed by anything storing a channel as a foreign key, such as a quick reply. */
+export interface ChannelLookup {
+  id: string;
+  key: ChannelKey;
+  nameEn: string;
+  nameAr: string;
+}
+
 export interface TicketLookups {
   categories: TicketCategoryLookup[];
   priorities: TicketPriorityLookup[];
   statuses: TicketStatusLookup[];
   departments: DepartmentLookup[];
+  channels: ChannelLookup[];
 }

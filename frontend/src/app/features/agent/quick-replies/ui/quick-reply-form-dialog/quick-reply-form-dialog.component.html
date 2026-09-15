@@ -1,0 +1,165 @@
+<app-modal [open]="open()" [titleKey]="quickReply() ? 'quickReplies.form.editTitle' : 'quickReplies.form.createTitle'" (closed)="close()">
+  <div class="max-h-[70vh] space-y-4 overflow-y-auto pe-1">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div>
+        <label class="form-label" for="qrScope">{{ 'quickReplies.form.scope' | translate }}</label>
+        <select id="qrScope" class="form-control" [ngModel]="scope()" (ngModelChange)="scope.set($event)">
+          <option value="Personal">{{ 'quickReplies.scope.personal' | translate }}</option>
+          <option value="Team">{{ 'quickReplies.scope.team' | translate }}</option>
+          @if (canUseGlobal()) {
+            <option value="Global">{{ 'quickReplies.scope.global' | translate }}</option>
+          }
+        </select>
+      </div>
+
+      @if (scope() === 'Team') {
+        <div>
+          <label class="form-label" for="qrTeamId">{{ 'quickReplies.form.teamId' | translate }}</label>
+          <input id="qrTeamId" class="form-control" [ngModel]="teamId()" (ngModelChange)="teamId.set($event)" />
+          <p class="mt-1 text-xs text-slate-400">{{ 'quickReplies.form.teamIdHint' | translate }}</p>
+        </div>
+      }
+
+      <div>
+        <label class="form-label" for="qrShortcut">{{ 'quickReplies.form.shortcut' | translate }}</label>
+        <input
+          id="qrShortcut"
+          class="form-control"
+          placeholder="/refund"
+          [ngModel]="shortcut()"
+          (ngModelChange)="shortcut.set($event)"
+        />
+        @if (errors()['shortcut']; as msgs) {
+          <p class="form-error">{{ msgs[0] }}</p>
+        }
+      </div>
+
+      <div>
+        <label class="form-label" for="qrCategory">{{ 'quickReplies.form.category' | translate }}</label>
+        <select id="qrCategory" class="form-control" [ngModel]="categoryId()" (ngModelChange)="categoryId.set($event)">
+          <option value="">{{ 'quickReplies.form.noCategory' | translate }}</option>
+          @for (c of categories(); track c.id) {
+            <option [value]="c.id">{{ localizedName(c) }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label class="form-label" for="qrChannel">{{ 'quickReplies.form.channel' | translate }}</label>
+        <select id="qrChannel" class="form-control" [ngModel]="channelId()" (ngModelChange)="channelId.set($event)">
+          <option value="">{{ 'quickReplies.form.anyChannel' | translate }}</option>
+          @for (c of channels(); track c.id) {
+            <option [value]="c.id">{{ localizedName(c) }}</option>
+          }
+        </select>
+      </div>
+
+      @if (quickReply()) {
+        <label class="flex items-center gap-2 self-end pb-2 text-sm text-slate-700">
+          <input type="checkbox" [checked]="isActive()" (change)="isActive.set($any($event.target).checked)" />
+          {{ 'quickReplies.form.active' | translate }}
+        </label>
+      }
+    </div>
+
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div>
+        <label class="form-label" for="qrTitleEn">{{ 'quickReplies.form.titleEn' | translate }} *</label>
+        <input id="qrTitleEn" class="form-control" [ngModel]="titleEn()" (ngModelChange)="titleEn.set($event)" />
+      </div>
+      <div>
+        <label class="form-label" for="qrTitleAr">{{ 'quickReplies.form.titleAr' | translate }} *</label>
+        <input id="qrTitleAr" class="form-control" dir="rtl" [ngModel]="titleAr()" (ngModelChange)="titleAr.set($event)" />
+      </div>
+    </div>
+
+    <div>
+      <p class="form-label">{{ 'quickReplies.form.tokenPalette' | translate }}</p>
+      <div class="flex flex-wrap gap-1.5">
+        @for (token of tokens; track token) {
+          <span class="chip cursor-default border-slate-200 bg-slate-50 text-slate-600">{{ '{{' + token + '}}' }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div>
+        <div class="mb-1 flex items-center justify-between">
+          <label class="form-label !mb-0" for="qrBodyEn">{{ 'quickReplies.form.bodyEn' | translate }} *</label>
+        </div>
+        <div class="mb-1 flex flex-wrap gap-1">
+          @for (token of tokens; track token) {
+            <button type="button" class="chip border-brand-200 bg-brand-50 text-brand-700 hover:bg-brand-100" (click)="insertToken('bodyEn', token)">
+              +{{ token }}
+            </button>
+          }
+        </div>
+        <textarea
+          id="qrBodyEn"
+          #bodyEnInput
+          rows="6"
+          class="form-control font-mono text-sm"
+          [ngModel]="bodyEn()"
+          (ngModelChange)="bodyEn.set($event)"
+        ></textarea>
+      </div>
+
+      <div>
+        <div class="mb-1 flex items-center justify-between">
+          <label class="form-label !mb-0" for="qrBodyAr">{{ 'quickReplies.form.bodyAr' | translate }} *</label>
+        </div>
+        <div class="mb-1 flex flex-wrap gap-1">
+          @for (token of tokens; track token) {
+            <button type="button" class="chip border-brand-200 bg-brand-50 text-brand-700 hover:bg-brand-100" (click)="insertToken('bodyAr', token)">
+              +{{ token }}
+            </button>
+          }
+        </div>
+        <textarea
+          id="qrBodyAr"
+          #bodyArInput
+          dir="rtl"
+          rows="6"
+          class="form-control font-mono text-sm"
+          [ngModel]="bodyAr()"
+          (ngModelChange)="bodyAr.set($event)"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="rounded-lg border border-slate-200 p-3">
+      <div class="mb-2 flex flex-wrap items-center gap-2">
+        <label class="form-label !mb-0" for="qrPreviewTicket">{{ 'quickReplies.form.previewAgainst' | translate }}</label>
+        <select
+          id="qrPreviewTicket"
+          class="form-control max-w-xs"
+          [ngModel]="previewTicketId()"
+          (ngModelChange)="previewTicketId.set($event)"
+        >
+          @for (t of sampleTickets(); track t.id) {
+            <option [value]="t.id">{{ t.number }} — {{ t.subject }}</option>
+          }
+        </select>
+        <button type="button" class="btn-secondary px-3 py-1.5 text-xs" [disabled]="!previewTicketId() || previewing()" (click)="runPreview()">
+          {{ 'quickReplies.form.preview' | translate }}
+        </button>
+      </div>
+
+      @if (previewResult(); as preview) {
+        <p class="whitespace-pre-wrap rounded-lg bg-slate-50 p-2 text-sm text-slate-800">{{ preview.body }}</p>
+        @if (preview.unresolvedTokens.length) {
+          <p class="mt-2 text-xs text-rose-600">
+            {{ 'quickReplies.form.unresolvedWarning' | translate: { tokens: preview.unresolvedTokens.join(', ') } }}
+          </p>
+        }
+      }
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button type="button" class="btn-secondary" (click)="close()">{{ 'common.cancel' | translate }}</button>
+      <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">
+        {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+      </button>
+    </div>
+  </div>
+</app-modal>

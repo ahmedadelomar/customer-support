@@ -162,6 +162,16 @@ public record TicketLookupsDto
     public IReadOnlyList<TicketPriorityLookupDto> Priorities { get; init; } = Array.Empty<TicketPriorityLookupDto>();
     public IReadOnlyList<TicketStatusLookupDto> Statuses { get; init; } = Array.Empty<TicketStatusLookupDto>();
     public IReadOnlyList<DepartmentLookupDto> Departments { get; init; } = Array.Empty<DepartmentLookupDto>();
+    /// <summary>Real <c>Channel</c> rows (not just the <c>ChannelKey</c> enum) — needed by anything that stores a channel as a foreign key, such as a quick reply.</summary>
+    public IReadOnlyList<ChannelLookupDto> Channels { get; init; } = Array.Empty<ChannelLookupDto>();
+}
+
+public record ChannelLookupDto
+{
+    public Guid Id { get; init; }
+    public ChannelKey Key { get; init; }
+    public string NameEn { get; init; } = string.Empty;
+    public string NameAr { get; init; } = string.Empty;
 }
 
 public record TicketCategoryLookupDto

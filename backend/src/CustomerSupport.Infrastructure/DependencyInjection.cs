@@ -1,6 +1,7 @@
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Files;
 using CustomerSupport.Application.Tickets.Assignment;
+using CustomerSupport.Application.Workspace.QuickReplies;
 using CustomerSupport.Infrastructure.Identity;
 using CustomerSupport.Infrastructure.Jobs;
 using CustomerSupport.Infrastructure.Persistence;
@@ -84,6 +85,7 @@ public static class DependencyInjection
         services.AddScoped<IAgentDirectory, AgentDirectory>();
         services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
         services.AddScoped<IAgentCapacityService, AgentCapacityService>();
+        services.AddScoped<IPlaceholderResolver, PlaceholderResolver>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IContactVerificationSender, LoggingContactVerificationSender>();
         services.AddScoped<IAttachmentOwnerAuthorizer, AttachmentOwnerAuthorizer>();

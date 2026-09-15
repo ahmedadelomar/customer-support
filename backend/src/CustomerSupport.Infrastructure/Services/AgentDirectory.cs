@@ -12,7 +12,7 @@ public class AgentDirectory(AppDbContext db) : IAgentDirectory
     {
         return await db.Users.AsNoTracking()
             .Where(u => u.Id == agentId)
-            .Select(u => new AgentSnapshot(u.Id, u.DisplayName, u.IsActive, u.AvailabilityStatus, u.MaxConcurrentTickets, u.DepartmentId))
+            .Select(u => new AgentSnapshot(u.Id, u.DisplayName, u.IsActive, u.AvailabilityStatus, u.MaxConcurrentTickets, u.DepartmentId, u.JobTitle))
             .FirstOrDefaultAsync(ct);
     }
 
@@ -27,7 +27,7 @@ public class AgentDirectory(AppDbContext db) : IAgentDirectory
 
         return await db.Users.AsNoTracking()
             .Where(u => ids.Contains(u.Id))
-            .Select(u => new AgentSnapshot(u.Id, u.DisplayName, u.IsActive, u.AvailabilityStatus, u.MaxConcurrentTickets, u.DepartmentId))
+            .Select(u => new AgentSnapshot(u.Id, u.DisplayName, u.IsActive, u.AvailabilityStatus, u.MaxConcurrentTickets, u.DepartmentId, u.JobTitle))
             .ToDictionaryAsync(a => a.Id, ct);
     }
 

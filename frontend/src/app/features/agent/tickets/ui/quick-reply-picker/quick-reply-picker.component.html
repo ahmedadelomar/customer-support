@@ -1,0 +1,46 @@
+<app-modal [open]="open()" titleKey="quickReplies.picker.title" (closed)="close()">
+  <div class="w-full sm:w-96">
+    <input
+      class="form-control mb-3"
+      type="text"
+      autofocus
+      [placeholder]="'quickReplies.picker.searchPlaceholder' | translate"
+      [ngModel]="searchTerm()"
+      (ngModelChange)="searchTerm.set($event); onSearchChange()"
+      (keydown)="onKeydown($event)"
+    />
+
+    @if (loading()) {
+      <div class="space-y-2">
+        @for (i of [1, 2, 3]; track i) {
+          <div class="h-12 animate-pulse rounded-lg bg-slate-100"></div>
+        }
+      </div>
+    } @else if (filtered().length === 0) {
+      <p class="py-6 text-center text-sm text-slate-400">{{ 'quickReplies.picker.empty' | translate }}</p>
+    } @else {
+      <ul class="max-h-80 space-y-1 overflow-y-auto">
+        @for (item of filtered(); track item.id; let i = $index) {
+          <li>
+            <button
+              type="button"
+              class="w-full rounded-lg px-3 py-2 text-start"
+              [class.bg-brand-50]="i === activeIndex()"
+              (mouseenter)="activeIndex.set(i)"
+              (click)="select(item)"
+            >
+              <div class="flex items-center gap-2 text-sm">
+                <span class="font-medium text-slate-800">{{ title(item) }}</span>
+                @if (item.shortcut) {
+                  <span class="chip border-slate-200 bg-slate-50 font-mono text-xs text-slate-500">{{ item.shortcut }}</span>
+                }
+                <span class="ms-auto shrink-0 text-xs text-slate-400">{{ ('quickReplies.scope.' + item.scope.toLowerCase()) | translate }}</span>
+              </div>
+              <p class="mt-0.5 truncate text-xs text-slate-500">{{ bodyPreview(item) }}</p>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</app-modal>

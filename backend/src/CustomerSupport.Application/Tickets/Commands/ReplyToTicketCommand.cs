@@ -22,6 +22,8 @@ public record ReplyToTicketCommand : IRequest<Guid>
     public Guid TicketId { get; init; }
     public string BodyText { get; init; } = string.Empty;
     public string? BodyHtml { get; init; }
+    /// <summary>Set when this reply was inserted from a quick reply (Agent Dashboard / Quick replies), for attribution.</summary>
+    public Guid? QuickReplyId { get; init; }
 }
 
 public class ReplyToTicketCommandValidator : AbstractValidator<ReplyToTicketCommand>
@@ -64,6 +66,7 @@ public class ReplyToTicketCommandHandler(
             AuthorDisplayName = currentUser.UserName,
             BodyText = request.BodyText,
             BodyHtml = request.BodyHtml,
+            QuickReplyId = request.QuickReplyId,
             SentAt = clock.UtcNow,
         };
 

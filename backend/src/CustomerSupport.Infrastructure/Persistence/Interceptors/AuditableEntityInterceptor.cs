@@ -71,6 +71,23 @@ public class AuditableEntityInterceptor(ICurrentUser currentUser, IDateTimeProvi
                 deletable.IsDeleted = true;
                 deletable.DeletedAt = now;
                 deletable.DeletedById = userId;
+
+                // EF Core had already cascaded this entity's owned-type dependents (e.g. a
+                // LocalizedText Name/Body sharing the same table row) to EntityState.Deleted before
+                // this interceptor ever ran. Converting the OWNER back to Modified does not un-cascade
+                // them: left as Deleted, EF still nulls out their columns as part of the same shared
+                // UPDATE, which trips a NOT NULL constraint on the first soft-deletable entity that
+                // also owns a required LocalizedText (first hit: deleting a QuickReply). Walk the
+                // owner's own reference navigations forward to find those dependents and reset them —
+                // more reliable than the dependent's back-reference, which the cascade may have
+                // already severed by this point.
+                foreach (var navigation in entry.Navigations)
+                {
+                    if (navigation is ReferenceEntry { TargetEntry.State: EntityState.Deleted } reference)
+                    {
+                        reference.TargetEntry!.State = EntityState.Modified;
+                    }
+                }
             }
         }
     }

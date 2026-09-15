@@ -631,5 +631,57 @@
       "threeHours": "3 hours",
       "tomorrow": "Tomorrow"
     }
+  },
+  "quickReplies": {
+    "title": "Quick Replies",
+    "empty": "No quick replies yet.",
+    "created": "Quick reply created.",
+    "updated": "Quick reply updated.",
+    "deleted": "Quick reply deleted.",
+    "scope": {
+      "personal": "Personal",
+      "team": "Team",
+      "global": "Global"
+    },
+    "filters": {
+      "allScopes": "All scopes",
+      "scope": "Scope"
+    },
+    "columns": {
+      "title": "Title",
+      "scope": "Scope",
+      "shortcut": "Shortcut",
+      "usage": "Used"
+    },
+    "form": {
+      "createTitle": "New quick reply",
+      "editTitle": "Edit quick reply",
+      "scope": "Scope",
+      "teamId": "Team ID",
+      "teamIdHint": "Raw team ID — a team picker will replace this once team management ships.",
+      "shortcut": "Shortcut",
+      "category": "Category",
+      "noCategory": "Any category",
+      "channel": "Channel",
+      "anyChannel": "Any channel",
+      "active": "Active",
+      "titleEn": "Title (English)",
+      "titleAr": "Title (Arabic)",
+      "bodyEn": "Body (English)",
+      "bodyAr": "Body (Arabic)",
+      "tokenPalette": "Available placeholders",
+      "previewAgainst": "Preview against",
+      "preview": "Preview",
+      "unresolvedWarning": "Unresolved for this ticket: {{tokens}}"
+    },
+    "picker": {
+      "title": "Quick replies",
+      "searchPlaceholder": "Search title, shortcut or body…",
+      "empty": "No matching quick replies."
+    },
+    "composer": {
+      "insert": "Quick reply",
+      "unresolvedWarning": "This reply has unresolved placeholders: {{tokens}}"
+    }
   }
 }

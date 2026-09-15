@@ -631,5 +631,57 @@
       "threeHours": "3 ساعات",
       "tomorrow": "غداً"
     }
+  },
+  "quickReplies": {
+    "title": "الردود السريعة",
+    "empty": "لا توجد ردود سريعة بعد.",
+    "created": "تم إنشاء الرد السريع.",
+    "updated": "تم تحديث الرد السريع.",
+    "deleted": "تم حذف الرد السريع.",
+    "scope": {
+      "personal": "شخصي",
+      "team": "الفريق",
+      "global": "عام"
+    },
+    "filters": {
+      "allScopes": "كل النطاقات",
+      "scope": "النطاق"
+    },
+    "columns": {
+      "title": "العنوان",
+      "scope": "النطاق",
+      "shortcut": "الاختصار",
+      "usage": "الاستخدام"
+    },
+    "form": {
+      "createTitle": "رد سريع جديد",
+      "editTitle": "تعديل الرد السريع",
+      "scope": "النطاق",
+      "teamId": "معرّف الفريق",
+      "teamIdHint": "معرّف فريق خام — سيتم استبداله بمنتقي فرق حقيقي عند إطلاق إدارة الفرق.",
+      "shortcut": "الاختصار",
+      "category": "التصنيف",
+      "noCategory": "أي تصنيف",
+      "channel": "القناة",
+      "anyChannel": "أي قناة",
+      "active": "نشط",
+      "titleEn": "العنوان (إنجليزي)",
+      "titleAr": "العنوان (عربي)",
+      "bodyEn": "النص (إنجليزي)",
+      "bodyAr": "النص (عربي)",
+      "tokenPalette": "الحقول المتاحة",
+      "previewAgainst": "معاينة على",
+      "preview": "معاينة",
+      "unresolvedWarning": "غير محلول لهذه التذكرة: {{tokens}}"
+    },
+    "picker": {
+      "title": "الردود السريعة",
+      "searchPlaceholder": "ابحث بالعنوان أو الاختصار أو النص…",
+      "empty": "لا توجد ردود سريعة مطابقة."
+    },
+    "composer": {
+      "insert": "رد سريع",
+      "unresolvedWarning": "يحتوي هذا الرد على حقول غير محلولة: {{tokens}}"
+    }
   }
 }

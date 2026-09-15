@@ -186,6 +186,8 @@ export interface UpdateTicketRequest {
 export interface ReplyToTicketRequest {
   bodyText: string;
   bodyHtml?: string;
+  /** Set when this reply was inserted from a quick reply, for attribution. */
+  quickReplyId?: string;
 }
 
 export interface AddInternalNoteRequest {

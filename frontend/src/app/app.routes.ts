@@ -52,6 +52,13 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/agent/tasks/tasks.routes').then((m) => m.TASK_ROUTES),
       },
+      {
+        path: 'quick-replies',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'nav.quickReplies', permissions: [PERMISSIONS.workspace.manageQuickReplies] },
+        loadChildren: () =>
+          import('./features/agent/quick-replies/quick-replies.routes').then((m) => m.QUICK_REPLY_ROUTES),
+      },
     ],
   },
 

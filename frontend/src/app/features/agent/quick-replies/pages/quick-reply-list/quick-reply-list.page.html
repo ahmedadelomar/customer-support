@@ -1,0 +1,68 @@
+<app-page-header titleKey="quickReplies.title" [subtitleKey]="null">
+  <button type="button" class="btn-primary" (click)="openCreate()">{{ 'quickReplies.form.createTitle' | translate }}</button>
+</app-page-header>
+
+<div class="mb-4">
+  <label class="form-label" for="scopeFilter">{{ 'quickReplies.filters.scope' | translate }}</label>
+  <select
+    id="scopeFilter"
+    class="form-control max-w-xs"
+    [ngModel]="scopeFilter()"
+    (ngModelChange)="scopeFilter.set($event); onFilterChange()"
+  >
+    @for (option of scopeOptions; track option.value) {
+      <option [value]="option.value">{{ option.labelKey | translate }}</option>
+    }
+  </select>
+</div>
+
+@if (loading()) {
+  <div class="space-y-2">
+    @for (i of [1, 2, 3]; track i) {
+      <div class="card h-14 animate-pulse"></div>
+    }
+  </div>
+} @else if (items().length === 0) {
+  <div class="card">
+    <app-empty-state titleKey="quickReplies.empty" icon="⚡" />
+  </div>
+} @else {
+  <div class="card overflow-x-auto p-0">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-slate-200 text-start text-xs font-medium uppercase tracking-wide text-slate-400">
+          <th class="px-4 py-2 text-start">{{ 'quickReplies.columns.title' | translate }}</th>
+          <th class="px-4 py-2 text-start">{{ 'quickReplies.columns.scope' | translate }}</th>
+          <th class="px-4 py-2 text-start">{{ 'quickReplies.columns.shortcut' | translate }}</th>
+          <th class="px-4 py-2 text-start">{{ 'quickReplies.columns.usage' | translate }}</th>
+          <th class="px-4 py-2"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items(); track item.id) {
+          <tr class="border-b border-slate-100 last:border-0" [class.opacity-50]="!item.isActive">
+            <td class="px-4 py-2">
+              <p class="font-medium text-slate-800">{{ title(item) }}</p>
+              <p class="truncate text-xs text-slate-400">{{ bodyPreview(item) }}</p>
+            </td>
+            <td class="px-4 py-2">{{ ('quickReplies.scope.' + item.scope.toLowerCase()) | translate }}</td>
+            <td class="px-4 py-2 font-mono text-xs">{{ item.shortcut || '—' }}</td>
+            <td class="px-4 py-2">{{ item.usageCount }}</td>
+            <td class="px-4 py-2 text-end">
+              @if (item.canEdit) {
+                <button type="button" class="btn-secondary px-2.5 py-1 text-xs" (click)="openEdit(item)">
+                  {{ 'common.edit' | translate }}
+                </button>
+                <button type="button" class="btn-secondary px-2.5 py-1 text-xs text-rose-600" (click)="delete(item)">
+                  {{ 'common.delete' | translate }}
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+<app-quick-reply-form-dialog [open]="formOpen()" [quickReply]="editing()" (saved)="onSaved()" (closed)="closeForm()" />

@@ -91,15 +91,34 @@
             {{ 'tickets.composer.note' | translate }}
           </button>
         }
+
+        @if (canReply()) {
+          <button
+            type="button"
+            class="ms-1 rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+            [attr.title]="'quickReplies.picker.title' | translate"
+            (click)="openPicker()"
+          >
+            ⚡ {{ 'quickReplies.composer.insert' | translate }}
+          </button>
+        }
       </div>
 
+      @if (unresolvedTokens().length) {
+        <p class="mb-2 rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700">
+          {{ 'quickReplies.composer.unresolvedWarning' | translate: { tokens: unresolvedTokens().join(', ') } }}
+        </p>
+      }
+
       <textarea
+        #composerInput
         rows="3"
         class="form-control"
         [class.border-amber-300]="mode() === 'note'"
         [placeholder]="(mode() === 'reply' ? 'tickets.composer.replyPlaceholder' : 'tickets.composer.notePlaceholder') | translate"
         [ngModel]="body()"
         (ngModelChange)="body.set($event)"
+        (input)="onBodyInput()"
       ></textarea>
 
       <div class="mt-2 flex justify-end">
@@ -114,5 +133,14 @@
         </button>
       </div>
     </div>
+  }
+
+  @if (canReply()) {
+    <app-quick-reply-picker
+      [open]="pickerOpen()"
+      [ticketId]="ticketId()"
+      (inserted)="onQuickReplyInserted($event)"
+      (closed)="closePicker()"
+    />
   }
 </div>

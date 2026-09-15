@@ -64,14 +64,19 @@ public interface IUserDisplayNameResolver
         IEnumerable<Guid> userIds, CancellationToken ct = default);
 }
 
-/// <summary>The agent fields assignment and capacity checks need, read without exposing <c>ApplicationUser</c> itself.</summary>
+/// <summary>
+/// The agent fields assignment and capacity checks need, read without exposing <c>ApplicationUser</c>
+/// itself. <see cref="JobTitle"/> is used only by the quick-reply placeholder resolver's
+/// <c>agent.jobTitle</c> token (Agent Dashboard / Quick replies).
+/// </summary>
 public record AgentSnapshot(
     Guid Id,
     LocalizedText DisplayName,
     bool IsActive,
     string AvailabilityStatus,
     int MaxConcurrentTickets,
-    Guid? DepartmentId);
+    Guid? DepartmentId,
+    string? JobTitle = null);
 
 /// <summary>
 /// Resolves agent identity and availability for assignment (Ticket Management / Assign tickets to
