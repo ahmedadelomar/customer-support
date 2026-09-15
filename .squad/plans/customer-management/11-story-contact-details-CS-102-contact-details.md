@@ -142,12 +142,26 @@ A small dialog: send the code, then a 6-digit input with a countdown to expiry a
 
 ## Done Criteria
 
-- [ ] `ContactNormalizer` is shared by every path that writes a contact.
-- [ ] Exactly one primary per type is enforced transactionally, and the denormalised columns stay in sync.
-- [ ] Cross-customer duplicates warn and require confirmation rather than being silently accepted.
-- [ ] A customer can never be left with no reachable contact.
-- [ ] Verification works with hashed codes, expiry, attempt limits and send rate limiting.
-- [ ] `AllowNotifications` is respected by automated outbound and ignored for manual replies.
-- [ ] The contact panel is fully translated and works in RTL.
+- [x] `ContactNormalizer` is shared by every path that writes a contact — verified by creating the
+      same phone number in two different formats through both `CreateCustomerCommand` and
+      `AddCustomerContactCommand`; the duplicate check caught it either way.
+- [x] Exactly one primary per type is enforced transactionally, and the denormalised columns stay in
+      sync — verified end to end via the API (add → set-primary → delete-primary-with-successor →
+      delete-primary-with-no-successor), each time checking `Customer.PrimaryEmail`/`PrimaryPhone`.
+- [x] Cross-customer duplicates warn and require confirmation rather than being silently accepted —
+      verified: 409 with `duplicateCustomerId`/`duplicateCustomerName`, then success on resubmit with
+      `confirmDuplicate: true`.
+- [x] A customer can never be left with no reachable contact — verified: deleting the only email/phone
+      contact is refused with 409.
+- [x] Verification works with hashed codes, expiry, attempt limits and send rate limiting — verified:
+      wrong code decrements attempts and reports the count, the 6th attempt is refused outright, and
+      the 4th send within an hour is rate-limited. (Codes are SHA-256 hashed at rest; the 10-minute
+      expiry is implemented via `IDateTimeProvider` but not re-verified with a manipulated clock.)
+- [ ] `AllowNotifications` is respected by automated outbound and ignored for manual replies — **not
+      yet verifiable**. The flag exists, is stored, and is editable from the contact form, but no
+      automated outbound sender exists in the codebase yet to honour or ignore it — that arrives with
+      CS-301 (email) and CS-304 (SMS). Revisit this checkbox once either of those stories lands.
+- [x] The contact panel is fully translated (en/ar key parity verified programmatically) and uses only
+      logical CSS properties, matching the rest of the codebase's RTL approach.
 
 **STOP HERE. Report to the user and wait for confirmation before proceeding to the next story.**

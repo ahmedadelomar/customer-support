@@ -1,0 +1,90 @@
+<app-modal [open]="open()" titleKey="customers.contacts.verifyDialog.title" (closed)="close()">
+  @if (contact(); as c) {
+    <div class="space-y-4">
+      <p class="text-sm text-slate-600">{{ c.value }}</p>
+
+      @if (errorMessage()) {
+        <p class="form-error">{{ errorMessage() }}</p>
+      }
+
+      @switch (stage()) {
+        @case ('idle') {
+          <div class="flex justify-end gap-2">
+            <button type="button" class="btn-secondary" (click)="close()">
+              {{ 'common.cancel' | translate }}
+            </button>
+            <button type="button" class="btn-primary" [disabled]="sending()" (click)="send()">
+              {{ 'customers.contacts.verifyDialog.sendCode' | translate }}
+            </button>
+          </div>
+        }
+
+        @case ('sent') {
+          <p class="text-sm text-emerald-700">{{ 'customers.contacts.verifyDialog.codeSent' | translate }}</p>
+
+          @if (devCode()) {
+            <p class="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+              {{ 'customers.contacts.verifyDialog.devCodeHint' | translate: { code: devCode() } }}
+            </p>
+          }
+
+          <div>
+            <label class="form-label" for="code">{{ 'customers.contacts.verifyDialog.codeLabel' | translate }}</label>
+            <input
+              id="code"
+              type="text"
+              inputmode="numeric"
+              maxlength="6"
+              class="form-control tracking-widest"
+              [ngModel]="code()"
+              (ngModelChange)="code.set($event)"
+            />
+          </div>
+
+          @if (remainingAttempts() < 5) {
+            <p class="form-error">
+              {{ 'customers.contacts.verifyDialog.incorrect' | translate: { remaining: remainingAttempts() } }}
+            </p>
+          }
+
+          <div class="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              class="text-sm text-brand-700 hover:underline disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline"
+              [disabled]="!canResend() || sending()"
+              (click)="send()"
+            >
+              {{ 'customers.contacts.verifyDialog.resend' | translate }}
+            </button>
+
+            <div class="flex gap-2">
+              <button type="button" class="btn-secondary" (click)="close()">
+                {{ 'common.cancel' | translate }}
+              </button>
+              <button
+                type="button"
+                class="btn-primary"
+                [disabled]="confirming() || code().length !== 6"
+                (click)="confirm()"
+              >
+                {{ 'customers.contacts.verifyDialog.confirm' | translate }}
+              </button>
+            </div>
+          </div>
+        }
+
+        @case ('verified') {
+          <p class="text-sm font-medium text-emerald-700">
+            ✓ {{ 'customers.contacts.verifyDialog.verified' | translate }}
+          </p>
+
+          <div class="flex justify-end">
+            <button type="button" class="btn-primary" (click)="close()">
+              {{ 'common.close' | translate }}
+            </button>
+          </div>
+        }
+      }
+    </div>
+  }
+</app-modal>

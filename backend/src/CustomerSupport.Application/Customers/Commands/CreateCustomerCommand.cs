@@ -1,3 +1,4 @@
+using CustomerSupport.Application.Common;
 using CustomerSupport.Application.Common.Exceptions;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Security;
@@ -44,7 +45,9 @@ public class CreateCustomerCommandValidator : AbstractValidator<CreateCustomerCo
         RuleFor(x => x.PreferredLanguage).Must(l => l is "ar" or "en")
             .WithMessage("PreferredLanguage must be 'ar' or 'en'.");
         RuleFor(x => x.Email).EmailAddress().When(x => !string.IsNullOrWhiteSpace(x.Email));
-        RuleFor(x => x.Phone).Matches(@"^\+?[0-9]{7,15}$")
+        // Checked against the NORMALISED value — the raw input legitimately contains spaces
+        // ("+966 50 123 4567" is exactly what a customer types), and ContactNormalizer strips them.
+        RuleFor(x => x.Phone).Must(ContactValueValidator.IsValidPhone)
             .When(x => !string.IsNullOrWhiteSpace(x.Phone))
             .WithMessage("Phone must be 7 to 15 digits, optionally prefixed with '+'.");
         RuleFor(x => x.CompanyName).NotEmpty()
@@ -63,8 +66,8 @@ public class CreateCustomerCommandHandler(
 {
     public async Task<Guid> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
     {
-        var email = Normalize(request.Email);
-        var phone = Normalize(request.Phone);
+        var email = ContactNormalizer.Normalize(request.Email);
+        var phone = ContactNormalizer.Normalize(request.Phone);
 
         // Reject duplicates up front: two profiles for one person is the most common data-quality
         // problem in a support CRM, and it silently splits the interaction history.
@@ -131,15 +134,5 @@ public class CreateCustomerCommandHandler(
         db.Customers.Add(customer);
         await db.SaveChangesAsync(cancellationToken);
         return customer.Id;
-    }
-
-    /// <summary>Lower-cases emails and strips separators from phone numbers so dedupe is reliable.</summary>
-    private static string? Normalize(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value)) return null;
-        var trimmed = value.Trim();
-        return trimmed.Contains('@')
-            ? trimmed.ToLowerInvariant()
-            : new string(trimmed.Where(ch => char.IsDigit(ch) || ch == '+').ToArray());
     }
 }

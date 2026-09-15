@@ -66,6 +66,22 @@ public class CustomerContactConfiguration : IEntityTypeConfiguration<CustomerCon
     }
 }
 
+public class ContactVerificationConfiguration : IEntityTypeConfiguration<ContactVerification>
+{
+    public void Configure(EntityTypeBuilder<ContactVerification> builder)
+    {
+        builder.Property(x => x.CodeHash).HasMaxLength(64).IsRequired();
+
+        builder.HasOne(x => x.CustomerContact)
+            .WithMany()
+            .HasForeignKey(x => x.CustomerContactId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Both the "any active code?" and the rate-limit checks filter by contact and time.
+        builder.HasIndex(x => new { x.CustomerContactId, x.ExpiresAt });
+    }
+}
+
 public class CustomerNoteConfiguration : IEntityTypeConfiguration<CustomerNote>
 {
     public void Configure(EntityTypeBuilder<CustomerNote> builder)

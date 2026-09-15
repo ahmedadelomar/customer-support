@@ -3,18 +3,18 @@ import { Component, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { HasPermissionDirective } from '../../../core/directives/has-permission.directive';
-import { ContactType } from '../../../core/models/enums';
 import { PERMISSIONS } from '../../../core/permissions';
 import { LanguageService } from '../../../core/services/language.service';
 import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
 import { StateCardComponent } from '../../../shared/ui/state-card/state-card.component';
-import type { CustomerContact, CustomerDetail } from './customer.models';
+import { ContactsPanelComponent } from './contacts/contacts-panel.component';
+import type { CustomerDetail } from './customer.models';
 import { CustomersService } from './customers.service';
 
 /**
- * Customer profile page. Contacts (Contact details) render here; the interaction-history and
- * notes tabs are added by their own stories against this same shell.
+ * Customer profile page. The Contact details tab is `ContactsPanelComponent` (CS-102); the
+ * interaction-history and notes tabs are added by their own stories against this same shell.
  */
 @Component({
   selector: 'app-customer-detail',
@@ -26,6 +26,7 @@ import { CustomersService } from './customers.service';
     StateCardComponent,
     EmptyStateComponent,
     HasPermissionDirective,
+    ContactsPanelComponent,
   ],
   templateUrl: './customer-detail.page.html',
 })
@@ -59,26 +60,6 @@ export class CustomerDetailPage {
     return c ? this.#language.pick({ en: c.displayNameEn, ar: c.displayNameAr }) : '';
   });
 
-  /** Contacts grouped by type so the panel reads as Email, Mobile, Address rather than a flat list. */
-  readonly contactGroups = computed(() => {
-    const contacts = this.customer()?.contacts ?? [];
-    const groups = new Map<ContactType, CustomerContact[]>();
-
-    for (const contact of contacts) {
-      const bucket = groups.get(contact.type) ?? [];
-      bucket.push(contact);
-      groups.set(contact.type, bucket);
-    }
-
-    return [...groups.entries()]
-      .sort((a, b) => a[0] - b[0])
-      .map(([type, items]) => ({
-        type,
-        labelKey: `enums.contactType.${type}`,
-        items: items.sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary)),
-      }));
-  });
-
   constructor() {
     // `input.required` is resolved before the constructor body runs for routed inputs, so the
     // load is triggered from an effect-free read in ngOnInit-equivalent position.
@@ -98,6 +79,15 @@ export class CustomerDetailPage {
         this.loading.set(false);
       },
     });
+  }
+
+  /**
+   * Re-fetches the profile without the loading skeleton, so a contact change (which manages its
+   * own panel-level loading state) doesn't blank the whole page while it refreshes the header's
+   * denormalised primary email/phone.
+   */
+  refreshHeader(): void {
+    this.#service.getById(this.id()).subscribe({ next: (customer) => this.customer.set(customer) });
   }
 
   selectTab(key: string): void {

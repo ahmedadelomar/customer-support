@@ -22,6 +22,7 @@ public class GlobalExceptionHandler(
             ValidationException => (StatusCodes.Status400BadRequest, "Validation failed", exception.Message),
             NotFoundException => (StatusCodes.Status404NotFound, "Resource not found", exception.Message),
             ConflictException => (StatusCodes.Status409Conflict, "Conflict", exception.Message),
+            DuplicateContactException => (StatusCodes.Status409Conflict, "Duplicate contact", exception.Message),
             ForbiddenException => (StatusCodes.Status403Forbidden, "Forbidden", exception.Message),
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Unauthorized", "Authentication is required."),
             // 499 is a de-facto standard for a client-cancelled request and has no StatusCodes constant.
@@ -55,6 +56,14 @@ public class GlobalExceptionHandler(
         if (exception is ValidationException validation)
         {
             problem.Extensions["errors"] = validation.Errors;
+        }
+
+        // Lets the client show "already used by {name}" and offer a confirm-and-resubmit step,
+        // rather than only a generic conflict message.
+        if (exception is DuplicateContactException duplicate)
+        {
+            problem.Extensions["duplicateCustomerId"] = duplicate.DuplicateCustomerId;
+            problem.Extensions["duplicateCustomerName"] = duplicate.DuplicateCustomerName;
         }
 
         return await problemDetails.TryWriteAsync(new ProblemDetailsContext

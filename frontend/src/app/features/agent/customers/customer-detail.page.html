@@ -108,46 +108,7 @@
 
   @switch (activeTab()) {
     @case ('contacts') {
-      @if (contactGroups().length === 0) {
-        <div class="card">
-          <app-empty-state titleKey="customers.contacts.empty" icon="☎" />
-        </div>
-      } @else {
-        <div class="grid gap-4 md:grid-cols-2">
-          @for (group of contactGroups(); track group.type) {
-            <section class="card p-4">
-              <h3 class="mb-3 text-sm font-medium text-slate-700">{{ group.labelKey | translate }}</h3>
-
-              <ul class="space-y-2">
-                @for (contact of group.items; track contact.id) {
-                  <li class="flex flex-wrap items-center gap-2 text-sm">
-                    <span class="text-slate-800">{{ contact.value }}</span>
-
-                    @if (contact.label) {
-                      <span class="text-xs text-slate-400">({{ contact.label }})</span>
-                    }
-                    @if (contact.isPrimary) {
-                      <span class="chip border-brand-200 bg-brand-50 text-brand-700">
-                        {{ 'customers.contacts.primary' | translate }}
-                      </span>
-                    }
-                    @if (contact.isVerified) {
-                      <span class="chip border-emerald-200 bg-emerald-50 text-emerald-700">
-                        {{ 'customers.contacts.verified' | translate }}
-                      </span>
-                    }
-                    @if (!contact.allowNotifications) {
-                      <span class="chip border-slate-200 bg-slate-100 text-slate-600">
-                        {{ 'customers.contacts.optedOut' | translate }}
-                      </span>
-                    }
-                  </li>
-                }
-              </ul>
-            </section>
-          }
-        </div>
-      }
+      <app-contacts-panel [customerId]="customer()!.id" (changed)="refreshHeader()" />
     }
     @default {
       <!-- Interaction history, notes and tickets each land here from their own story. -->

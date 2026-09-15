@@ -53,6 +53,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     // Customers
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<CustomerContact> CustomerContacts => Set<CustomerContact>();
+    public DbSet<ContactVerification> ContactVerifications => Set<ContactVerification>();
     public DbSet<CustomerNote> CustomerNotes => Set<CustomerNote>();
     public DbSet<Interaction> Interactions => Set<Interaction>();
     public DbSet<Attachment> Attachments => Set<Attachment>();

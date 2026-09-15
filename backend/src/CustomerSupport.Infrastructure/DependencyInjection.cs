@@ -76,6 +76,7 @@ public static class DependencyInjection
         services.AddScoped<IReferenceNumberGenerator, ReferenceNumberGenerator>();
         services.AddScoped<ITicketEventRecorder, TicketEventRecorder>();
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IContactVerificationSender, LoggingContactVerificationSender>();
         services.AddScoped<DbSeeder>();
 
         return services;

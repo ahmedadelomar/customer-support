@@ -39,6 +39,7 @@ public interface IAppDbContext
     // Customers
     DbSet<Customer> Customers { get; }
     DbSet<CustomerContact> CustomerContacts { get; }
+    DbSet<ContactVerification> ContactVerifications { get; }
     DbSet<CustomerNote> CustomerNotes { get; }
     DbSet<Interaction> Interactions { get; }
     DbSet<Attachment> Attachments { get; }
