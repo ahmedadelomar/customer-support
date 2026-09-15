@@ -1,3 +1,4 @@
+using CustomerSupport.Domain.Common;
 using CustomerSupport.Domain.Enums;
 
 namespace CustomerSupport.Application.Common.Interfaces;
@@ -28,6 +29,39 @@ public interface ITicketEventRecorder
         string? newDisplay = null,
         string? metadataJson = null,
         string? triggeredByRule = null);
+}
+
+/// <summary>
+/// Appends a row to the unified customer timeline (Customer Management / Interaction history).
+/// Every feature that represents a customer touchpoint — ticket creation, an inbound or outbound
+/// message, a chat session, a portal submission, a CSAT response — must call this in the SAME
+/// transaction as the row it describes, or the timeline silently falls out of sync with reality.
+/// </summary>
+public interface IInteractionRecorder
+{
+    /// <summary>Adds a timeline entry to the current unit of work. The caller saves.</summary>
+    void Record(
+        Guid customerId,
+        ChannelKey channel,
+        MessageDirection direction,
+        string? subject,
+        string? preview,
+        Guid? ticketId = null,
+        string? sourceType = null,
+        Guid? sourceId = null,
+        Guid? agentId = null);
+}
+
+/// <summary>
+/// Resolves display names for a batch of user ids. Exists so Application-layer handlers can show
+/// "who did this" (an interaction's agent, a ticket's assignee, an audit actor, …) without depending
+/// on the Identity types that live in Infrastructure — <see cref="IAppDbContext"/> deliberately does
+/// not expose <c>ApplicationUser</c>, to keep that boundary real rather than aspirational.
+/// </summary>
+public interface IUserDisplayNameResolver
+{
+    Task<IReadOnlyDictionary<Guid, LocalizedText>> ResolveAsync(
+        IEnumerable<Guid> userIds, CancellationToken ct = default);
 }
 
 /// <summary>Working-hours arithmetic used by every SLA calculation.</summary>

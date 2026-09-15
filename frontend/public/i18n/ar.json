@@ -19,6 +19,7 @@
     "dismiss": "إغلاق",
     "add": "إضافة",
     "close": "إغلاق",
+    "loading": "جارٍ التحميل…",
     "previous": "السابق",
     "next": "التالي",
     "pagination": "ترقيم الصفحات",
@@ -140,6 +141,24 @@
       "history": "سجل التفاعلات",
       "notes": "الملاحظات والمرفقات",
       "tickets": "التذاكر"
+    },
+    "history": {
+      "empty": "لم يتم تسجيل أي تفاعلات بعد.",
+      "today": "اليوم",
+      "yesterday": "أمس",
+      "by": "بواسطة {{name}}",
+      "direction": {
+        "inbound": "وارد",
+        "outbound": "صادر"
+      },
+      "filters": {
+        "channel": "القناة",
+        "direction": "الاتجاه",
+        "from": "من",
+        "to": "إلى",
+        "allChannels": "كل القنوات",
+        "allDirections": "كل الاتجاهات"
+      }
     },
     "contacts": {
       "empty": "لم يتم تسجيل بيانات تواصل بعد.",

@@ -19,6 +19,7 @@
     "dismiss": "Dismiss",
     "add": "Add",
     "close": "Close",
+    "loading": "Loading…",
     "previous": "Previous",
     "next": "Next",
     "pagination": "Pagination",
@@ -140,6 +141,24 @@
       "history": "Interaction history",
       "notes": "Notes & attachments",
       "tickets": "Tickets"
+    },
+    "history": {
+      "empty": "No interactions recorded yet.",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "by": "by {{name}}",
+      "direction": {
+        "inbound": "Inbound",
+        "outbound": "Outbound"
+      },
+      "filters": {
+        "channel": "Channel",
+        "direction": "Direction",
+        "from": "From",
+        "to": "To",
+        "allChannels": "All channels",
+        "allDirections": "All directions"
+      }
     },
     "contacts": {
       "empty": "No contact details recorded yet.",

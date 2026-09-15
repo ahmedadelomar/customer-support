@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { AuthService } from '../../../core/auth/auth.service';
 import { HasPermissionDirective } from '../../../core/directives/has-permission.directive';
 import { PERMISSIONS } from '../../../core/permissions';
 import { LanguageService } from '../../../core/services/language.service';
@@ -11,10 +12,12 @@ import { StateCardComponent } from '../../../shared/ui/state-card/state-card.com
 import { ContactsPanelComponent } from './contacts/contacts-panel.component';
 import type { CustomerDetail } from './customer.models';
 import { CustomersService } from './customers.service';
+import { InteractionTimelineComponent } from './history/interaction-timeline.component';
 
 /**
- * Customer profile page. The Contact details tab is `ContactsPanelComponent` (CS-102); the
- * interaction-history and notes tabs are added by their own stories against this same shell.
+ * Customer profile page. The Contact details tab is `ContactsPanelComponent` (CS-102) and the
+ * History tab is `InteractionTimelineComponent` (CS-103); the notes and tickets tabs are added by
+ * their own stories against this same shell.
  */
 @Component({
   selector: 'app-customer-detail',
@@ -27,14 +30,17 @@ import { CustomersService } from './customers.service';
     EmptyStateComponent,
     HasPermissionDirective,
     ContactsPanelComponent,
+    InteractionTimelineComponent,
   ],
   templateUrl: './customer-detail.page.html',
 })
 export class CustomerDetailPage {
   readonly #service = inject(CustomersService);
   readonly #language = inject(LanguageService);
+  readonly #auth = inject(AuthService);
 
   readonly permissions = PERMISSIONS;
+  readonly canViewHistory = computed(() => this.#auth.hasPermission(PERMISSIONS.customers.viewHistory));
 
   /** Bound from the route parameter by `withComponentInputBinding()`. */
   readonly id = input.required<string>();

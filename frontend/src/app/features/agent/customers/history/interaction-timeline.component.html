@@ -1,0 +1,137 @@
+<!-- Filters -->
+<div class="mb-4 flex flex-wrap items-end gap-3">
+  <div>
+    <label class="form-label" for="channelFilter">{{ 'customers.history.filters.channel' | translate }}</label>
+    <select
+      id="channelFilter"
+      class="form-control"
+      [ngModel]="channelFilter()"
+      (ngModelChange)="channelFilter.set($event); onFilterChange()"
+    >
+      @for (option of channelOptions; track option.value) {
+        <option [value]="option.value">{{ option.labelKey | translate }}</option>
+      }
+    </select>
+  </div>
+
+  <div>
+    <label class="form-label" for="directionFilter">{{ 'customers.history.filters.direction' | translate }}</label>
+    <select
+      id="directionFilter"
+      class="form-control"
+      [ngModel]="directionFilter()"
+      (ngModelChange)="directionFilter.set($event); onFilterChange()"
+    >
+      @for (option of directionOptions; track option.value) {
+        <option [value]="option.value">{{ option.labelKey | translate }}</option>
+      }
+    </select>
+  </div>
+
+  <div>
+    <label class="form-label" for="fromFilter">{{ 'customers.history.filters.from' | translate }}</label>
+    <input
+      id="fromFilter"
+      type="date"
+      class="form-control"
+      [ngModel]="fromFilter()"
+      (ngModelChange)="fromFilter.set($event); onFilterChange()"
+    />
+  </div>
+
+  <div>
+    <label class="form-label" for="toFilter">{{ 'customers.history.filters.to' | translate }}</label>
+    <input
+      id="toFilter"
+      type="date"
+      class="form-control"
+      [ngModel]="toFilter()"
+      (ngModelChange)="toFilter.set($event); onFilterChange()"
+    />
+  </div>
+
+  <button type="button" class="btn-secondary" (click)="clearFilters()">
+    {{ 'common.clearFilters' | translate }}
+  </button>
+</div>
+
+<!-- Timeline -->
+@if (loading()) {
+  <div class="space-y-3">
+    @for (i of [1, 2, 3]; track i) {
+      <div class="card h-20 animate-pulse"></div>
+    }
+  </div>
+} @else if (groups().length === 0) {
+  <div class="card">
+    <app-empty-state titleKey="customers.history.empty" icon="◷" />
+  </div>
+} @else {
+  <div class="space-y-6">
+    @for (group of groups(); track group.key) {
+      <section>
+        <h3 class="sticky top-0 z-10 mb-2 bg-slate-50 py-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          {{ group.label }}
+        </h3>
+
+        <ul class="space-y-2">
+          @for (entry of group.items; track entry.id) {
+            <li class="card flex gap-3 p-3">
+              <span
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-50 text-base"
+                aria-hidden="true"
+              >
+                {{ channelIcon[entry.channel] }}
+              </span>
+
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2 text-sm">
+                  <span
+                    class="chip"
+                    [class]="
+                      entry.direction === MessageDirection.Inbound
+                        ? 'border-sky-200 bg-sky-50 text-sky-700'
+                        : 'border-violet-200 bg-violet-50 text-violet-700'
+                    "
+                  >
+                    {{ 'customers.history.direction.' + (entry.direction === MessageDirection.Inbound ? 'inbound' : 'outbound') | translate }}
+                  </span>
+
+                  <span class="text-xs text-slate-400">{{ 'enums.channel.' + entry.channel | translate }}</span>
+
+                  @if (entry.ticketId) {
+                    <a class="text-xs font-medium text-brand-700 hover:underline" [routerLink]="['/agent/tickets', entry.ticketId]">
+                      {{ entry.ticketNumber || entry.ticketId }}
+                    </a>
+                  }
+
+                  <span class="ms-auto shrink-0 text-xs text-slate-400" [title]="entry.occurredAt | date: 'medium' : undefined : locale()">
+                    {{ relativeTime(entry.occurredAt) }}
+                  </span>
+                </div>
+
+                @if (entry.subject) {
+                  <p class="mt-1 truncate text-sm font-medium text-slate-800">{{ entry.subject }}</p>
+                }
+                @if (entry.preview) {
+                  <p class="mt-0.5 line-clamp-2 text-sm text-slate-500">{{ entry.preview }}</p>
+                }
+                @if (agentName(entry); as name) {
+                  <p class="mt-1 text-xs text-slate-400">{{ 'customers.history.by' | translate: { name } }}</p>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  </div>
+
+  @if (hasMore()) {
+    <div #sentinel class="flex justify-center py-4">
+      @if (loadingMore()) {
+        <span class="text-sm text-slate-400">{{ 'common.loading' | translate }}</span>
+      }
+    </div>
+  }
+}

@@ -75,6 +75,8 @@ public static class DependencyInjection
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
         services.AddScoped<IReferenceNumberGenerator, ReferenceNumberGenerator>();
         services.AddScoped<ITicketEventRecorder, TicketEventRecorder>();
+        services.AddScoped<IInteractionRecorder, InteractionRecorder>();
+        services.AddScoped<IUserDisplayNameResolver, UserDisplayNameResolver>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IContactVerificationSender, LoggingContactVerificationSender>();
         services.AddScoped<DbSeeder>();

@@ -110,6 +110,15 @@
     @case ('contacts') {
       <app-contacts-panel [customerId]="customer()!.id" (changed)="refreshHeader()" />
     }
+    @case ('history') {
+      @if (canViewHistory()) {
+        <app-interaction-timeline [customerId]="customer()!.id" />
+      } @else {
+        <div class="card">
+          <app-empty-state titleKey="errors.forbiddenTitle" descriptionKey="errors.forbidden" icon="⚠" />
+        </div>
+      }
+    }
     @default {
       <!-- Interaction history, notes and tickets each land here from their own story. -->
       <div class="card">

@@ -123,12 +123,32 @@ Replace the History tab placeholder in `customer-detail.page.html` with the comp
 
 ## Done Criteria
 
-- [ ] `IInteractionRecorder` exists and writes into the caller's unit of work.
-- [ ] The timeline query uses keyset pagination and supports channel, direction and date filters.
-- [ ] Previews are plain text and truncated at write time.
-- [ ] `LastInteractionAt` is maintained.
-- [ ] The timeline component loads incrementally with date grouping and links to sources.
-- [ ] Every downstream feature plan records its obligation to call the recorder.
-- [ ] No mutation endpoint exists for the timeline.
+- [x] `IInteractionRecorder` exists and writes into the caller's unit of work — verified by unit
+      tests that call `SaveChangesAsync` themselves and confirm nothing persists before that.
+- [x] The timeline query uses keyset pagination and supports channel, direction and date filters —
+      verified by a unit test that inserts a new row *between* two page fetches and asserts page 2
+      neither repeats nor skips a row (this is exactly what offset paging gets wrong). Also verified
+      over the real HTTP endpoint (200/404/401/400, and that a `channel=0` filter is not silently
+      dropped by a falsy-zero check).
+- [x] Previews are plain text and truncated at write time — HTML tags stripped, entities decoded,
+      collapsed to 1000 characters.
+- [x] `LastInteractionAt` is maintained — verified both when the `Customer` is already tracked in
+      the caller's unit of work and when it is not (the two cases needing different EF handling to
+      avoid a duplicate-tracking exception).
+- [x] The timeline component loads incrementally (`IntersectionObserver`) with date grouping and
+      links to the source ticket. Frontend build is clean; `en.json`/`ar.json` key parity verified
+      programmatically (198 keys each).
+- [ ] **Every downstream feature plan records its obligation to call the recorder** — not done in
+      this pass. CS-201 (tickets), the Section 3 channel stories, CS-303, CS-305, CS-801 and CS-805
+      do not yet exist as plan files with this obligation noted; none of those stories has been
+      written yet. Whoever writes each of those plans needs to add the call explicitly.
+- [x] No mutation endpoint exists for the timeline — `CustomerInteractionsController` has a single
+      `GET` action only.
+
+**Verification steps 1–3 and 7 from this plan assume ticket creation exists (CS-201), which it does
+not yet.** Steps 4–6, 8 and 9 were verified; steps 1–3 and 7 are covered instead by the unit tests
+described above, which exercise the same recorder and query code a real ticket-creation call would.
+Revisit this plan's own verification steps once CS-201 lands, to confirm the real call site behaves
+the same way the tests predict.
 
 **STOP HERE. Report to the user and wait for confirmation before proceeding to the next story.**
