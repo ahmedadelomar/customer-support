@@ -2,18 +2,18 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AuthService } from '../../../core/auth/auth.service';
-import { HasPermissionDirective } from '../../../core/directives/has-permission.directive';
-import { PERMISSIONS } from '../../../core/permissions';
-import { LanguageService } from '../../../core/services/language.service';
-import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
-import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
-import { StateCardComponent } from '../../../shared/ui/state-card/state-card.component';
-import { ContactsPanelComponent } from './contacts/contacts-panel.component';
-import type { CustomerDetail } from './customer.models';
-import { CustomersService } from './customers.service';
-import { InteractionTimelineComponent } from './history/interaction-timeline.component';
-import { NotesPanelComponent } from './notes/notes-panel.component';
+import { AuthService } from '../../../../../core/auth/auth.service';
+import { HasPermissionDirective } from '../../../../../core/directives/has-permission.directive';
+import { PERMISSIONS } from '../../../../../core/permissions';
+import { LanguageService } from '../../../../../core/services/language.service';
+import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
+import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { StateCardComponent } from '../../../../../shared/ui/state-card/state-card.component';
+import { CustomersService } from '../../data-access/customers.service';
+import type { CustomerDetail } from '../../data-access/interfaces/customer.interface';
+import { ContactsPanelComponent } from './ui/contacts-panel/contacts-panel.component';
+import { InteractionTimelineComponent } from './ui/interaction-timeline/interaction-timeline.component';
+import { NotesPanelComponent } from './ui/notes-panel/notes-panel.component';
 
 /**
  * Customer profile page. The Contact details tab is `ContactsPanelComponent` (CS-102), the History

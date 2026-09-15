@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AppConfigService } from '../../../../core/services/app-config.service';
-import type { InteractionPage, InteractionQuery } from '../customer.models';
+import type { InteractionPage, InteractionQuery } from './interfaces/interaction.interface';
 
 /** Data access for one customer's interaction timeline. Read-only — see `CustomerInteractionsController`. */
 @Injectable({ providedIn: 'root' })

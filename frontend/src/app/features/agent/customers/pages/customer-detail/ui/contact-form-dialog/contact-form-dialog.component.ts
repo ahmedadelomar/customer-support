@@ -2,12 +2,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, type OnChanges, computed, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import type { ApiProblem } from '../../../../core/models/api.models';
-import { ContactType } from '../../../../core/models/enums';
-import { ToastService } from '../../../../core/services/toast.service';
-import { ModalComponent } from '../../../../shared/ui/modal/modal.component';
-import type { CustomerContact, DuplicateContactProblem } from '../customer.models';
-import { CustomerContactsService } from './customer-contacts.service';
+import type { ApiProblem } from '../../../../../../../core/models/api.models';
+import { ContactType } from '../../../../../../../core/models/enums';
+import { ToastService } from '../../../../../../../core/services/toast.service';
+import { ModalComponent } from '../../../../../../../shared/ui/modal/modal.component';
+import { CustomerContactsService } from '../../../../data-access/customer-contacts.service';
+import type { CustomerContact, DuplicateContactProblem } from '../../../../data-access/interfaces/contact.interface';
 
 /**
  * Add or edit a single contact. One component serves both because the fields are identical; only

@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import type { PagedResult } from '../../../../core/models/api.models';
 import { AppConfigService } from '../../../../core/services/app-config.service';
-import type { CreateNoteRequest, CustomerNote, UpdateNoteRequest } from '../customer.models';
+import type { CreateNoteRequest, CustomerNote, UpdateNoteRequest } from './interfaces/note.interface';
 
 /** Data access for one customer's notes. */
 @Injectable({ providedIn: 'root' })

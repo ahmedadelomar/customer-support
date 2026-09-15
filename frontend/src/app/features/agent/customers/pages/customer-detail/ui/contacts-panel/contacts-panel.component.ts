@@ -1,13 +1,13 @@
 import { Component, type OnChanges, computed, inject, input, output, signal } from '@angular/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { HasPermissionDirective } from '../../../../core/directives/has-permission.directive';
-import { ContactType } from '../../../../core/models/enums';
-import { PERMISSIONS } from '../../../../core/permissions';
-import { ToastService } from '../../../../core/services/toast.service';
-import type { CustomerContact } from '../customer.models';
-import { ContactFormDialogComponent } from './contact-form-dialog.component';
-import { ContactVerifyDialogComponent } from './contact-verify-dialog.component';
-import { CustomerContactsService } from './customer-contacts.service';
+import { HasPermissionDirective } from '../../../../../../../core/directives/has-permission.directive';
+import { ContactType } from '../../../../../../../core/models/enums';
+import { PERMISSIONS } from '../../../../../../../core/permissions';
+import { ToastService } from '../../../../../../../core/services/toast.service';
+import { CustomerContactsService } from '../../../../data-access/customer-contacts.service';
+import type { CustomerContact } from '../../../../data-access/interfaces/contact.interface';
+import { ContactFormDialogComponent } from '../contact-form-dialog/contact-form-dialog.component';
+import { ContactVerifyDialogComponent } from '../contact-verify-dialog/contact-verify-dialog.component';
 
 /** Every contact type gets its own section — including ones with no contacts yet — so "Add" is
  *  always reachable rather than only appearing once a first contact of that type already exists. */

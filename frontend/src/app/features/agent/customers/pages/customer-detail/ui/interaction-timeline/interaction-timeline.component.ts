@@ -13,12 +13,12 @@ import {
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { ChannelKey, MessageDirection } from '../../../../core/models/enums';
-import { LanguageService } from '../../../../core/services/language.service';
-import { EmptyStateComponent } from '../../../../shared/ui/empty-state/empty-state.component';
-import { relativeTime } from '../../../../shared/utils/relative-time';
-import type { Interaction, InteractionQuery } from '../customer.models';
-import { InteractionHistoryService } from './interaction-history.service';
+import { ChannelKey, MessageDirection } from '../../../../../../../core/models/enums';
+import { LanguageService } from '../../../../../../../core/services/language.service';
+import { EmptyStateComponent } from '../../../../../../../shared/ui/empty-state/empty-state.component';
+import { relativeTime } from '../../../../../../../shared/utils/relative-time';
+import { InteractionHistoryService } from '../../../../data-access/interaction-history.service';
+import type { Interaction, InteractionQuery } from '../../../../data-access/interfaces/interaction.interface';
 
 /** One local calendar day's worth of entries, keyed by a sortable date string for @for's track. */
 interface TimelineGroup {

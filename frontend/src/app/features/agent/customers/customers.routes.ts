@@ -5,24 +5,24 @@ import { PERMISSIONS } from '../../../core/permissions';
 export const CUSTOMER_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () => import('./customer-list.page').then((m) => m.CustomerListPage),
+    loadComponent: () => import('./pages/customer-list/customer-list.page').then((m) => m.CustomerListPage),
     data: { titleKey: 'customers.title' },
   },
   {
     path: 'new',
     canActivate: [permissionGuard],
     data: { titleKey: 'customers.create', permissions: [PERMISSIONS.customers.create] },
-    loadComponent: () => import('./customer-form.page').then((m) => m.CustomerFormPage),
+    loadComponent: () => import('./pages/customer-form/customer-form.page').then((m) => m.CustomerFormPage),
   },
   {
     path: ':id',
-    loadComponent: () => import('./customer-detail.page').then((m) => m.CustomerDetailPage),
+    loadComponent: () => import('./pages/customer-detail/customer-detail.page').then((m) => m.CustomerDetailPage),
     data: { titleKey: 'customers.detail' },
   },
   {
     path: ':id/edit',
     canActivate: [permissionGuard],
     data: { titleKey: 'customers.edit', permissions: [PERMISSIONS.customers.update] },
-    loadComponent: () => import('./customer-form.page').then((m) => m.CustomerFormPage),
+    loadComponent: () => import('./pages/customer-form/customer-form.page').then((m) => m.CustomerFormPage),
   },
 ];

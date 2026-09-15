@@ -1,15 +1,15 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import type { PagedResult } from '../../../core/models/api.models';
-import { AppConfigService } from '../../../core/services/app-config.service';
+import type { PagedResult } from '../../../../core/models/api.models';
+import { AppConfigService } from '../../../../core/services/app-config.service';
 import type {
   CreateCustomerRequest,
   CustomerDetail,
   CustomerListItem,
   CustomerQuery,
   UpdateCustomerRequest,
-} from './customer.models';
+} from './interfaces/customer.interface';
 
 /**
  * Data access for customer profiles. This is the reference shape for every feature service:

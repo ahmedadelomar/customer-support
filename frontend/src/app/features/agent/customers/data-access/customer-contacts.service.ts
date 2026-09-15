@@ -8,7 +8,7 @@ import type {
   CustomerContact,
   SendVerificationResult,
   UpdateContactRequest,
-} from '../customer.models';
+} from './interfaces/contact.interface';
 
 /** Data access for one customer's contacts. Nested under the customer id, matching the API routes. */
 @Injectable({ providedIn: 'root' })

@@ -1,15 +1,15 @@
 import { Component, type OnChanges, computed, inject, signal, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { LanguageService } from '../../../../core/services/language.service';
-import { EmptyStateComponent } from '../../../../shared/ui/empty-state/empty-state.component';
-import type { Attachment } from '../../../../shared/ui/file-upload/attachment.models';
-import { AttachmentsService } from '../../../../shared/ui/file-upload/attachments.service';
-import { FileUploadComponent } from '../../../../shared/ui/file-upload/file-upload.component';
-import { PaginationComponent } from '../../../../shared/ui/pagination/pagination.component';
-import { relativeTime } from '../../../../shared/utils/relative-time';
-import type { CustomerNote } from '../customer.models';
-import { CustomerNotesService } from './customer-notes.service';
+import { LanguageService } from '../../../../../../../core/services/language.service';
+import { EmptyStateComponent } from '../../../../../../../shared/ui/empty-state/empty-state.component';
+import type { Attachment } from '../../../../../../../shared/ui/file-upload/attachment.models';
+import { AttachmentsService } from '../../../../../../../shared/ui/file-upload/attachments.service';
+import { FileUploadComponent } from '../../../../../../../shared/ui/file-upload/file-upload.component';
+import { PaginationComponent } from '../../../../../../../shared/ui/pagination/pagination.component';
+import { relativeTime } from '../../../../../../../shared/utils/relative-time';
+import { CustomerNotesService } from '../../../../data-access/customer-notes.service';
+import type { CustomerNote } from '../../../../data-access/interfaces/note.interface';
 
 /**
  * The Notes tab: internal notes with attachments, backed by the shared attachment store — see

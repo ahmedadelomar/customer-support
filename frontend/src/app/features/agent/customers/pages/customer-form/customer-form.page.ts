@@ -10,12 +10,12 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import type { Observable } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
-import type { ApiProblem } from '../../../core/models/api.models';
-import { ChannelKey, CustomerType } from '../../../core/models/enums';
-import { ToastService } from '../../../core/services/toast.service';
-import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
-import type { CreateCustomerRequest, UpdateCustomerRequest } from './customer.models';
-import { CustomersService } from './customers.service';
+import type { ApiProblem } from '../../../../../core/models/api.models';
+import { ChannelKey, CustomerType } from '../../../../../core/models/enums';
+import { ToastService } from '../../../../../core/services/toast.service';
+import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { CustomersService } from '../../data-access/customers.service';
+import type { CreateCustomerRequest, UpdateCustomerRequest } from '../../data-access/interfaces/customer.interface';
 
 /**
  * Create and edit form for a customer profile. One component serves both, because the fields are

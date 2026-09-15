@@ -2,25 +2,25 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AuthService } from '../../../core/auth/auth.service';
-import { HasPermissionDirective } from '../../../core/directives/has-permission.directive';
-import { CustomerType } from '../../../core/models/enums';
-import { PERMISSIONS } from '../../../core/permissions';
-import { AppConfigService } from '../../../core/services/app-config.service';
-import { LanguageService } from '../../../core/services/language.service';
-import { ToastService } from '../../../core/services/toast.service';
-import { DataTableComponent } from '../../../shared/ui/data-table/data-table.component';
+import { AuthService } from '../../../../../core/auth/auth.service';
+import { HasPermissionDirective } from '../../../../../core/directives/has-permission.directive';
+import { CustomerType } from '../../../../../core/models/enums';
+import { PERMISSIONS } from '../../../../../core/permissions';
+import { AppConfigService } from '../../../../../core/services/app-config.service';
+import { LanguageService } from '../../../../../core/services/language.service';
+import { ToastService } from '../../../../../core/services/toast.service';
+import { DataTableComponent } from '../../../../../shared/ui/data-table/data-table.component';
 import type {
   DataTableColumn,
   SortState,
   StatusChipConfigMap,
-} from '../../../shared/ui/data-table/data-table.models';
-import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
-import { PaginationComponent } from '../../../shared/ui/pagination/pagination.component';
-import { SearchInputComponent } from '../../../shared/ui/search-input/search-input.component';
-import { StateCardComponent } from '../../../shared/ui/state-card/state-card.component';
-import type { CustomerListItem, CustomerQuery } from './customer.models';
-import { CustomersService } from './customers.service';
+} from '../../../../../shared/ui/data-table/data-table.models';
+import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
+import { PaginationComponent } from '../../../../../shared/ui/pagination/pagination.component';
+import { SearchInputComponent } from '../../../../../shared/ui/search-input/search-input.component';
+import { StateCardComponent } from '../../../../../shared/ui/state-card/state-card.component';
+import { CustomersService } from '../../data-access/customers.service';
+import type { CustomerListItem, CustomerQuery } from '../../data-access/interfaces/customer.interface';
 
 /**
  * Customer list (Customer Management / Customer profiles).

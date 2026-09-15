@@ -2,11 +2,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, type OnChanges, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import type { ApiProblem } from '../../../../core/models/api.models';
-import { ToastService } from '../../../../core/services/toast.service';
-import { ModalComponent } from '../../../../shared/ui/modal/modal.component';
-import type { CustomerContact } from '../customer.models';
-import { CustomerContactsService } from './customer-contacts.service';
+import type { ApiProblem } from '../../../../../../../core/models/api.models';
+import { ToastService } from '../../../../../../../core/services/toast.service';
+import { ModalComponent } from '../../../../../../../shared/ui/modal/modal.component';
+import { CustomerContactsService } from '../../../../data-access/customer-contacts.service';
+import type { CustomerContact } from '../../../../data-access/interfaces/contact.interface';
 
 type Stage = 'idle' | 'sent' | 'verified';
 
