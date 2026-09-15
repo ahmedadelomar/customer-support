@@ -119,8 +119,17 @@
         </div>
       }
     }
+    @case ('notes') {
+      @if (canViewNotes()) {
+        <app-notes-panel [customerId]="customer()!.id" />
+      } @else {
+        <div class="card">
+          <app-empty-state titleKey="errors.forbiddenTitle" descriptionKey="errors.forbidden" icon="⚠" />
+        </div>
+      }
+    }
     @default {
-      <!-- Interaction history, notes and tickets each land here from their own story. -->
+      <!-- The tickets tab lands here from its own story. -->
       <div class="card">
         <app-empty-state titleKey="common.comingSoon" descriptionKey="customers.tabPending" icon="◌" />
       </div>

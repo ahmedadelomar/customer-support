@@ -1,0 +1,150 @@
+<!-- Composer -->
+<div class="card mb-4 p-4">
+  <textarea
+    class="form-control"
+    rows="3"
+    [placeholder]="'customers.notes.composerPlaceholder' | translate"
+    [ngModel]="composerBody()"
+    (ngModelChange)="composerBody.set($event)"
+  ></textarea>
+
+  <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+    <label class="flex items-center gap-2 text-sm text-slate-600">
+      <input
+        type="checkbox"
+        [ngModel]="composerInternal()"
+        (ngModelChange)="composerInternal.set($event)"
+      />
+      {{ 'customers.notes.internal' | translate }}
+    </label>
+
+    <button
+      type="button"
+      class="btn-primary"
+      [disabled]="creating() || !composerBody().trim()"
+      (click)="createNote()"
+    >
+      {{ (creating() ? 'common.saving' : 'customers.notes.add') | translate }}
+    </button>
+  </div>
+</div>
+
+<!-- List -->
+@if (loading()) {
+  <div class="space-y-3">
+    @for (i of [1, 2, 3]; track i) {
+      <div class="card h-24 animate-pulse"></div>
+    }
+  </div>
+} @else if (notes().length === 0) {
+  <div class="card">
+    <app-empty-state titleKey="customers.notes.empty" icon="🗒" />
+  </div>
+} @else {
+  <ul class="space-y-3">
+    @for (note of notes(); track note.id) {
+      <li class="card p-4" [class.border-amber-300]="note.isPinned">
+        <div class="mb-2 flex flex-wrap items-center gap-2 text-sm">
+          @if (note.isPinned) {
+            <span class="chip border-amber-200 bg-amber-50 text-amber-700">📌 {{ 'customers.notes.pinned' | translate }}</span>
+          }
+          @if (!note.isInternal) {
+            <span class="chip border-sky-200 bg-sky-50 text-sky-700">{{ 'customers.notes.external' | translate }}</span>
+          }
+
+          @if (authorName(note); as name) {
+            <span class="font-medium text-slate-700">{{ name }}</span>
+          }
+
+          <span class="text-slate-400" [title]="note.createdAt">{{ relativeTime(note.createdAt) }}</span>
+
+          <div class="ms-auto flex gap-3 text-xs font-medium">
+            <button type="button" class="text-brand-700 hover:underline" (click)="togglePin(note)">
+              {{ (note.isPinned ? 'customers.notes.unpin' : 'customers.notes.pin') | translate }}
+            </button>
+
+            @if (note.canEdit) {
+              @if (editingNoteId() !== note.id) {
+                <button type="button" class="text-brand-700 hover:underline" (click)="startEdit(note)">
+                  {{ 'common.edit' | translate }}
+                </button>
+              }
+              <button type="button" class="text-rose-600 hover:underline" (click)="deleteNote(note)">
+                {{ 'common.delete' | translate }}
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (editingNoteId() === note.id) {
+          <textarea
+            class="form-control"
+            rows="3"
+            [ngModel]="editingBody()"
+            (ngModelChange)="editingBody.set($event)"
+          ></textarea>
+          <div class="mt-2 flex justify-end gap-2">
+            <button type="button" class="btn-secondary" (click)="cancelEdit()">{{ 'common.cancel' | translate }}</button>
+            <button type="button" class="btn-primary" [disabled]="!editingBody().trim()" (click)="saveEdit(note)">
+              {{ 'common.save' | translate }}
+            </button>
+          </div>
+        } @else {
+          <p class="whitespace-pre-wrap text-sm text-slate-800">{{ note.body }}</p>
+        }
+
+        @if (note.attachments.length > 0) {
+          <ul class="mt-3 flex flex-wrap gap-2">
+            @for (attachment of note.attachments; track attachment.id) {
+              <li class="chip border-slate-200 bg-slate-50 text-slate-700">
+                <button type="button" class="hover:underline" (click)="downloadAttachment(attachment)">
+                  📎 {{ attachment.fileName }}
+                </button>
+                <span class="text-slate-400">({{ formatSize(attachment.sizeBytes) }})</span>
+                @if (note.canEdit) {
+                  <button
+                    type="button"
+                    class="text-slate-400 hover:text-rose-600"
+                    [attr.aria-label]="'common.delete' | translate"
+                    (click)="deleteAttachment(note, attachment)"
+                  >
+                    ✕
+                  </button>
+                }
+              </li>
+            }
+          </ul>
+        }
+
+        @if (activeUploadNoteId() === note.id) {
+          <div class="mt-3 border-t border-slate-100 pt-3">
+            <app-file-upload
+              [ownerType]="'CustomerNote'"
+              [ownerId]="note.id"
+              (uploaded)="onAttachmentUploaded(note, $event)"
+            />
+            <button type="button" class="mt-2 text-xs text-slate-400 hover:underline" (click)="finishAttaching()">
+              {{ 'customers.notes.doneAttaching' | translate }}
+            </button>
+          </div>
+        } @else if (note.canEdit) {
+          <button
+            type="button"
+            class="mt-2 text-xs font-medium text-brand-700 hover:underline"
+            (click)="startAttaching(note.id)"
+          >
+            + {{ 'customers.notes.attachFiles' | translate }}
+          </button>
+        }
+      </li>
+    }
+  </ul>
+
+  <app-pagination
+    class="mt-4 block"
+    [page]="page()"
+    [pageSize]="pageSize"
+    [totalCount]="totalCount()"
+    (pageChange)="onPageChange($event)"
+  />
+}

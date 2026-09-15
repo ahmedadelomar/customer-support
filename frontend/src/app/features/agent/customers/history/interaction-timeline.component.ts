@@ -16,6 +16,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ChannelKey, MessageDirection } from '../../../../core/models/enums';
 import { LanguageService } from '../../../../core/services/language.service';
 import { EmptyStateComponent } from '../../../../shared/ui/empty-state/empty-state.component';
+import { relativeTime } from '../../../../shared/utils/relative-time';
 import type { Interaction, InteractionQuery } from '../customer.models';
 import { InteractionHistoryService } from './interaction-history.service';
 
@@ -216,30 +217,8 @@ export class InteractionTimelineComponent implements OnChanges {
     });
   }
 
-  /**
-   * `Intl.RelativeTimeFormat` rather than a hand-rolled "N hours ago" string: it gets Arabic
-   * pluralisation (which has distinct dual/plural forms English doesn't) correct for free.
-   */
   relativeTime(iso: string): string {
-    const diffSeconds = Math.round((new Date(iso).getTime() - Date.now()) / 1000);
-    const formatter = new Intl.RelativeTimeFormat(this.locale(), { numeric: 'auto' });
-
-    const units: [Intl.RelativeTimeFormatUnit, number][] = [
-      ['year', 31_536_000],
-      ['month', 2_592_000],
-      ['week', 604_800],
-      ['day', 86_400],
-      ['hour', 3_600],
-      ['minute', 60],
-    ];
-
-    for (const [unit, secondsInUnit] of units) {
-      if (Math.abs(diffSeconds) >= secondsInUnit) {
-        return formatter.format(Math.round(diffSeconds / secondsInUnit), unit);
-      }
-    }
-
-    return formatter.format(diffSeconds, 'second');
+    return relativeTime(iso, this.locale());
   }
 
   agentName(entry: Interaction): string | undefined {

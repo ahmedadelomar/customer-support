@@ -1,4 +1,5 @@
 using CustomerSupport.Application.Common.Interfaces;
+using CustomerSupport.Application.Files;
 using CustomerSupport.Infrastructure.Identity;
 using CustomerSupport.Infrastructure.Persistence;
 using CustomerSupport.Infrastructure.Persistence.Interceptors;
@@ -79,6 +80,10 @@ public static class DependencyInjection
         services.AddScoped<IUserDisplayNameResolver, UserDisplayNameResolver>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IContactVerificationSender, LoggingContactVerificationSender>();
+        services.AddScoped<IAttachmentOwnerAuthorizer, AttachmentOwnerAuthorizer>();
+        services.AddSingleton<IFileStorage, LocalFileStorage>();
+        services.AddSingleton<IAttachmentPolicyProvider, AttachmentPolicyProvider>();
+        services.AddSingleton<IVirusScanner, NoOpVirusScanner>();
         services.AddScoped<DbSeeder>();
 
         return services;

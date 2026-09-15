@@ -13,11 +13,12 @@ import { ContactsPanelComponent } from './contacts/contacts-panel.component';
 import type { CustomerDetail } from './customer.models';
 import { CustomersService } from './customers.service';
 import { InteractionTimelineComponent } from './history/interaction-timeline.component';
+import { NotesPanelComponent } from './notes/notes-panel.component';
 
 /**
- * Customer profile page. The Contact details tab is `ContactsPanelComponent` (CS-102) and the
- * History tab is `InteractionTimelineComponent` (CS-103); the notes and tickets tabs are added by
- * their own stories against this same shell.
+ * Customer profile page. The Contact details tab is `ContactsPanelComponent` (CS-102), the History
+ * tab is `InteractionTimelineComponent` (CS-103), and the Notes tab is `NotesPanelComponent`
+ * (CS-104); the tickets tab is added by its own story against this same shell.
  */
 @Component({
   selector: 'app-customer-detail',
@@ -31,6 +32,7 @@ import { InteractionTimelineComponent } from './history/interaction-timeline.com
     HasPermissionDirective,
     ContactsPanelComponent,
     InteractionTimelineComponent,
+    NotesPanelComponent,
   ],
   templateUrl: './customer-detail.page.html',
 })
@@ -41,6 +43,7 @@ export class CustomerDetailPage {
 
   readonly permissions = PERMISSIONS;
   readonly canViewHistory = computed(() => this.#auth.hasPermission(PERMISSIONS.customers.viewHistory));
+  readonly canViewNotes = computed(() => this.#auth.hasPermission(PERMISSIONS.customers.viewNotes));
 
   /** Bound from the route parameter by `withComponentInputBinding()`. */
   readonly id = input.required<string>();

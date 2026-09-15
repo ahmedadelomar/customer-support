@@ -112,3 +112,28 @@ public interface IFileStorage
     Task<Stream> OpenAsync(string storageKey, CancellationToken ct = default);
     Task DeleteAsync(string storageKey, CancellationToken ct = default);
 }
+
+/// <summary>The size cap and extension allow-list an upload is checked against.</summary>
+public record AttachmentPolicy(long MaxBytes, IReadOnlyCollection<string> AllowedExtensions);
+
+/// <summary>
+/// Source of <see cref="AttachmentPolicy"/>. Reads plain configuration today — CS-1004 (system
+/// configuration) is not built yet, so there is nowhere to read a <c>SystemSetting</c> row from.
+/// The method is async so that swapping the implementation for one backed by the database, once
+/// CS-1004 lands, needs no signature change and no change to any caller.
+/// </summary>
+public interface IAttachmentPolicyProvider
+{
+    Task<AttachmentPolicy> GetPolicyAsync(CancellationToken ct = default);
+}
+
+/// <summary>
+/// Scans a saved file before it becomes downloadable. The default implementation is a no-op that
+/// reports <c>"skipped"</c> — shipping the hook now means wiring a real scanner later is
+/// configuration, not a schema or call-site change.
+/// </summary>
+public interface IVirusScanner
+{
+    /// <summary>Returns <c>"skipped"</c>, <c>"clean"</c> or <c>"infected"</c>.</summary>
+    Task<string> ScanAsync(string storageKey, CancellationToken ct = default);
+}

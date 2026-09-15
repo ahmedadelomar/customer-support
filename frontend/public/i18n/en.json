@@ -160,6 +160,19 @@
         "allDirections": "All directions"
       }
     },
+    "notes": {
+      "empty": "No notes recorded yet.",
+      "composerPlaceholder": "Write a note about this customer…",
+      "internal": "Internal (never shown to the customer)",
+      "external": "Customer-visible",
+      "add": "Add note",
+      "pin": "Pin",
+      "unpin": "Unpin",
+      "pinned": "Pinned",
+      "deleteConfirm": "Delete this note? This cannot be undone.",
+      "attachFiles": "Attach files",
+      "doneAttaching": "Done attaching files"
+    },
     "contacts": {
       "empty": "No contact details recorded yet.",
       "noneOfType": "None recorded.",
@@ -256,5 +269,12 @@
       "5": "Closed",
       "6": "Cancelled"
     }
+  },
+  "fileUpload": {
+    "browse": "Browse",
+    "orDrop": "or drag files here",
+    "hint": "Allowed: {{extensions}} — up to {{maxMb}} MB",
+    "disallowedExtension": "Files of type '{{extension}}' are not allowed.",
+    "tooLarge": "This file exceeds the {{maxMb}} MB limit."
   }
 }

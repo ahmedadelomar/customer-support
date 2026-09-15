@@ -150,13 +150,39 @@ Download attachments through an authenticated blob request, not an anchor href, 
 
 ## Done Criteria
 
-- [ ] `LocalFileStorage` implements `IFileStorage` with generated keys and traversal protection.
-- [ ] `IAttachmentOwnerAuthorizer` gates both upload and download per owning record, and unknown owner types are refused.
-- [ ] Size and extension are validated before bytes are persisted, from configurable settings.
-- [ ] Notes support pin, internal flag, author-based edit rules and soft delete.
-- [ ] The shared file-upload component works and is reusable by tickets and the knowledge base.
-- [ ] Non-ASCII filenames download correctly.
-- [ ] The virus-scan hook exists with a no-op default.
-- [ ] Internal notes are never exposed through the portal.
+- [x] `LocalFileStorage` implements `IFileStorage` with generated keys and traversal protection —
+      verified live (storage directory shows only generated GUID keys, never the uploaded name) and
+      by unit tests covering `../`-style traversal on both `OpenAsync` and `DeleteAsync`.
+- [x] `IAttachmentOwnerAuthorizer` gates both upload and download per owning record, and unknown
+      owner types are refused — verified live (unrecognised `ownerType` → 403; tampered attachment
+      id → 404) and by unit tests covering the Customer/CustomerNote branches, branch scoping, and
+      the default-refuse case. The Ticket/TicketMessage/KbArticle branches are written but only
+      buildable against permission + branch scope, since none of those features exist yet — see the
+      remark in `AttachmentOwnerAuthorizer.cs`.
+- [x] Size and extension are validated before bytes are persisted, from configurable settings —
+      verified live (`.exe` and an 11 MB file both rejected with 400, before any file write) and
+      hardcoded to `appsettings`-driven configuration rather than `SystemSetting`, since CS-1004
+      isn't built — `IAttachmentPolicyProvider` is async-shaped specifically so that swap needs no
+      signature change later.
+- [x] Notes support pin, internal flag, author-based edit rules and soft delete — pin/unpin, create,
+      update, delete all verified live; the author-vs-`customers.notes.manage` rule is verified by
+      unit tests instead, since no second, permission-constrained agent user exists yet to test it
+      live with (CS-1001 has no user management beyond the bootstrap administrator).
+- [x] The shared file-upload component works and is reusable by tickets and the knowledge base —
+      built under `shared/ui/file-upload/` with no dependency on notes; drag-and-drop, progress,
+      and client-side policy validation confirmed via the frontend build. Live end-to-end upload
+      exercised through the API directly (curl's multipart handling of this shell proved
+      unreliable, so a small Node script drove the actual HTTP calls instead — the request/response
+      shape is identical to what the component sends).
+- [x] Non-ASCII filenames download correctly — verified live with an Arabic filename: upload
+      preserves it exactly, and the download response carries both the ASCII-safe `filename=`
+      fallback and the RFC 5987 `filename*=UTF-8''...` parameter, decoding back to the original
+      Arabic string. No extra code was needed — ASP.NET Core's `File()` helper does this natively.
+- [x] The virus-scan hook exists with a no-op default — `IVirusScanner`/`NoOpVirusScanner`.
+      The "infected" rejection path (delete the saved file, never create a row) has no real scanner
+      to trigger it live yet, so it's covered by a unit test that substitutes the interface instead.
+- [x] Internal notes are never exposed through the portal — there is no portal in this codebase yet
+      (CS-801 is unbuilt), so there is no endpoint to leak through. Revisit this checkbox once CS-801
+      exists, to confirm its DTOs are built independently and never reuse `CustomerNoteDto`.
 
 **STOP HERE. Report to the user and wait for confirmation before proceeding to the next story.**
