@@ -138,4 +138,54 @@ public class TicketsController : ApiControllerBase
         await Sender.Send(command with { TicketId = id }, ct);
         return NoContent();
     }
+
+    /// <summary>Candidate agents for this ticket's team/department, with their current load and availability.</summary>
+    [HttpGet("assignable-agents")]
+    [ProducesResponseType(typeof(IReadOnlyList<AssignableAgentDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IReadOnlyList<AssignableAgentDto>>> GetAssignableAgents(
+        [FromQuery] Guid ticketId, CancellationToken ct)
+        => Ok(await Sender.Send(new GetAssignableAgentsQuery(ticketId), ct));
+
+    /// <summary>Assigns (or reassigns) the ticket to an agent, a team, or both. Away/at-capacity warnings need <c>force: true</c> to proceed; a deactivated agent never does.</summary>
+    [HttpPost("{id:guid}/assign")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Assign(Guid id, [FromBody] AssignTicketCommand command, CancellationToken ct)
+    {
+        await Sender.Send(command with { TicketId = id }, ct);
+        return NoContent();
+    }
+
+    /// <summary>Claims an unassigned ticket for the caller. 409 if another agent claimed it first.</summary>
+    [HttpPost("{id:guid}/claim")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Claim(Guid id, CancellationToken ct)
+    {
+        await Sender.Send(new ClaimTicketCommand(id), ct);
+        return NoContent();
+    }
+
+    /// <summary>Clears the ticket's agent and team assignment.</summary>
+    [HttpPost("{id:guid}/unassign")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Unassign(Guid id, CancellationToken ct)
+    {
+        await Sender.Send(new UnassignTicketCommand(id), ct);
+        return NoContent();
+    }
+
+    /// <summary>Assigns up to 100 tickets at once. Reports which succeeded and which failed, and why — never all-or-nothing.</summary>
+    [HttpPost("bulk-assign")]
+    [ProducesResponseType(typeof(BulkAssignResultDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<BulkAssignResultDto>> BulkAssign(
+        [FromBody] BulkAssignTicketsCommand command, CancellationToken ct)
+        => Ok(await Sender.Send(command, ct));
 }

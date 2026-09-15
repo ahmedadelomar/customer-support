@@ -23,6 +23,7 @@ public class GlobalExceptionHandler(
             NotFoundException => (StatusCodes.Status404NotFound, "Resource not found", exception.Message),
             ConflictException => (StatusCodes.Status409Conflict, "Conflict", exception.Message),
             DuplicateContactException => (StatusCodes.Status409Conflict, "Duplicate contact", exception.Message),
+            AssignmentWarningException => (StatusCodes.Status409Conflict, "Assignment warning", exception.Message),
             ForbiddenException => (StatusCodes.Status403Forbidden, "Forbidden", exception.Message),
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Unauthorized", "Authentication is required."),
             // 499 is a de-facto standard for a client-cancelled request and has no StatusCodes constant.
@@ -64,6 +65,15 @@ public class GlobalExceptionHandler(
         {
             problem.Extensions["duplicateCustomerId"] = duplicate.DuplicateCustomerId;
             problem.Extensions["duplicateCustomerName"] = duplicate.DuplicateCustomerName;
+        }
+
+        // Lets the client offer "proceed anyway" only when the warning is actually overridable —
+        // a deactivated agent (IsHardBlock) never gets a force-retry option.
+        if (exception is AssignmentWarningException assignmentWarning)
+        {
+            problem.Extensions["isHardBlock"] = assignmentWarning.IsHardBlock;
+            problem.Extensions["openTickets"] = assignmentWarning.OpenTickets;
+            problem.Extensions["cap"] = assignmentWarning.Cap;
         }
 
         return await problemDetails.TryWriteAsync(new ProblemDetailsContext

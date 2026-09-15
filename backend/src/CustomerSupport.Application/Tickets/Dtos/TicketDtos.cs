@@ -126,6 +126,7 @@ public record TicketDetailDto
     public bool CanReply { get; init; }
     public bool CanAddInternalNote { get; init; }
     public bool CanMerge { get; init; }
+    public bool CanAssign { get; init; }
 }
 
 public record TicketTagDto

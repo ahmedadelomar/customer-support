@@ -57,6 +57,29 @@
   <div>
     <p class="text-xs text-slate-500">{{ 'tickets.properties.assignee' | translate }}</p>
     <p class="text-sm text-slate-800">{{ assigneeName() ?? ('tickets.properties.noAssignee' | translate) }}</p>
+
+    @if (ticket().canAssign && !ticket().isTerminal) {
+      <div class="mt-2 flex flex-wrap gap-2">
+        @if (!ticket().assignedAgentId) {
+          <button type="button" class="btn-primary px-2 py-1 text-xs" [disabled]="claiming()" (click)="claim()">
+            {{ (claiming() ? 'common.saving' : 'tickets.assignment.claim') | translate }}
+          </button>
+        }
+        <button type="button" class="btn-secondary px-2 py-1 text-xs" (click)="openAssignDialog()">
+          {{ 'tickets.assignment.assign' | translate }}
+        </button>
+        @if (ticket().assignedAgentId || ticket().departmentId) {
+          <button
+            type="button"
+            class="btn-secondary px-2 py-1 text-xs text-rose-600"
+            [disabled]="unassigning()"
+            (click)="unassign()"
+          >
+            {{ (unassigning() ? 'common.saving' : 'tickets.assignment.unassign') | translate }}
+          </button>
+        }
+      </div>
+    }
   </div>
 
   <div>

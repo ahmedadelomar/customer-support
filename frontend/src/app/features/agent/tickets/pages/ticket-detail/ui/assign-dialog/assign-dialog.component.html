@@ -1,0 +1,56 @@
+<app-modal [open]="open()" titleKey="tickets.assignment.assign" (closed)="close()">
+  @if (confirming(); as agent) {
+    <div class="space-y-3">
+      <p class="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+        {{ agent.warning }}
+      </p>
+      <p class="text-sm text-slate-600">
+        {{ 'tickets.assignment.confirmWarning' | translate: { name: name(agent) } }}
+      </p>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" class="btn-secondary" (click)="cancelConfirm()">{{ 'common.cancel' | translate }}</button>
+        <button type="button" class="btn-primary" [disabled]="saving()" (click)="confirmWarned()">
+          {{ (saving() ? 'common.saving' : 'tickets.assignment.confirmAssign') | translate }}
+        </button>
+      </div>
+    </div>
+  } @else {
+    @if (errorMessage()) {
+      <p class="form-error mb-2">{{ errorMessage() }}</p>
+    }
+
+    @if (loading()) {
+      <div class="space-y-2">
+        @for (i of [1, 2, 3]; track i) {
+          <div class="h-12 animate-pulse rounded-lg bg-slate-100"></div>
+        }
+      </div>
+    } @else if (candidates().length === 0) {
+      <p class="py-6 text-center text-sm text-slate-500">{{ 'tickets.assignment.noCandidates' | translate }}</p>
+    } @else {
+      <ul class="max-h-80 space-y-1 overflow-y-auto">
+        @for (agent of candidates(); track agent.id) {
+          <li>
+            <button
+              type="button"
+              class="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-start hover:bg-slate-50"
+              [class.opacity-50]="!agent.isAvailable"
+              [disabled]="saving()"
+              (click)="select(agent)"
+            >
+              <span class="min-w-0">
+                <span class="block truncate font-medium text-slate-900">{{ name(agent) }}</span>
+                <span class="block text-xs text-slate-500">
+                  {{ loadLabel(agent) }} · {{ agent.availabilityStatus }}
+                </span>
+              </span>
+              @if (!agent.isAvailable) {
+                <span aria-hidden="true" title="{{ agent.warning }}">⚠</span>
+              }
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  }
+</app-modal>

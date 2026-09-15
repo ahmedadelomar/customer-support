@@ -3,6 +3,16 @@
   <table class="w-full min-w-[48rem] text-sm">
     <thead class="border-b border-slate-200 bg-slate-50">
       <tr>
+        @if (selectable()) {
+          <th scope="col" class="w-10 px-4 py-3">
+            <input
+              type="checkbox"
+              [checked]="allOnPageSelected()"
+              [attr.aria-label]="'common.selectAll' | translate"
+              (click)="toggleSelectAll()"
+            />
+          </th>
+        }
         @for (column of desktopColumns(); track column.id) {
           <th
             scope="col"
@@ -37,6 +47,9 @@
       @if (loading()) {
         @for (row of skeletonRange(); track row) {
           <tr>
+            @if (selectable()) {
+              <td class="px-4 py-3"></td>
+            }
             @for (column of desktopColumns(); track column.id) {
               <td class="px-4 py-3">
                 <div class="h-4 w-full animate-pulse rounded bg-slate-100"></div>
@@ -46,13 +59,23 @@
         }
       } @else if (rows().length === 0) {
         <tr>
-          <td [attr.colspan]="desktopColumns().length" class="px-4 py-12 text-center text-slate-500">
+          <td [attr.colspan]="desktopColumns().length + (selectable() ? 1 : 0)" class="px-4 py-12 text-center text-slate-500">
             {{ emptyMessageKey() | translate }}
           </td>
         </tr>
       } @else {
         @for (row of rows(); track row.id) {
-          <tr class="hover:bg-slate-50" (click)="rowClick.emit(row)">
+          <tr class="hover:bg-slate-50" [ngClass]="isSelected(row) ? 'bg-brand-50/40' : ''" (click)="rowClick.emit(row)">
+            @if (selectable()) {
+              <td class="px-4 py-3">
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(row)"
+                  [attr.aria-label]="'common.select' | translate"
+                  (click)="toggleRowSelection(row, $event)"
+                />
+              </td>
+            }
             @for (column of desktopColumns(); track column.id) {
               <td class="px-4 py-3" [ngClass]="column.alignEnd ? 'text-end' : ''">
                 @switch (column.type) {

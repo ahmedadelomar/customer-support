@@ -120,6 +120,7 @@ export interface TicketDetail {
   canReply: boolean;
   canAddInternalNote: boolean;
   canMerge: boolean;
+  canAssign: boolean;
 }
 
 export interface CreateTicketRequest {
@@ -154,4 +155,42 @@ export interface MergeTicketsRequest {
   targetTicketId: string;
   reason?: string;
   allowCrossCustomer?: boolean;
+}
+
+/** One assignment candidate with the load and availability the picker shows inline. */
+export interface AssignableAgent {
+  id: string;
+  nameEn: string;
+  nameAr: string;
+  availabilityStatus: string;
+  openTickets: number;
+  cap: number | null;
+  isAvailable: boolean;
+  warning: string | null;
+}
+
+export interface AssignTicketRequest {
+  agentId?: string;
+  teamId?: string;
+  force?: boolean;
+}
+
+export interface BulkAssignRequest {
+  ticketIds: string[];
+  agentId?: string;
+  teamId?: string;
+  force?: boolean;
+}
+
+export interface BulkAssignItemResult {
+  ticketId: string;
+  number: string;
+  succeeded: boolean;
+  error: string | null;
+}
+
+export interface BulkAssignResult {
+  succeeded: number;
+  failed: number;
+  results: BulkAssignItemResult[];
 }

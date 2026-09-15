@@ -23,6 +23,20 @@ public class DuplicateContactException(Guid duplicateCustomerId, string duplicat
 /// <summary>Thrown when the caller is authenticated but lacks the required permission. Surfaces as HTTP 403.</summary>
 public class ForbiddenException(string message) : Exception(message);
 
+/// <summary>
+/// Thrown when assigning a ticket to an agent who is unavailable or at capacity. Unlike
+/// <see cref="ConflictException"/>, this is sometimes meant to be overridden — the caller may resubmit
+/// with <c>Force = true</c> — except when <see cref="IsHardBlock"/> is set, for a deactivated agent,
+/// which no amount of forcing may bypass.
+/// </summary>
+public class AssignmentWarningException(string message, bool isHardBlock, int openTickets, int? cap)
+    : Exception(message)
+{
+    public bool IsHardBlock { get; } = isHardBlock;
+    public int OpenTickets { get; } = openTickets;
+    public int? Cap { get; } = cap;
+}
+
 /// <summary>Aggregates FluentValidation failures. Surfaces as HTTP 400 with a per-field problem detail.</summary>
 public class ValidationException(IDictionary<string, string[]> errors)
     : Exception("One or more validation failures occurred.")

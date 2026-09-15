@@ -7,6 +7,10 @@ import type { TicketLookups } from './interfaces/ticket-lookups.interface';
 import type { TicketMessage } from './interfaces/ticket-message.interface';
 import type {
   AddInternalNoteRequest,
+  AssignableAgent,
+  AssignTicketRequest,
+  BulkAssignRequest,
+  BulkAssignResult,
   CreateTicketRequest,
   MergeTicketsRequest,
   ReplyToTicketRequest,
@@ -65,6 +69,28 @@ export class TicketsService {
 
   merge(id: string, request: MergeTicketsRequest): Observable<void> {
     return this.#http.post<void>(`${this.#baseUrl}/${id}/merge`, request);
+  }
+
+  assignableAgents(ticketId: string): Observable<AssignableAgent[]> {
+    return this.#http.get<AssignableAgent[]>(`${this.#baseUrl}/assignable-agents`, {
+      params: this.#toParams({ ticketId }),
+    });
+  }
+
+  assign(id: string, request: AssignTicketRequest): Observable<void> {
+    return this.#http.post<void>(`${this.#baseUrl}/${id}/assign`, request);
+  }
+
+  claim(id: string): Observable<void> {
+    return this.#http.post<void>(`${this.#baseUrl}/${id}/claim`, {});
+  }
+
+  unassign(id: string): Observable<void> {
+    return this.#http.post<void>(`${this.#baseUrl}/${id}/unassign`, {});
+  }
+
+  bulkAssign(request: BulkAssignRequest): Observable<BulkAssignResult> {
+    return this.#http.post<BulkAssignResult>(`${this.#baseUrl}/bulk-assign`, request);
   }
 
   /** Builds the query string, skipping empty values so the URL stays clean. */

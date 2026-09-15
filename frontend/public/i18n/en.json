@@ -25,6 +25,8 @@
     "pagination": "Pagination",
     "showingRange": "Showing {{from}}–{{to}} of {{total}}",
     "noResults": "No results found.",
+    "select": "Select row",
+    "selectAll": "Select all on this page",
     "clearFilters": "Clear filters",
     "switchLanguage": "العربية",
     "unknown": "Unknown",
@@ -335,6 +337,27 @@
     },
     "errors": {
       "customerBlocked": "This customer is blocked and cannot raise new tickets."
+    },
+    "assignment": {
+      "assign": "Assign",
+      "assigned": "Ticket assigned.",
+      "claim": "Claim",
+      "claimed": "Ticket claimed.",
+      "unassign": "Unassign",
+      "unassigned": "Ticket unassigned.",
+      "confirmWarning": "Assign to {{name}} anyway?",
+      "confirmAssign": "Assign anyway",
+      "noCandidates": "No candidate agents were found for this ticket's team or department."
+    },
+    "bulkAssign": {
+      "title": "Bulk assign",
+      "action": "Assign",
+      "agent": "Agent",
+      "force": "Assign anyway if an agent is unavailable or at capacity",
+      "selectedCount": "{{count}} ticket(s) selected",
+      "summary": "{{succeeded}} succeeded, {{failed}} failed.",
+      "showFailures": "Show failures",
+      "hideFailures": "Hide failures"
     }
   },
   "admin": {

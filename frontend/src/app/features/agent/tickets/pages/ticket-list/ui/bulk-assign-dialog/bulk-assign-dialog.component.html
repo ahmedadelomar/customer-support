@@ -1,0 +1,70 @@
+<app-modal [open]="open()" titleKey="tickets.bulkAssign.title" (closed)="close()">
+  @if (result(); as r) {
+    <div class="space-y-3">
+      <p class="text-sm text-slate-700">
+        {{ 'tickets.bulkAssign.summary' | translate: { succeeded: r.succeeded, failed: r.failed } }}
+      </p>
+
+      @if (r.failed > 0) {
+        <button type="button" class="text-sm text-brand-700 hover:underline" (click)="toggleFailures()">
+          {{ (showFailures() ? 'tickets.bulkAssign.hideFailures' : 'tickets.bulkAssign.showFailures') | translate }}
+        </button>
+
+        @if (showFailures()) {
+          <ul class="max-h-56 space-y-1 overflow-y-auto rounded-lg border border-rose-100 bg-rose-50 p-2 text-sm">
+            @for (item of r.results; track item.ticketId) {
+              @if (!item.succeeded) {
+                <li class="text-rose-700">
+                  <span class="font-medium">{{ item.number || item.ticketId }}</span>: {{ item.error }}
+                </li>
+              }
+            }
+          </ul>
+        }
+      }
+
+      <div class="flex justify-end pt-2">
+        <button type="button" class="btn-primary" (click)="close()">{{ 'common.close' | translate }}</button>
+      </div>
+    </div>
+  } @else {
+    <div class="space-y-3">
+      <p class="text-sm text-slate-600">
+        {{ 'tickets.bulkAssign.selectedCount' | translate: { count: ticketIds().length } }}
+      </p>
+
+      @if (loading()) {
+        <div class="h-10 animate-pulse rounded-lg bg-slate-100"></div>
+      } @else if (candidates().length === 0) {
+        <p class="py-4 text-center text-sm text-slate-500">{{ 'tickets.assignment.noCandidates' | translate }}</p>
+      } @else {
+        <div>
+          <label class="form-label" for="bulk-assign-agent">{{ 'tickets.bulkAssign.agent' | translate }}</label>
+          <select
+            id="bulk-assign-agent"
+            class="form-control"
+            [ngModel]="selectedAgentId()"
+            (ngModelChange)="selectedAgentId.set($event)"
+          >
+            <option value="" disabled>{{ 'tickets.bulkAssign.agent' | translate }}</option>
+            @for (agent of candidates(); track agent.id) {
+              <option [value]="agent.id">{{ name(agent) }} — {{ loadLabel(agent) }} · {{ agent.availabilityStatus }}</option>
+            }
+          </select>
+        </div>
+
+        <label class="flex items-center gap-2 text-sm text-slate-700">
+          <input type="checkbox" [ngModel]="force()" (ngModelChange)="force.set($event)" />
+          {{ 'tickets.bulkAssign.force' | translate }}
+        </label>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" class="btn-secondary" (click)="close()">{{ 'common.cancel' | translate }}</button>
+          <button type="button" class="btn-primary" [disabled]="saving() || !selectedAgentId()" (click)="submit()">
+            {{ (saving() ? 'common.saving' : 'tickets.bulkAssign.action') | translate }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+</app-modal>

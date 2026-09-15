@@ -64,6 +64,28 @@ public interface IUserDisplayNameResolver
         IEnumerable<Guid> userIds, CancellationToken ct = default);
 }
 
+/// <summary>The agent fields assignment and capacity checks need, read without exposing <c>ApplicationUser</c> itself.</summary>
+public record AgentSnapshot(
+    Guid Id,
+    LocalizedText DisplayName,
+    bool IsActive,
+    string AvailabilityStatus,
+    int MaxConcurrentTickets,
+    Guid? DepartmentId);
+
+/// <summary>
+/// Resolves agent identity and availability for assignment (Ticket Management / Assign tickets to
+/// agents). Same reasoning as <see cref="IUserDisplayNameResolver"/>: <see cref="IAppDbContext"/>
+/// never exposes <c>ApplicationUser</c>, so handlers needing more than a name go through this instead.
+/// </summary>
+public interface IAgentDirectory
+{
+    Task<AgentSnapshot?> GetAsync(Guid agentId, CancellationToken ct = default);
+    Task<IReadOnlyDictionary<Guid, AgentSnapshot>> GetManyAsync(IEnumerable<Guid> agentIds, CancellationToken ct = default);
+    /// <summary>Active agents whose home department matches — the fallback candidate pool when a ticket has no team yet.</summary>
+    Task<IReadOnlyList<Guid>> GetAgentIdsByDepartmentAsync(Guid departmentId, CancellationToken ct = default);
+}
+
 /// <summary>Working-hours arithmetic used by every SLA calculation.</summary>
 public interface IBusinessCalendarCalculator
 {

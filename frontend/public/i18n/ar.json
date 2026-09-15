@@ -25,6 +25,8 @@
     "pagination": "ترقيم الصفحات",
     "showingRange": "عرض {{from}}–{{to}} من {{total}}",
     "noResults": "لا توجد نتائج.",
+    "select": "تحديد الصف",
+    "selectAll": "تحديد الكل في هذه الصفحة",
     "clearFilters": "مسح عوامل التصفية",
     "switchLanguage": "English",
     "unknown": "غير معروف",
@@ -335,6 +337,27 @@
     },
     "errors": {
       "customerBlocked": "هذا العميل محظور ولا يمكن فتح تذاكر جديدة له."
+    },
+    "assignment": {
+      "assign": "إسناد",
+      "assigned": "تم إسناد التذكرة.",
+      "claim": "استلام",
+      "claimed": "تم استلام التذكرة.",
+      "unassign": "إلغاء الإسناد",
+      "unassigned": "تم إلغاء إسناد التذكرة.",
+      "confirmWarning": "هل تريد إسنادها إلى {{name}} رغم ذلك؟",
+      "confirmAssign": "إسناد على أي حال",
+      "noCandidates": "لم يتم العثور على موظفين مرشحين لفريق أو قسم هذه التذكرة."
+    },
+    "bulkAssign": {
+      "title": "إسناد جماعي",
+      "action": "إسناد",
+      "agent": "الموظف",
+      "force": "الإسناد رغم ذلك إذا كان الموظف غير متاح أو في أقصى طاقته",
+      "selectedCount": "تم تحديد {{count}} تذكرة",
+      "summary": "نجح {{succeeded}}، وفشل {{failed}}.",
+      "showFailures": "عرض حالات الفشل",
+      "hideFailures": "إخفاء حالات الفشل"
     }
   },
   "admin": {

@@ -62,7 +62,12 @@
       }
     </div>
 
-    <app-properties-panel [ticket]="t" [lookups]="lookups()" (saved)="refresh()" />
+    <app-properties-panel
+      [ticket]="t"
+      [lookups]="lookups()"
+      (saved)="refresh()"
+      (assignRequested)="openAssignDialog()"
+    />
   </div>
 
   <app-merge-dialog
@@ -70,5 +75,12 @@
     [ticketId]="t.id"
     (closed)="closeMergeDialog()"
     (merged)="onMerged()"
+  />
+
+  <app-assign-dialog
+    [open]="assignDialogOpen()"
+    [ticketId]="t.id"
+    (closed)="closeAssignDialog()"
+    (assigned)="onAssigned()"
   />
 }

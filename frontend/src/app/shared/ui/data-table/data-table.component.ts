@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe, NgClass, NgTemplateOutlet } from '@angular/common';
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LanguageService } from '../../../core/services/language.service';
 import type {
@@ -37,11 +37,56 @@ export class DataTableComponent<TRow extends { id: string }> {
   /** Number of skeleton rows drawn while loading, matched to the requested page size. */
   readonly skeletonRows = input(5);
 
+  /** Adds a checkbox column plus a select-all-on-page control, for bulk actions on the list. */
+  readonly selectable = input(false);
+
   readonly sortChange = output<SortState>();
   readonly rowClick = output<TRow>();
+  /** Every selected row id, emitted whenever the selection changes. */
+  readonly selectionChange = output<string[]>();
 
   /** Id of the row whose action menu is open; only one may be open at a time. */
   readonly openMenuRowId = signal<string | null>(null);
+
+  readonly selectedIds = signal<ReadonlySet<string>>(new Set());
+
+  readonly allOnPageSelected = computed(() => {
+    const rows = this.rows();
+    return rows.length > 0 && rows.every((r) => this.selectedIds().has(r.id));
+  });
+
+  constructor() {
+    // A fresh `rows()` array — a page change, a filter change, or a reload after a bulk action —
+    // means the previous selection no longer corresponds to what's on screen.
+    effect(() => {
+      this.rows();
+      this.selectedIds.set(new Set());
+    });
+  }
+
+  isSelected(row: TRow): boolean {
+    return this.selectedIds().has(row.id);
+  }
+
+  toggleRowSelection(row: TRow, event: Event): void {
+    event.stopPropagation();
+
+    const next = new Set(this.selectedIds());
+    if (next.has(row.id)) {
+      next.delete(row.id);
+    } else {
+      next.add(row.id);
+    }
+
+    this.selectedIds.set(next);
+    this.selectionChange.emit([...next]);
+  }
+
+  toggleSelectAll(): void {
+    const next = this.allOnPageSelected() ? new Set<string>() : new Set(this.rows().map((r) => r.id));
+    this.selectedIds.set(next);
+    this.selectionChange.emit([...next]);
+  }
 
   readonly locale = computed(() => this.#language.locale());
 

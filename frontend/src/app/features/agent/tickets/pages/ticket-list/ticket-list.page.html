@@ -154,15 +154,28 @@
   <span [class]="slaClasses(row)">{{ slaLabel(row) }}</span>
 </ng-template>
 
+@if (canBulkAssign() && selectedTicketIds().length > 0) {
+  <div class="sticky top-16 z-10 mb-4 flex items-center justify-between gap-3 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2.5">
+    <p class="text-sm font-medium text-brand-800">
+      {{ 'tickets.bulkAssign.selectedCount' | translate: { count: selectedTicketIds().length } }}
+    </p>
+    <button type="button" class="btn-primary px-3 py-1.5" (click)="openBulkAssign()">
+      {{ 'tickets.bulkAssign.action' | translate }}
+    </button>
+  </div>
+}
+
 <app-data-table
   [columns]="columns()"
   [rows]="items()"
   [loading]="loading()"
   [sort]="sort()"
   [skeletonRows]="pageSize()"
+  [selectable]="canBulkAssign()"
   emptyMessageKey="common.noResults"
   (sortChange)="onSortChange($event)"
   (rowClick)="openTicket($event)"
+  (selectionChange)="onSelectionChange($event)"
 />
 
 <app-pagination
@@ -170,4 +183,11 @@
   [pageSize]="pageSize()"
   [totalCount]="totalCount()"
   (pageChange)="onPageChange($event)"
+/>
+
+<app-bulk-assign-dialog
+  [open]="bulkAssignDialogOpen()"
+  [ticketIds]="selectedTicketIds()"
+  (closed)="closeBulkAssign()"
+  (completed)="onBulkAssignCompleted()"
 />

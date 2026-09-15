@@ -2,6 +2,7 @@ import { Component, OnInit, TemplateRef, computed, inject, signal, viewChild } f
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { AuthService } from '../../../../../core/auth/auth.service';
 import { HasPermissionDirective } from '../../../../../core/directives/has-permission.directive';
 import { PERMISSIONS } from '../../../../../core/permissions';
 import { AppConfigService } from '../../../../../core/services/app-config.service';
@@ -24,6 +25,7 @@ import type {
   TicketQuery,
   TicketStatistics,
 } from '../../data-access/interfaces/ticket.interface';
+import { BulkAssignDialogComponent } from './ui/bulk-assign-dialog/bulk-assign-dialog.component';
 
 /**
  * Ticket list (Ticket Management / Create and track tickets) — the screen agents spend their day
@@ -41,6 +43,7 @@ import type {
     SearchInputComponent,
     StateCardComponent,
     HasPermissionDirective,
+    BulkAssignDialogComponent,
   ],
   templateUrl: './ticket-list.page.html',
 })
@@ -53,8 +56,10 @@ export class TicketListPage implements OnInit {
   readonly #translate = inject(TranslateService);
   readonly #toast = inject(ToastService);
   readonly #config = inject(AppConfigService);
+  readonly #auth = inject(AuthService);
 
   readonly permissions = PERMISSIONS;
+  readonly canBulkAssign = computed(() => this.#auth.hasPermission(PERMISSIONS.tickets.assign));
 
   readonly items = signal<TicketListItem[]>([]);
   readonly loading = signal(false);
@@ -77,6 +82,9 @@ export class TicketListPage implements OnInit {
   readonly newViewNameEn = signal('');
   readonly newViewNameAr = signal('');
   readonly showSaveViewForm = signal(false);
+
+  readonly selectedTicketIds = signal<string[]>([]);
+  readonly bulkAssignDialogOpen = signal(false);
 
   readonly assignmentTabs: { value: TicketAssignmentFilter; labelKey: string }[] = [
     { value: 'mine', labelKey: 'tickets.assignment.mine' },
@@ -214,6 +222,9 @@ export class TicketListPage implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    // A fresh page of rows invalidates any previous selection — the table's own view resets the
+    // same way in response to its `rows()` input changing.
+    this.selectedTicketIds.set([]);
 
     this.#service.list(this.#query()).subscribe({
       next: (result) => {
@@ -335,6 +346,23 @@ export class TicketListPage implements OnInit {
 
   viewLabel(view: SavedTicketView): string {
     return this.#language.pick({ en: view.nameEn, ar: view.nameAr });
+  }
+
+  // --- Bulk assign -------------------------------------------------------------------------
+  onSelectionChange(ids: string[]): void {
+    this.selectedTicketIds.set(ids);
+  }
+
+  openBulkAssign(): void {
+    this.bulkAssignDialogOpen.set(true);
+  }
+
+  closeBulkAssign(): void {
+    this.bulkAssignDialogOpen.set(false);
+  }
+
+  onBulkAssignCompleted(): void {
+    this.load();
   }
 
   #patchQuery(params: Record<string, string | number | null>): void {

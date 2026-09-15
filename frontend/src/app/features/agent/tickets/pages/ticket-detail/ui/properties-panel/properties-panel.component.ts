@@ -28,11 +28,15 @@ export class PropertiesPanelComponent implements OnChanges {
   readonly lookups = input<TicketLookups | null>(null);
 
   readonly saved = output<void>();
+  /** The properties panel only opens the assign dialog; `ticket-detail.page` owns it, alongside merge. */
+  readonly assignRequested = output<void>();
 
   readonly editing = signal(false);
   readonly saving = signal(false);
   readonly categoryId = signal('');
   readonly priorityId = signal('');
+  readonly claiming = signal(false);
+  readonly unassigning = signal(false);
 
   readonly locale = computed(() => this.#language.locale());
   readonly lang = computed(() => this.#language.current());
@@ -103,5 +107,33 @@ export class PropertiesPanelComponent implements OnChanges {
         },
         error: () => this.saving.set(false),
       });
+  }
+
+  openAssignDialog(): void {
+    this.assignRequested.emit();
+  }
+
+  claim(): void {
+    this.claiming.set(true);
+    this.#service.claim(this.ticket().id).subscribe({
+      next: () => {
+        this.claiming.set(false);
+        this.#toast.success('tickets.assignment.claimed');
+        this.saved.emit();
+      },
+      error: () => this.claiming.set(false),
+    });
+  }
+
+  unassign(): void {
+    this.unassigning.set(true);
+    this.#service.unassign(this.ticket().id).subscribe({
+      next: () => {
+        this.unassigning.set(false);
+        this.#toast.success('tickets.assignment.unassigned');
+        this.saved.emit();
+      },
+      error: () => this.unassigning.set(false),
+    });
   }
 }

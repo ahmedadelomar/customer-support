@@ -1,5 +1,6 @@
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Files;
+using CustomerSupport.Application.Tickets.Assignment;
 using CustomerSupport.Infrastructure.Identity;
 using CustomerSupport.Infrastructure.Persistence;
 using CustomerSupport.Infrastructure.Persistence.Interceptors;
@@ -78,6 +79,9 @@ public static class DependencyInjection
         services.AddScoped<ITicketEventRecorder, TicketEventRecorder>();
         services.AddScoped<IInteractionRecorder, InteractionRecorder>();
         services.AddScoped<IUserDisplayNameResolver, UserDisplayNameResolver>();
+        services.AddScoped<IAgentDirectory, AgentDirectory>();
+        services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
+        services.AddScoped<IAgentCapacityService, AgentCapacityService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IContactVerificationSender, LoggingContactVerificationSender>();
         services.AddScoped<IAttachmentOwnerAuthorizer, AttachmentOwnerAuthorizer>();

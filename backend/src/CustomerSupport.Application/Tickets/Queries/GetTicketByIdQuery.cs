@@ -105,6 +105,7 @@ public class GetTicketByIdQueryHandler(IAppDbContext db, ICurrentUser currentUse
             CanReply = currentUser.HasPermission(Permissions.Tickets.Reply),
             CanAddInternalNote = currentUser.HasPermission(Permissions.Tickets.InternalNote),
             CanMerge = currentUser.HasPermission(Permissions.Tickets.Merge),
+            CanAssign = currentUser.HasPermission(Permissions.Tickets.Assign),
         };
     }
 }

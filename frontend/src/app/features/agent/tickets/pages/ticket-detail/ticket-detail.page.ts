@@ -10,6 +10,7 @@ import { CustomerPanelComponent } from './ui/customer-panel/customer-panel.compo
 import { ConversationThreadComponent } from './ui/conversation-thread/conversation-thread.component';
 import { PropertiesPanelComponent } from './ui/properties-panel/properties-panel.component';
 import { MergeDialogComponent } from './ui/merge-dialog/merge-dialog.component';
+import { AssignDialogComponent } from './ui/assign-dialog/assign-dialog.component';
 
 /**
  * Ticket detail screen: customer panel, conversation thread and properties panel — the three-column
@@ -25,6 +26,7 @@ import { MergeDialogComponent } from './ui/merge-dialog/merge-dialog.component';
     ConversationThreadComponent,
     PropertiesPanelComponent,
     MergeDialogComponent,
+    AssignDialogComponent,
   ],
   templateUrl: './ticket-detail.page.html',
 })
@@ -42,6 +44,7 @@ export class TicketDetailPage {
   readonly loading = signal(true);
   readonly notFound = signal(false);
   readonly mergeDialogOpen = signal(false);
+  readonly assignDialogOpen = signal(false);
 
   readonly tabs = [
     { key: 'conversation', labelKey: 'tickets.tabs.conversation' },
@@ -98,6 +101,19 @@ export class TicketDetailPage {
 
   onMerged(): void {
     this.mergeDialogOpen.set(false);
+    this.load();
+  }
+
+  openAssignDialog(): void {
+    this.assignDialogOpen.set(true);
+  }
+
+  closeAssignDialog(): void {
+    this.assignDialogOpen.set(false);
+  }
+
+  onAssigned(): void {
+    this.assignDialogOpen.set(false);
     this.load();
   }
 }
