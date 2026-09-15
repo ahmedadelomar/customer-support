@@ -62,6 +62,7 @@ public class GetTicketLookupsQueryHandler(IAppDbContext db)
                 Kind = s.Kind,
                 ColorHex = s.ColorHex,
                 IsTerminal = s.IsTerminal,
+                PausesSla = s.PausesSla,
                 IsDefault = s.IsDefault,
             })
             .ToListAsync(cancellationToken);

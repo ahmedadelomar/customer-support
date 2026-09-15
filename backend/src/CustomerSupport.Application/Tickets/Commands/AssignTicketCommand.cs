@@ -1,6 +1,7 @@
 using CustomerSupport.Application.Common.Exceptions;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Security;
+using CustomerSupport.Application.Tickets;
 using CustomerSupport.Application.Tickets.Assignment;
 using CustomerSupport.Domain.Enums;
 using CustomerSupport.Domain.Organization;
@@ -51,9 +52,12 @@ public class AssignTicketCommandHandler(
 {
     public async Task Handle(AssignTicketCommand request, CancellationToken cancellationToken)
     {
-        var ticket = await db.Tickets.WhereBranchAccessible(currentUser).WhereTicketVisible(currentUser)
+        var ticket = await db.Tickets.Include(t => t.Status)
+            .WhereBranchAccessible(currentUser).WhereTicketVisible(currentUser)
             .FirstOrDefaultAsync(t => t.Id == request.TicketId, cancellationToken)
             ?? throw new NotFoundException(nameof(Ticket), request.TicketId);
+
+        TicketReadOnlyGuard.EnsureEditable(ticket, ticket.Status.IsTerminal);
 
         AgentSnapshot? newAgent = null;
         if (request.AgentId is { } agentId)

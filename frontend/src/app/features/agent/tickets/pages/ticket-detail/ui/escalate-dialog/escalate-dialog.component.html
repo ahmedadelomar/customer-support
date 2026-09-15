@@ -1,0 +1,28 @@
+<app-modal [open]="open()" titleKey="tickets.escalation.title" (closed)="close()">
+  <div class="space-y-3">
+    <p class="text-sm text-slate-600">
+      {{ (departmentName() ? 'tickets.escalation.notifyWithDepartment' : 'tickets.escalation.notifyGeneric') | translate: { department: departmentName() } }}
+    </p>
+
+    <div>
+      <label class="form-label" for="escalate-reason">{{ 'tickets.escalation.reason' | translate }} *</label>
+      <textarea
+        id="escalate-reason"
+        rows="3"
+        class="form-control"
+        [ngModel]="reason()"
+        (ngModelChange)="reason.set($event)"
+      ></textarea>
+      @if (!reason().trim()) {
+        <p class="form-error">{{ 'validation.required' | translate }}</p>
+      }
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button type="button" class="btn-secondary" (click)="close()">{{ 'common.cancel' | translate }}</button>
+      <button type="button" class="btn-primary" [disabled]="saving() || !reason().trim()" (click)="submit()">
+        {{ (saving() ? 'common.saving' : 'tickets.escalation.confirm') | translate }}
+      </button>
+    </div>
+  </div>
+</app-modal>

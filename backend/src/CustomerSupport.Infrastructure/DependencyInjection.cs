@@ -2,6 +2,7 @@ using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Files;
 using CustomerSupport.Application.Tickets.Assignment;
 using CustomerSupport.Infrastructure.Identity;
+using CustomerSupport.Infrastructure.Jobs;
 using CustomerSupport.Infrastructure.Persistence;
 using CustomerSupport.Infrastructure.Persistence.Interceptors;
 using CustomerSupport.Infrastructure.Persistence.Seed;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Quartz;
 
 namespace CustomerSupport.Infrastructure;
 
@@ -88,8 +90,22 @@ public static class DependencyInjection
         services.AddScoped<ISlaEngine, NoOpSlaEngine>();
         services.AddSingleton<IFileStorage, LocalFileStorage>();
         services.AddSingleton<IAttachmentPolicyProvider, AttachmentPolicyProvider>();
+        services.AddSingleton<IAutoCloseSettingsProvider, AutoCloseSettingsProvider>();
         services.AddSingleton<IVirusScanner, NoOpVirusScanner>();
         services.AddScoped<DbSeeder>();
+
+        // Hourly auto-close sweep (Ticket Management / Status workflow and escalation). The package
+        // was already referenced before any job used it; this is the first thing to actually run on it.
+        services.AddQuartz(q =>
+        {
+            var jobKey = new JobKey(nameof(AutoCloseResolvedTicketsJob));
+            q.AddJob<AutoCloseResolvedTicketsJob>(opts => opts.WithIdentity(jobKey));
+            q.AddTrigger(opts => opts
+                .ForJob(jobKey)
+                .WithIdentity($"{nameof(AutoCloseResolvedTicketsJob)}-trigger")
+                .WithSimpleSchedule(s => s.WithIntervalInHours(1).RepeatForever()));
+        });
+        services.AddQuartzHostedService(opts => opts.WaitForJobsToComplete = true);
 
         return services;
     }

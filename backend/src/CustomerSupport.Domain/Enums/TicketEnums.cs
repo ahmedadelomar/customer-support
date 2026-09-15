@@ -72,4 +72,6 @@ public enum TicketEventType
     DepartmentChanged = 15,
     TagsChanged = 16,
     WatcherAdded = 17,
+    /// <summary>Recorded on the closed/cancelled ticket when a customer reply creates a linked follow-up instead of reopening it.</summary>
+    FollowUpCreated = 18,
 }

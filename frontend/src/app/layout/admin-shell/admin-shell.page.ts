@@ -51,6 +51,12 @@ export class AdminShellPage {
       route: '/admin/ticket-priorities',
       permissions: [PERMISSIONS.tickets.managePriorities],
     },
+    {
+      labelKey: 'nav.ticketStatuses',
+      icon: '◷',
+      route: '/admin/ticket-statuses',
+      permissions: [PERMISSIONS.tickets.manageStatuses],
+    },
   ];
 
   readonly navigation = computed<NavItem[]>(() => {

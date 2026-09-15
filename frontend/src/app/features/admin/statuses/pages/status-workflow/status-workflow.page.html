@@ -1,0 +1,77 @@
+<app-page-header titleKey="admin.statuses.title">
+  <button type="button" class="btn-primary" (click)="openCreate()">{{ 'admin.statuses.add' | translate }}</button>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-64 animate-pulse"></div>
+} @else if (statuses().length === 0) {
+  <div class="card p-8 text-center text-slate-500">{{ 'common.noResults' | translate }}</div>
+} @else {
+  <div class="card divide-y divide-slate-100">
+    @for (status of statuses(); track status.id; let i = $index) {
+      <div class="flex flex-wrap items-center gap-3 p-3" [class.opacity-50]="!status.isActive">
+        <div class="flex flex-col gap-0.5">
+          <button
+            type="button"
+            class="text-slate-400 hover:text-slate-700 disabled:opacity-30"
+            [disabled]="i === 0"
+            (click)="moveUp(i)"
+          >
+            ▲
+          </button>
+          <button
+            type="button"
+            class="text-slate-400 hover:text-slate-700 disabled:opacity-30"
+            [disabled]="i === statuses().length - 1"
+            (click)="moveDown(i)"
+          >
+            ▼
+          </button>
+        </div>
+
+        <span class="h-6 w-6 shrink-0 rounded-full border border-slate-200" [style.backgroundColor]="status.colorHex"></span>
+
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="font-medium text-slate-900">{{ name(status) }}</span>
+            <span class="text-xs text-slate-400">{{ status.code }}</span>
+            <span class="chip border-slate-200 bg-slate-50 text-slate-600">
+              {{ 'enums.ticketStatusKind.' + status.kind | translate }}
+            </span>
+            @if (status.isDefault) {
+              <span class="chip border-brand-200 bg-brand-50 text-brand-700">{{ 'admin.priorities.default' | translate }}</span>
+            }
+            @if (status.isTerminal) {
+              <span class="chip border-slate-300 bg-slate-100 text-slate-600">{{ 'admin.statuses.terminal' | translate }}</span>
+            }
+            @if (status.pausesSla) {
+              <span class="chip border-amber-200 bg-amber-50 text-amber-700">{{ 'admin.statuses.pausesSla' | translate }}</span>
+            }
+            @if (!status.isActive) {
+              <span class="chip border-slate-200 bg-slate-100 text-slate-500">{{ 'admin.categories.inactive' | translate }}</span>
+            }
+          </div>
+          <p class="mt-0.5 text-xs text-slate-500">
+            {{ 'admin.statuses.usage' | translate: { count: status.ticketCount } }}
+          </p>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button type="button" class="btn-secondary px-2 py-1 text-xs" (click)="openEdit(status)">
+            {{ 'common.edit' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn-secondary px-2 py-1 text-xs text-rose-600"
+            [disabled]="status.isDefault || status.ticketCount > 0"
+            (click)="delete(status)"
+          >
+            {{ 'common.delete' | translate }}
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<app-status-form-dialog [open]="formOpen()" [status]="editingStatus()" (saved)="onFormSaved()" (closed)="closeForm()" />

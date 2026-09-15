@@ -2,6 +2,7 @@ using System.Text.Json;
 using CustomerSupport.Application.Common.Exceptions;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Security;
+using CustomerSupport.Application.Tickets;
 using CustomerSupport.Domain.Enums;
 using CustomerSupport.Domain.Tickets;
 using FluentValidation;
@@ -45,8 +46,11 @@ public class UpdateTicketCommandHandler(IAppDbContext db, ITicketEventRecorder e
     {
         var ticket = await db.Tickets
             .Include(t => t.Tags)
+            .Include(t => t.Status)
             .FirstOrDefaultAsync(t => t.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Ticket), request.Id);
+
+        TicketReadOnlyGuard.EnsureEditable(ticket, ticket.Status.IsTerminal);
 
         if (ticket.CategoryId != request.CategoryId)
         {

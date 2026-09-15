@@ -2,11 +2,19 @@ import { DatePipe } from '@angular/common';
 import { Component, type OnChanges, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
+import { TicketStatusKind } from '../../../../../../../core/models/enums';
 import { LanguageService } from '../../../../../../../core/services/language.service';
 import { ToastService } from '../../../../../../../core/services/toast.service';
 import { TicketsService } from '../../../../data-access/tickets.service';
-import type { TicketLookups } from '../../../../data-access/interfaces/ticket-lookups.interface';
+import type { TicketLookups, TicketStatusLookup } from '../../../../data-access/interfaces/ticket-lookups.interface';
 import type { TicketDetail } from '../../../../data-access/interfaces/ticket.interface';
+
+/** One status kind's group of options, for the grouped `<select>`. */
+interface StatusKindGroup {
+  kind: TicketStatusKind;
+  labelKey: string;
+  statuses: TicketStatusLookup[];
+}
 
 /**
  * Right column: ticket properties. Category and priority are editable inline through
@@ -28,8 +36,11 @@ export class PropertiesPanelComponent implements OnChanges {
   readonly lookups = input<TicketLookups | null>(null);
 
   readonly saved = output<void>();
-  /** The properties panel only opens the assign dialog; `ticket-detail.page` owns it, alongside merge. */
+  /** The properties panel only opens these dialogs; `ticket-detail.page` owns them, alongside merge. */
   readonly assignRequested = output<void>();
+  /** Emitted instead of changing the status directly, whenever the target status is Resolved-kind. */
+  readonly resolveRequested = output<string>();
+  readonly escalateRequested = output<void>();
 
   readonly editing = signal(false);
   readonly saving = signal(false);
@@ -37,9 +48,29 @@ export class PropertiesPanelComponent implements OnChanges {
   readonly priorityId = signal('');
   readonly claiming = signal(false);
   readonly unassigning = signal(false);
+  readonly changingStatus = signal(false);
 
   readonly locale = computed(() => this.#language.locale());
   readonly lang = computed(() => this.#language.current());
+
+  private static readonly KIND_ORDER: { kind: TicketStatusKind; labelKey: string }[] = [
+    { kind: TicketStatusKind.New, labelKey: 'enums.ticketStatusKind.0' },
+    { kind: TicketStatusKind.Open, labelKey: 'enums.ticketStatusKind.1' },
+    { kind: TicketStatusKind.Pending, labelKey: 'enums.ticketStatusKind.2' },
+    { kind: TicketStatusKind.OnHold, labelKey: 'enums.ticketStatusKind.3' },
+    { kind: TicketStatusKind.Resolved, labelKey: 'enums.ticketStatusKind.4' },
+    { kind: TicketStatusKind.Closed, labelKey: 'enums.ticketStatusKind.5' },
+    { kind: TicketStatusKind.Cancelled, labelKey: 'enums.ticketStatusKind.6' },
+  ];
+
+  readonly statusGroups = computed<StatusKindGroup[]>(() => {
+    const statuses = this.lookups()?.statuses ?? [];
+
+    return PropertiesPanelComponent.KIND_ORDER.map((group) => ({
+      ...group,
+      statuses: statuses.filter((s) => s.kind === group.kind),
+    })).filter((group) => group.statuses.length > 0);
+  });
 
   ngOnChanges(): void {
     if (!this.editing()) {
@@ -111,6 +142,33 @@ export class PropertiesPanelComponent implements OnChanges {
 
   openAssignDialog(): void {
     this.assignRequested.emit();
+  }
+
+  onStatusChange(newStatusId: string): void {
+    if (!newStatusId || newStatusId === this.ticket().statusId) {
+      return;
+    }
+
+    const target = (this.lookups()?.statuses ?? []).find((s) => s.id === newStatusId);
+
+    if (target?.kind === TicketStatusKind.Resolved) {
+      this.resolveRequested.emit(newStatusId);
+      return;
+    }
+
+    this.changingStatus.set(true);
+    this.#service.changeStatus(this.ticket().id, { statusId: newStatusId }).subscribe({
+      next: () => {
+        this.changingStatus.set(false);
+        this.#toast.success('tickets.properties.statusChanged');
+        this.saved.emit();
+      },
+      error: () => this.changingStatus.set(false),
+    });
+  }
+
+  openEscalateDialog(): void {
+    this.escalateRequested.emit();
   }
 
   claim(): void {

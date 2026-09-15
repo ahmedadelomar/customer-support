@@ -30,6 +30,7 @@ export interface TicketStatusLookup {
   kind: TicketStatusKind;
   colorHex: string;
   isTerminal: boolean;
+  pausesSla: boolean;
   isDefault: boolean;
 }
 

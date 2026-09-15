@@ -68,6 +68,13 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/admin/priorities/priorities.routes').then((m) => m.PRIORITY_ROUTES),
       },
+      {
+        path: 'ticket-statuses',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'nav.ticketStatuses', permissions: [PERMISSIONS.tickets.manageStatuses] },
+        loadChildren: () =>
+          import('./features/admin/statuses/statuses.routes').then((m) => m.STATUS_ROUTES),
+      },
     ],
   },
 

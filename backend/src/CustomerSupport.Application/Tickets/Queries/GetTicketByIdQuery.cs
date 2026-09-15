@@ -89,9 +89,12 @@ public class GetTicketByIdQueryHandler(IAppDbContext db, ICurrentUser currentUse
             IsFirstResponseBreached = ticket.IsFirstResponseBreached,
             IsResolutionBreached = ticket.IsResolutionBreached,
             ResolvedAt = ticket.ResolvedAt,
+            ResolutionNote = ticket.ResolutionNote,
             ClosedAt = ticket.ClosedAt,
             ReopenCount = ticket.ReopenCount,
             CustomerReplyCount = ticket.CustomerReplyCount,
+            EscalationLevel = ticket.EscalationLevel,
+            EscalatedAt = ticket.EscalatedAt,
             MergedIntoTicketId = ticket.MergedIntoTicketId,
             Tags = ticket.Tags.Select(tt => new TicketTagDto
             {
@@ -106,6 +109,8 @@ public class GetTicketByIdQueryHandler(IAppDbContext db, ICurrentUser currentUse
             CanAddInternalNote = currentUser.HasPermission(Permissions.Tickets.InternalNote),
             CanMerge = currentUser.HasPermission(Permissions.Tickets.Merge),
             CanAssign = currentUser.HasPermission(Permissions.Tickets.Assign),
+            CanChangeStatus = currentUser.HasPermission(Permissions.Tickets.ChangeStatus),
+            CanEscalate = currentUser.HasPermission(Permissions.Tickets.Escalate),
         };
     }
 }

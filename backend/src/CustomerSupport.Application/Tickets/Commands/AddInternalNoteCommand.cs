@@ -1,6 +1,7 @@
 using CustomerSupport.Application.Common.Exceptions;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Security;
+using CustomerSupport.Application.Tickets;
 using CustomerSupport.Domain.Enums;
 using CustomerSupport.Domain.Tickets;
 using FluentValidation;
@@ -47,7 +48,9 @@ public class AddInternalNoteCommandHandler(
             throw new NotFoundException(nameof(Ticket), request.TicketId);
         }
 
-        var ticket = await db.Tickets.FirstAsync(t => t.Id == request.TicketId, cancellationToken);
+        var ticket = await db.Tickets.Include(t => t.Status).FirstAsync(t => t.Id == request.TicketId, cancellationToken);
+
+        TicketReadOnlyGuard.EnsureEditable(ticket, ticket.Status.IsTerminal);
 
         var message = new TicketMessage
         {

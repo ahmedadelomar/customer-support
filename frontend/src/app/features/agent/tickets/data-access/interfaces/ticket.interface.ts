@@ -109,9 +109,12 @@ export interface TicketDetail {
   isFirstResponseBreached: boolean;
   isResolutionBreached: boolean;
   resolvedAt: string | null;
+  resolutionNote: string | null;
   closedAt: string | null;
   reopenCount: number;
   customerReplyCount: number;
+  escalationLevel: number;
+  escalatedAt: string | null;
   mergedIntoTicketId: string | null;
   tags: TicketTag[];
   createdAt: string;
@@ -121,6 +124,8 @@ export interface TicketDetail {
   canAddInternalNote: boolean;
   canMerge: boolean;
   canAssign: boolean;
+  canChangeStatus: boolean;
+  canEscalate: boolean;
 }
 
 export interface CreateTicketRequest {
@@ -193,4 +198,14 @@ export interface BulkAssignResult {
   succeeded: number;
   failed: number;
   results: BulkAssignItemResult[];
+}
+
+export interface ChangeTicketStatusRequest {
+  statusId: string;
+  /** Required only when the target status is Resolved-kind. */
+  resolutionNote?: string;
+}
+
+export interface EscalateTicketRequest {
+  reason: string;
 }

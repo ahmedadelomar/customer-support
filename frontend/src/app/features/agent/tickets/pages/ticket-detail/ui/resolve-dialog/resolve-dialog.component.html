@@ -1,0 +1,32 @@
+<app-modal [open]="open()" titleKey="tickets.resolve.title" (closed)="close()">
+  <div class="space-y-3">
+    <p class="rounded-lg bg-brand-50 p-3 text-sm text-brand-800">
+      {{ 'tickets.resolve.surveyHint' | translate }}
+    </p>
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+
+    <div>
+      <label class="form-label" for="resolution-note">{{ 'tickets.resolve.note' | translate }} *</label>
+      <textarea
+        id="resolution-note"
+        rows="4"
+        class="form-control"
+        [ngModel]="note()"
+        (ngModelChange)="note.set($event)"
+      ></textarea>
+      @if (!note().trim()) {
+        <p class="form-error">{{ 'validation.required' | translate }}</p>
+      }
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button type="button" class="btn-secondary" (click)="close()">{{ 'common.cancel' | translate }}</button>
+      <button type="button" class="btn-primary" [disabled]="saving() || !note().trim()" (click)="submit()">
+        {{ (saving() ? 'common.saving' : 'tickets.resolve.confirm') | translate }}
+      </button>
+    </div>
+  </div>
+</app-modal>

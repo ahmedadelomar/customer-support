@@ -5,7 +5,14 @@
 } @else if (ticket(); as t) {
   <header class="mb-4 flex flex-wrap items-start justify-between gap-3">
     <div>
-      <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t.number }}</p>
+      <div class="flex items-center gap-2">
+        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t.number }}</p>
+        @if (t.escalationLevel > 0) {
+          <span class="chip border-amber-300 bg-amber-50 text-amber-800">
+            {{ 'tickets.escalation.levelBadge' | translate: { level: t.escalationLevel } }}
+          </span>
+        }
+      </div>
       <h1 class="text-xl font-semibold text-slate-900 sm:text-2xl">{{ t.subject }}</h1>
       <p class="mt-1 text-sm text-slate-500">{{ displayName() }}</p>
     </div>
@@ -23,6 +30,15 @@
   @if (t.mergedIntoTicketId) {
     <div class="card mb-4 border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
       {{ 'tickets.merge.title' | translate }}
+    </div>
+  } @else if (t.isTerminal) {
+    <div class="card mb-4 flex flex-wrap items-center justify-between gap-2 border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+      <span>{{ 'tickets.properties.terminalBanner' | translate }}</span>
+      @if (t.canChangeStatus) {
+        <button type="button" class="btn-secondary px-3 py-1.5 text-xs" (click)="reopen()">
+          {{ 'tickets.properties.reopen' | translate }}
+        </button>
+      }
     </div>
   }
 
@@ -67,6 +83,8 @@
       [lookups]="lookups()"
       (saved)="refresh()"
       (assignRequested)="openAssignDialog()"
+      (resolveRequested)="openResolveDialog($event)"
+      (escalateRequested)="openEscalateDialog()"
     />
   </div>
 
@@ -82,5 +100,21 @@
     [ticketId]="t.id"
     (closed)="closeAssignDialog()"
     (assigned)="onAssigned()"
+  />
+
+  <app-resolve-dialog
+    [open]="resolveDialogOpen()"
+    [ticketId]="t.id"
+    [statusId]="resolveStatusId()"
+    (closed)="closeResolveDialog()"
+    (resolved)="onResolved()"
+  />
+
+  <app-escalate-dialog
+    [open]="escalateDialogOpen()"
+    [ticketId]="t.id"
+    [departmentName]="t.departmentNameEn"
+    (closed)="closeEscalateDialog()"
+    (escalated)="onEscalated()"
   />
 }

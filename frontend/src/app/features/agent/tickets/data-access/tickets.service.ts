@@ -11,7 +11,9 @@ import type {
   AssignTicketRequest,
   BulkAssignRequest,
   BulkAssignResult,
+  ChangeTicketStatusRequest,
   CreateTicketRequest,
+  EscalateTicketRequest,
   MergeTicketsRequest,
   ReplyToTicketRequest,
   TicketDetail,
@@ -91,6 +93,14 @@ export class TicketsService {
 
   bulkAssign(request: BulkAssignRequest): Observable<BulkAssignResult> {
     return this.#http.post<BulkAssignResult>(`${this.#baseUrl}/bulk-assign`, request);
+  }
+
+  changeStatus(id: string, request: ChangeTicketStatusRequest): Observable<void> {
+    return this.#http.post<void>(`${this.#baseUrl}/${id}/status`, request);
+  }
+
+  escalate(id: string, request: EscalateTicketRequest): Observable<void> {
+    return this.#http.post<void>(`${this.#baseUrl}/${id}/escalate`, request);
   }
 
   /** Builds the query string, skipping empty values so the URL stays clean. */

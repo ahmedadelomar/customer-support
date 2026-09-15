@@ -111,9 +111,12 @@ public record TicketDetailDto
     public bool IsFirstResponseBreached { get; init; }
     public bool IsResolutionBreached { get; init; }
     public DateTimeOffset? ResolvedAt { get; init; }
+    public string? ResolutionNote { get; init; }
     public DateTimeOffset? ClosedAt { get; init; }
     public int ReopenCount { get; init; }
     public int CustomerReplyCount { get; init; }
+    public int EscalationLevel { get; init; }
+    public DateTimeOffset? EscalatedAt { get; init; }
     public Guid? MergedIntoTicketId { get; init; }
 
     public IReadOnlyList<TicketTagDto> Tags { get; init; } = Array.Empty<TicketTagDto>();
@@ -127,6 +130,8 @@ public record TicketDetailDto
     public bool CanAddInternalNote { get; init; }
     public bool CanMerge { get; init; }
     public bool CanAssign { get; init; }
+    public bool CanChangeStatus { get; init; }
+    public bool CanEscalate { get; init; }
 }
 
 public record TicketTagDto
@@ -206,6 +211,7 @@ public record TicketStatusLookupDto
     public TicketStatusKind Kind { get; init; }
     public string ColorHex { get; init; } = string.Empty;
     public bool IsTerminal { get; init; }
+    public bool PausesSla { get; init; }
     public bool IsDefault { get; init; }
 }
 

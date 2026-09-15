@@ -1,7 +1,7 @@
 <div class="card space-y-4 p-4">
   <div class="flex items-center justify-between">
     <h2 class="text-sm font-semibold text-slate-800">{{ 'tickets.properties.title' | translate }}</h2>
-    @if (!editing() && ticket().canUpdate) {
+    @if (!editing() && ticket().canUpdate && !ticket().isTerminal) {
       <button type="button" class="text-sm text-brand-700 hover:underline" (click)="startEdit()">
         {{ 'common.edit' | translate }}
       </button>
@@ -10,10 +10,43 @@
 
   <div>
     <p class="text-xs text-slate-500">{{ 'tickets.properties.status' | translate }}</p>
-    <span class="chip mt-1" [style.borderColor]="ticket().statusColorHex" [style.color]="ticket().statusColorHex">
-      {{ statusName() }}
-    </span>
+    @if (ticket().canChangeStatus) {
+      <select
+        class="form-control mt-1"
+        [ngModel]="ticket().statusId"
+        [disabled]="changingStatus()"
+        (ngModelChange)="onStatusChange($event)"
+      >
+        @for (group of statusGroups(); track group.kind) {
+          <optgroup [label]="group.labelKey | translate">
+            @for (option of group.statuses; track option.id) {
+              <option [value]="option.id">{{ lang() === 'ar' ? option.nameAr : option.nameEn }}</option>
+            }
+          </optgroup>
+        }
+      </select>
+    } @else {
+      <span class="chip mt-1" [style.borderColor]="ticket().statusColorHex" [style.color]="ticket().statusColorHex">
+        {{ statusName() }}
+      </span>
+    }
+
+    @if (ticket().isTerminal) {
+      <p class="mt-1 text-xs text-slate-500">{{ 'tickets.properties.terminalHint' | translate }}</p>
+    }
+
+    @if (ticket().resolutionNote) {
+      <p class="mt-1 text-xs text-slate-500">
+        <span class="font-medium">{{ 'tickets.resolve.note' | translate }}:</span> {{ ticket().resolutionNote }}
+      </p>
+    }
   </div>
+
+  @if (ticket().canEscalate && !ticket().isTerminal) {
+    <button type="button" class="btn-secondary w-full text-xs" (click)="openEscalateDialog()">
+      {{ 'tickets.escalation.action' | translate }}
+    </button>
+  }
 
   @if (editing()) {
     <div>

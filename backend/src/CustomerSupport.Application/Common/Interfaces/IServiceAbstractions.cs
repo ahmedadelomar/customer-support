@@ -150,6 +150,17 @@ public interface IAttachmentPolicyProvider
 }
 
 /// <summary>
+/// Source of the auto-close window (<c>tickets.autoCloseResolvedAfterDays</c>). Reads plain
+/// configuration today for the same reason <see cref="IAttachmentPolicyProvider"/> does — CS-1004
+/// (system configuration) is not built yet. Async so a database-backed implementation is a config
+/// change later, not a signature change.
+/// </summary>
+public interface IAutoCloseSettingsProvider
+{
+    Task<double> GetAutoCloseResolvedAfterDaysAsync(CancellationToken ct = default);
+}
+
+/// <summary>
 /// Scans a saved file before it becomes downloadable. The default implementation is a no-op that
 /// reports <c>"skipped"</c> — shipping the hook now means wiring a real scanner later is
 /// configuration, not a schema or call-site change.

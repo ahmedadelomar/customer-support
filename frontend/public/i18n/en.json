@@ -51,6 +51,7 @@
     "settings": "Settings",
     "ticketCategories": "Categories",
     "ticketPriorities": "Priorities",
+    "ticketStatuses": "Statuses",
     "groups": {
       "work": "Work",
       "knowledge": "Knowledge",
@@ -316,7 +317,28 @@
       "noAssignee": "Unassigned",
       "noDepartment": "—",
       "noTags": "No tags",
-      "save": "Save changes"
+      "save": "Save changes",
+      "statusChanged": "Status updated.",
+      "terminalHint": "This ticket is closed. Choose a status above to reopen it.",
+      "terminalBanner": "This ticket is closed and read-only.",
+      "reopen": "Reopen"
+    },
+    "resolve": {
+      "title": "Resolve ticket",
+      "surveyHint": "A satisfaction survey will be sent to the customer once this ticket is resolved.",
+      "note": "Resolution note",
+      "confirm": "Resolve",
+      "resolved": "Ticket resolved."
+    },
+    "escalation": {
+      "action": "Escalate",
+      "title": "Escalate this ticket",
+      "reason": "Reason",
+      "confirm": "Escalate",
+      "escalated": "Ticket escalated.",
+      "levelBadge": "Escalated (level {{level}})",
+      "notifyWithDepartment": "The {{department}} department manager and any existing watchers will be notified.",
+      "notifyGeneric": "Any existing watchers will be notified."
     },
     "customerPanel": {
       "code": "Code",
@@ -406,6 +428,25 @@
       "default": "Default",
       "active": "Active",
       "usage": "{{tickets}} ticket(s), {{slaTargets}} SLA target(s)"
+    },
+    "statuses": {
+      "title": "Status workflow",
+      "add": "New status",
+      "create": "New status",
+      "edit": "Edit status",
+      "created": "Status created.",
+      "updated": "Status updated.",
+      "deleted": "Status deleted.",
+      "code": "Code",
+      "nameEn": "Name (English)",
+      "nameAr": "Name (Arabic)",
+      "kind": "Kind",
+      "kindHint": "Behaviour (SLA pausing, terminal read-only, reporting) always follows kind, never the name.",
+      "terminal": "Terminal (read-only)",
+      "pausesSla": "Pauses the resolution clock",
+      "usage": "{{count}} ticket(s) currently in this status",
+      "kindChangeWarning": "{{count}} ticket(s) are currently in this status. Changing its kind changes their SLA and reporting behaviour immediately.",
+      "kindChangeConfirm": "Change kind anyway"
     }
   },
   "validation": {

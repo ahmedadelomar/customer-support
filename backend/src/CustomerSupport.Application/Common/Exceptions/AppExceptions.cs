@@ -37,6 +37,16 @@ public class AssignmentWarningException(string message, bool isHardBlock, int op
     public int? Cap { get; } = cap;
 }
 
+/// <summary>
+/// Thrown when changing a <c>TicketStatus</c>'s <c>Kind</c> would silently change SLA and reporting
+/// behaviour for tickets already sitting in that status. Unlike <see cref="ConflictException"/>, the
+/// caller may resubmit with <c>Force = true</c> once they've seen how many tickets are affected.
+/// </summary>
+public class StatusKindChangeWarningException(string message, int ticketCount) : Exception(message)
+{
+    public int TicketCount { get; } = ticketCount;
+}
+
 /// <summary>Aggregates FluentValidation failures. Surfaces as HTTP 400 with a per-field problem detail.</summary>
 public class ValidationException(IDictionary<string, string[]> errors)
     : Exception("One or more validation failures occurred.")

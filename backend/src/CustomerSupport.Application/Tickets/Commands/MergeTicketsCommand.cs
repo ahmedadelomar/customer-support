@@ -1,6 +1,7 @@
 using CustomerSupport.Application.Common.Exceptions;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Security;
+using CustomerSupport.Application.Tickets;
 using CustomerSupport.Domain.Enums;
 using CustomerSupport.Domain.Tickets;
 using FluentValidation;
@@ -43,7 +44,8 @@ public class MergeTicketsCommandHandler(IAppDbContext db, ICurrentUser currentUs
             .FirstOrDefaultAsync(t => t.Id == request.TicketId, cancellationToken)
             ?? throw new NotFoundException(nameof(Ticket), request.TicketId);
 
-        var target = await db.Tickets.WhereBranchAccessible(currentUser).WhereTicketVisible(currentUser)
+        var target = await db.Tickets.Include(t => t.Status)
+            .WhereBranchAccessible(currentUser).WhereTicketVisible(currentUser)
             .FirstOrDefaultAsync(t => t.Id == request.TargetTicketId, cancellationToken)
             ?? throw new NotFoundException(nameof(Ticket), request.TargetTicketId);
 
@@ -51,6 +53,11 @@ public class MergeTicketsCommandHandler(IAppDbContext db, ICurrentUser currentUs
         {
             throw new ConflictException($"Ticket {source.Number} is already merged and cannot be merged again.");
         }
+
+        // Only the target needs the read-only guard: merging a source that is independently
+        // terminal (e.g. cancelled) into another ticket is a reasonable cleanup action, but adding
+        // messages to an already-closed target's thread is not.
+        TicketReadOnlyGuard.EnsureEditable(target, target.Status.IsTerminal);
 
         if (source.CustomerId != target.CustomerId && !request.AllowCrossCustomer)
         {

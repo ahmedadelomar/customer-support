@@ -1,6 +1,7 @@
 using CustomerSupport.Application.Common.Exceptions;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Security;
+using CustomerSupport.Application.Tickets;
 using CustomerSupport.Domain.Enums;
 using CustomerSupport.Domain.Tickets;
 using FluentValidation;
@@ -50,6 +51,8 @@ public class ReplyToTicketCommandHandler(
             ?? throw new NotFoundException(nameof(Ticket), request.TicketId);
 
         var status = await db.TicketStatuses.FirstAsync(s => s.Id == ticket.StatusId, cancellationToken);
+
+        TicketReadOnlyGuard.EnsureEditable(ticket, status.IsTerminal);
 
         var message = new TicketMessage
         {

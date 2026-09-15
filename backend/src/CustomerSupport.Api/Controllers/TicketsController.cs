@@ -188,4 +188,47 @@ public class TicketsController : ApiControllerBase
     public async Task<ActionResult<BulkAssignResultDto>> BulkAssign(
         [FromBody] BulkAssignTicketsCommand command, CancellationToken ct)
         => Ok(await Sender.Send(command, ct));
+
+    /// <summary>
+    /// Moves the ticket to a new status. Every side effect follows the target status's <c>Kind</c>.
+    /// Resolving without a resolution note is refused with a field-level error.
+    /// </summary>
+    [HttpPost("{id:guid}/status")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> ChangeStatus(
+        Guid id, [FromBody] ChangeTicketStatusCommand command, CancellationToken ct)
+    {
+        await Sender.Send(command with { TicketId = id }, ct);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Records a customer-side message — the shared core a channel adapter or the portal will call
+    /// once built. Reopens a resolved ticket, or creates a linked follow-up for a closed one.
+    /// </summary>
+    [HttpPost("{id:guid}/customer-message")]
+    [ProducesResponseType(typeof(InboundMessageResultDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<InboundMessageResultDto>> RecordCustomerMessage(
+        Guid id, [FromBody] RecordInboundCustomerMessageCommand command, CancellationToken ct)
+    {
+        var result = await Sender.Send(command with { TicketId = id }, ct);
+        return CreatedAtAction(nameof(GetMessages), new { id = result.TicketId }, result);
+    }
+
+    /// <summary>Manually escalates the ticket. Requires a reason; notifies the department manager and existing watchers.</summary>
+    [HttpPost("{id:guid}/escalate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Escalate(
+        Guid id, [FromBody] EscalateTicketCommand command, CancellationToken ct)
+    {
+        await Sender.Send(command with { TicketId = id }, ct);
+        return NoContent();
+    }
 }

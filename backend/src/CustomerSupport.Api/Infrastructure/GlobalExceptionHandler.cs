@@ -24,6 +24,7 @@ public class GlobalExceptionHandler(
             ConflictException => (StatusCodes.Status409Conflict, "Conflict", exception.Message),
             DuplicateContactException => (StatusCodes.Status409Conflict, "Duplicate contact", exception.Message),
             AssignmentWarningException => (StatusCodes.Status409Conflict, "Assignment warning", exception.Message),
+            StatusKindChangeWarningException => (StatusCodes.Status409Conflict, "Status kind change warning", exception.Message),
             ForbiddenException => (StatusCodes.Status403Forbidden, "Forbidden", exception.Message),
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Unauthorized", "Authentication is required."),
             // 499 is a de-facto standard for a client-cancelled request and has no StatusCodes constant.
@@ -74,6 +75,11 @@ public class GlobalExceptionHandler(
             problem.Extensions["isHardBlock"] = assignmentWarning.IsHardBlock;
             problem.Extensions["openTickets"] = assignmentWarning.OpenTickets;
             problem.Extensions["cap"] = assignmentWarning.Cap;
+        }
+
+        if (exception is StatusKindChangeWarningException kindChangeWarning)
+        {
+            problem.Extensions["ticketCount"] = kindChangeWarning.TicketCount;
         }
 
         return await problemDetails.TryWriteAsync(new ProblemDetailsContext
