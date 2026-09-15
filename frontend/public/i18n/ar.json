@@ -47,6 +47,8 @@
     "channels": "قنوات التواصل",
     "users": "المستخدمون والصلاحيات",
     "settings": "الإعدادات",
+    "ticketCategories": "الفئات",
+    "ticketPriorities": "الأولويات",
     "groups": {
       "work": "العمل",
       "knowledge": "المعرفة",
@@ -333,6 +335,54 @@
     },
     "errors": {
       "customerBlocked": "هذا العميل محظور ولا يمكن فتح تذاكر جديدة له."
+    }
+  },
+  "admin": {
+    "categories": {
+      "title": "فئات التذاكر",
+      "addRoot": "إضافة فئة رئيسية",
+      "addChild": "إضافة فئة فرعية",
+      "create": "فئة جديدة",
+      "edit": "تعديل الفئة",
+      "created": "تم إنشاء الفئة.",
+      "updated": "تم تحديث الفئة.",
+      "moved": "تم نقل الفئة.",
+      "code": "الرمز",
+      "codeHint": "أحرف إنجليزية صغيرة وأرقام وشرطات فقط.",
+      "nameEn": "الاسم (إنجليزي)",
+      "nameAr": "الاسم (عربي)",
+      "description": "الوصف",
+      "displayOrder": "ترتيب العرض",
+      "defaultPriority": "الأولوية الافتراضية",
+      "defaultDepartment": "القسم الافتراضي",
+      "visibleInPortal": "مرئية للعملاء في بوابة الخدمة الذاتية",
+      "agentOnly": "للموظفين فقط",
+      "inactive": "غير نشطة",
+      "ticketCount": "{{count}} تذكرة",
+      "move": "نقل",
+      "newParent": "الفئة الأصل الجديدة",
+      "rootLevel": "المستوى الأعلى (بدون أصل)",
+      "moveWarning": "سيؤدي هذا إلى إعادة مسار {{count}} فئة فرعية معها.",
+      "activate": "تفعيل",
+      "deactivate": "تعطيل"
+    },
+    "priorities": {
+      "title": "أولويات التذاكر",
+      "add": "أولوية جديدة",
+      "create": "أولوية جديدة",
+      "edit": "تعديل الأولوية",
+      "created": "تم إنشاء الأولوية.",
+      "updated": "تم تحديث الأولوية.",
+      "deleted": "تم حذف الأولوية.",
+      "code": "الرمز",
+      "nameEn": "الاسم (إنجليزي)",
+      "nameAr": "الاسم (عربي)",
+      "color": "اللون",
+      "colorHint": "أدخل لوناً بصيغة hex، مثل #64748B.",
+      "setAsDefault": "تعيين كأولوية افتراضية",
+      "default": "افتراضية",
+      "active": "نشطة",
+      "usage": "{{tickets}} تذكرة، {{slaTargets}} هدف اتفاقية خدمة"
     }
   },
   "validation": {

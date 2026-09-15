@@ -47,6 +47,8 @@
     "channels": "Channels",
     "users": "Users & Roles",
     "settings": "Settings",
+    "ticketCategories": "Categories",
+    "ticketPriorities": "Priorities",
     "groups": {
       "work": "Work",
       "knowledge": "Knowledge",
@@ -333,6 +335,54 @@
     },
     "errors": {
       "customerBlocked": "This customer is blocked and cannot raise new tickets."
+    }
+  },
+  "admin": {
+    "categories": {
+      "title": "Ticket categories",
+      "addRoot": "Add top-level category",
+      "addChild": "Add sub-category",
+      "create": "New category",
+      "edit": "Edit category",
+      "created": "Category created.",
+      "updated": "Category updated.",
+      "moved": "Category moved.",
+      "code": "Code",
+      "codeHint": "Lowercase letters, digits and hyphens only.",
+      "nameEn": "Name (English)",
+      "nameAr": "Name (Arabic)",
+      "description": "Description",
+      "displayOrder": "Display order",
+      "defaultPriority": "Default priority",
+      "defaultDepartment": "Default department",
+      "visibleInPortal": "Visible to customers in the portal",
+      "agentOnly": "Agent-only",
+      "inactive": "Inactive",
+      "ticketCount": "{{count}} ticket(s)",
+      "move": "Move",
+      "newParent": "New parent",
+      "rootLevel": "Top level (no parent)",
+      "moveWarning": "This will re-path {{count}} sub-categor(y/ies) along with it.",
+      "activate": "Activate",
+      "deactivate": "Deactivate"
+    },
+    "priorities": {
+      "title": "Ticket priorities",
+      "add": "New priority",
+      "create": "New priority",
+      "edit": "Edit priority",
+      "created": "Priority created.",
+      "updated": "Priority updated.",
+      "deleted": "Priority deleted.",
+      "code": "Code",
+      "nameEn": "Name (English)",
+      "nameAr": "Name (Arabic)",
+      "color": "Colour",
+      "colorHint": "Enter a hex colour, e.g. #64748B.",
+      "setAsDefault": "Set as the default priority",
+      "default": "Default",
+      "active": "Active",
+      "usage": "{{tickets}} ticket(s), {{slaTargets}} SLA target(s)"
     }
   },
   "validation": {

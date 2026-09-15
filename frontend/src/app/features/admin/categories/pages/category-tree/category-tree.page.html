@@ -1,0 +1,46 @@
+<app-page-header titleKey="admin.categories.title">
+  <button type="button" class="btn-primary" (click)="openCreate(null)">
+    {{ 'admin.categories.addRoot' | translate }}
+  </button>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-64 animate-pulse"></div>
+} @else if (tree().length === 0) {
+  <div class="card p-8 text-center text-slate-500">{{ 'common.noResults' | translate }}</div>
+} @else {
+  <div class="space-y-2">
+    @for (node of tree(); track node.id) {
+      <app-category-node
+        [node]="node"
+        [priorityOptions]="priorityOptions()"
+        [departmentOptions]="departmentOptions()"
+        (addChild)="openCreate($event)"
+        (edit)="openEdit($event)"
+        (move)="openMove($event)"
+        (toggleActive)="toggleActive($event)"
+      />
+    }
+  </div>
+}
+
+<app-category-form-dialog
+  [open]="formOpen()"
+  [category]="editingCategory()"
+  [parentId]="newCategoryParentId()"
+  [priorityOptions]="priorityOptions()"
+  [departmentOptions]="departmentOptions()"
+  (saved)="onFormSaved()"
+  (closed)="closeForm()"
+/>
+
+@if (movingCategory(); as moving) {
+  <app-move-category-dialog
+    [open]="moveDialogOpen()"
+    [category]="moving"
+    [allCategories]="categories()"
+    [descendantCount]="descendantCount(moving)"
+    (moved)="onMoved()"
+    (closed)="closeMove()"
+  />
+}

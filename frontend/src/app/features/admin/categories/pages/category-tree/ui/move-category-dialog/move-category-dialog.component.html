@@ -1,0 +1,26 @@
+<app-modal [open]="open()" titleKey="admin.categories.move" (closed)="close()">
+  <div class="space-y-3">
+    @if (descendantCount() > 0) {
+      <p class="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+        {{ 'admin.categories.moveWarning' | translate: { count: descendantCount() } }}
+      </p>
+    }
+
+    <div>
+      <label class="form-label" for="move-parent">{{ 'admin.categories.newParent' | translate }}</label>
+      <select id="move-parent" class="form-control" [ngModel]="newParentId()" (ngModelChange)="newParentId.set($event)">
+        <option value="">{{ 'admin.categories.rootLevel' | translate }}</option>
+        @for (option of parentOptions(); track option.id) {
+          <option [value]="option.id">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button type="button" class="btn-secondary" (click)="close()">{{ 'common.cancel' | translate }}</button>
+      <button type="button" class="btn-primary" [disabled]="saving()" (click)="confirm()">
+        {{ (saving() ? 'common.saving' : 'admin.categories.move') | translate }}
+      </button>
+    </div>
+  </div>
+</app-modal>

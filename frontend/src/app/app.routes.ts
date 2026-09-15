@@ -49,6 +49,29 @@ export const routes: Routes = [
   },
 
   {
+    path: 'admin',
+    canActivate: [authGuard],
+    loadComponent: () => import('./layout/admin-shell/admin-shell.page').then((m) => m.AdminShellPage),
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'ticket-categories' },
+      {
+        path: 'ticket-categories',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'nav.ticketCategories', permissions: [PERMISSIONS.tickets.manageCategories] },
+        loadChildren: () =>
+          import('./features/admin/categories/categories.routes').then((m) => m.CATEGORY_ROUTES),
+      },
+      {
+        path: 'ticket-priorities',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'nav.ticketPriorities', permissions: [PERMISSIONS.tickets.managePriorities] },
+        loadChildren: () =>
+          import('./features/admin/priorities/priorities.routes').then((m) => m.PRIORITY_ROUTES),
+      },
+    ],
+  },
+
+  {
     path: 'forbidden',
     loadComponent: () => import('./features/errors/forbidden.page').then((m) => m.ForbiddenPage),
   },

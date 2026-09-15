@@ -1,0 +1,73 @@
+<div class="rounded-lg border border-slate-200 bg-white" [class.opacity-50]="!node().isActive">
+  <div class="flex flex-wrap items-center gap-2 p-3">
+    @if (node().children.length) {
+      <button type="button" class="w-5 text-slate-400 hover:text-slate-700" (click)="toggleExpanded()">
+        {{ expanded() ? '▾' : '▸' }}
+      </button>
+    } @else {
+      <span class="w-5"></span>
+    }
+
+    <div class="min-w-0 flex-1">
+      <div class="flex flex-wrap items-center gap-1.5">
+        <span class="font-medium text-slate-900">{{ name() }}</span>
+        <span class="text-xs text-slate-400">{{ node().code }}</span>
+        @if (!node().isActive) {
+          <span class="chip border-slate-200 bg-slate-100 text-slate-500">
+            {{ 'admin.categories.inactive' | translate }}
+          </span>
+        }
+        @if (!node().isVisibleInPortal) {
+          <span class="chip border-slate-200 bg-slate-50 text-slate-500">
+            {{ 'admin.categories.agentOnly' | translate }}
+          </span>
+        }
+        @if (node().ticketCount > 0) {
+          <span class="chip border-brand-200 bg-brand-50 text-brand-700">
+            {{ 'admin.categories.ticketCount' | translate: { count: node().ticketCount } }}
+          </span>
+        }
+      </div>
+
+      <div class="mt-1 flex flex-wrap gap-1.5 text-xs text-slate-500">
+        @if (defaultPriorityName(); as p) {
+          <span>{{ 'admin.categories.defaultPriority' | translate }}: {{ p }}</span>
+        }
+        @if (defaultDepartmentName(); as d) {
+          <span>{{ 'admin.categories.defaultDepartment' | translate }}: {{ d }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-1">
+      <button type="button" class="btn-secondary px-2 py-1 text-xs" (click)="addChild.emit(node().id)">
+        {{ 'admin.categories.addChild' | translate }}
+      </button>
+      <button type="button" class="btn-secondary px-2 py-1 text-xs" (click)="edit.emit(node())">
+        {{ 'common.edit' | translate }}
+      </button>
+      <button type="button" class="btn-secondary px-2 py-1 text-xs" (click)="move.emit(node())">
+        {{ 'admin.categories.move' | translate }}
+      </button>
+      <button type="button" class="btn-secondary px-2 py-1 text-xs" (click)="toggleActive.emit(node())">
+        {{ (node().isActive ? 'admin.categories.deactivate' : 'admin.categories.activate') | translate }}
+      </button>
+    </div>
+  </div>
+
+  @if (expanded() && node().children.length) {
+    <div class="space-y-2 border-t border-slate-100 p-2 ps-6">
+      @for (child of node().children; track child.id) {
+        <app-category-node
+          [node]="child"
+          [priorityOptions]="priorityOptions()"
+          [departmentOptions]="departmentOptions()"
+          (addChild)="addChild.emit($event)"
+          (edit)="edit.emit($event)"
+          (move)="move.emit($event)"
+          (toggleActive)="toggleActive.emit($event)"
+        />
+      }
+    </div>
+  }
+</div>
