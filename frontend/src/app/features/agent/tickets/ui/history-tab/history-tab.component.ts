@@ -45,6 +45,7 @@ const EVENT_TYPE_OPTIONS = [
   TicketEventType.TagsChanged,
   TicketEventType.WatcherAdded,
   TicketEventType.FollowUpCreated,
+  TicketEventType.WatcherRemoved,
 ];
 
 /**

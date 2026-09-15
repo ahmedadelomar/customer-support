@@ -1,0 +1,38 @@
+<app-page-header titleKey="collaboration.mentions.title" />
+
+<div class="card p-4">
+  @if (loading()) {
+    <div class="space-y-2">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="h-16 animate-pulse rounded-lg bg-slate-100"></div>
+      }
+    </div>
+  } @else if (items().length === 0) {
+    <app-empty-state titleKey="collaboration.mentions.empty" icon="🔔" />
+  } @else {
+    <ul class="divide-y divide-slate-100">
+      @for (mention of items(); track mention.id) {
+        <li>
+          <button
+            type="button"
+            class="flex w-full items-start justify-between gap-3 px-1 py-3 text-start hover:bg-slate-50"
+            (click)="open(mention)"
+          >
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                @if (!mention.readAt) {
+                  <span class="h-2 w-2 shrink-0 rounded-full bg-brand-600" aria-hidden="true"></span>
+                }
+                <span class="truncate text-sm font-medium text-slate-900">{{ mentionedByName(mention) }}</span>
+                <span class="shrink-0 text-xs text-slate-400">{{ mention.ticketNumber }}</span>
+              </div>
+              <p class="mt-0.5 truncate text-sm text-slate-600">{{ mention.ticketSubject }}</p>
+              <p class="mt-1 truncate text-xs text-slate-500">{{ mention.excerptEn }}</p>
+            </div>
+            <span class="shrink-0 whitespace-nowrap text-xs text-slate-400">{{ relativeTime(mention.mentionedAt) }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</div>

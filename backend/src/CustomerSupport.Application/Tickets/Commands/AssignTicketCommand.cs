@@ -3,6 +3,7 @@ using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Security;
 using CustomerSupport.Application.Tickets;
 using CustomerSupport.Application.Tickets.Assignment;
+using CustomerSupport.Application.Workspace.Collaboration;
 using CustomerSupport.Domain.Enums;
 using CustomerSupport.Domain.Organization;
 using CustomerSupport.Domain.Tickets;
@@ -28,6 +29,13 @@ public record AssignTicketCommand : IRequest
 
     /// <summary>Overrides an Away or at-capacity warning. Never overrides a deactivated agent.</summary>
     public bool Force { get; init; }
+
+    /// <summary>
+    /// Optional context for the new assignee (Agent Dashboard / Team collaboration). Recorded as a
+    /// regular internal note — visible to the new assignee like any other note, and its own
+    /// <c>@mentions</c> still work — rather than a separate field nobody else's tooling reads.
+    /// </summary>
+    public string? HandoverNote { get; init; }
 }
 
 public class AssignTicketCommandValidator : AbstractValidator<AssignTicketCommand>
@@ -52,7 +60,7 @@ public class AssignTicketCommandHandler(
 {
     public async Task Handle(AssignTicketCommand request, CancellationToken cancellationToken)
     {
-        var ticket = await db.Tickets.Include(t => t.Status)
+        var ticket = await db.Tickets.Include(t => t.Status).Include(t => t.Watchers)
             .WhereBranchAccessible(currentUser).WhereTicketVisible(currentUser)
             .FirstOrDefaultAsync(t => t.Id == request.TicketId, cancellationToken)
             ?? throw new NotFoundException(nameof(Ticket), request.TicketId);
@@ -90,6 +98,29 @@ public class AssignTicketCommandHandler(
             newValue: request.AgentId?.ToString(),
             oldDisplay: previousAgent?.DisplayName.En,
             newDisplay: newAgent?.DisplayName.En ?? team?.Name.En);
+
+        if (!string.IsNullOrWhiteSpace(request.HandoverNote))
+        {
+            var note = new TicketMessage
+            {
+                TicketId = ticket.Id,
+                Channel = ChannelKey.Internal,
+                Direction = MessageDirection.Outbound,
+                AuthorType = MessageAuthorType.Agent,
+                AuthorId = currentUser.UserId,
+                AuthorDisplayName = currentUser.UserName,
+                BodyText = request.HandoverNote,
+                IsInternalNote = true,
+                SentAt = clock.UtcNow,
+            };
+
+            db.TicketMessages.Add(note);
+            events.Record(ticket.Id, TicketEventType.InternalNoteAdded, metadataJson: """{"reason":"handover"}""");
+
+            await MentionProcessor.ProcessAsync(
+                db, notifications, events, ticket, note,
+                currentUser.UserId!.Value, currentUser.UserName ?? "", clock.UtcNow, cancellationToken);
+        }
 
         await db.SaveChangesAsync(cancellationToken);
 

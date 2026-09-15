@@ -59,6 +59,13 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/agent/quick-replies/quick-replies.routes').then((m) => m.QUICK_REPLY_ROUTES),
       },
+      {
+        path: 'mentions',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'nav.mentions', permissions: [PERMISSIONS.workspace.collaborate] },
+        loadChildren: () =>
+          import('./features/agent/collaboration/collaboration.routes').then((m) => m.COLLABORATION_ROUTES),
+      },
     ],
   },
 

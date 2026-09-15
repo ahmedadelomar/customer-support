@@ -1,4 +1,5 @@
 import { Component, type OnChanges, inject, input, output, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LanguageService } from '../../../../../core/services/language.service';
 import { ToastService } from '../../../../../core/services/toast.service';
@@ -14,7 +15,7 @@ import type { AssignableAgent } from '../../data-access/interfaces/ticket.interf
  */
 @Component({
   selector: 'app-assign-dialog',
-  imports: [TranslatePipe, ModalComponent],
+  imports: [FormsModule, TranslatePipe, ModalComponent],
   templateUrl: './assign-dialog.component.html',
 })
 export class AssignDialogComponent implements OnChanges {
@@ -33,6 +34,7 @@ export class AssignDialogComponent implements OnChanges {
   readonly saving = signal(false);
   readonly confirming = signal<AssignableAgent | null>(null);
   readonly errorMessage = signal<string | null>(null);
+  readonly handoverNote = signal('');
 
   ngOnChanges(): void {
     if (!this.open()) {
@@ -41,6 +43,7 @@ export class AssignDialogComponent implements OnChanges {
 
     this.confirming.set(null);
     this.errorMessage.set(null);
+    this.handoverNote.set('');
     this.loading.set(true);
 
     this.#service.assignableAgents(this.ticketId()).subscribe({
@@ -88,7 +91,7 @@ export class AssignDialogComponent implements OnChanges {
     this.saving.set(true);
     this.errorMessage.set(null);
 
-    this.#service.assign(this.ticketId(), { agentId, force }).subscribe({
+    this.#service.assign(this.ticketId(), { agentId, force, handoverNote: this.handoverNote().trim() || undefined }).subscribe({
       next: () => {
         this.saving.set(false);
         this.#toast.success('tickets.assignment.assigned');

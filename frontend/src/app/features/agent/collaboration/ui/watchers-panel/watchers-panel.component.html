@@ -1,0 +1,33 @@
+<div>
+  <div class="flex items-center justify-between">
+    <p class="text-xs text-slate-500">{{ 'collaboration.watchers.title' | translate }}</p>
+    <button type="button" class="text-xs text-brand-700 hover:underline" [disabled]="toggling()" (click)="toggle()">
+      {{ (isWatching() ? 'collaboration.watchers.unwatch' : 'collaboration.watchers.watch') | translate }}
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="mt-1 h-6 animate-pulse rounded bg-slate-100"></div>
+  } @else if (watchers().length === 0) {
+    <p class="mt-1 text-sm text-slate-500">{{ 'collaboration.watchers.empty' | translate }}</p>
+  } @else {
+    <ul class="mt-1 space-y-1">
+      @for (watcher of watchers(); track watcher.userId) {
+        <li class="flex items-center gap-2 text-sm text-slate-800">
+          <span
+            class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[10px] font-semibold text-brand-700"
+            aria-hidden="true"
+          >
+            {{ name(watcher).charAt(0) }}
+          </span>
+          <span class="truncate">{{ name(watcher) }}</span>
+          @if (watcher.addedByAutomation) {
+            <span class="chip shrink-0 border-slate-200 bg-slate-50 text-[10px] text-slate-500" [attr.title]="'collaboration.watchers.automationHint' | translate">
+              {{ 'collaboration.watchers.automated' | translate }}
+            </span>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

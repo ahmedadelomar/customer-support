@@ -38,4 +38,43 @@ public class AgentDirectory(AppDbContext db) : IAgentDirectory
             .Select(u => u.Id)
             .ToListAsync(ct);
     }
+
+    public async Task<IReadOnlyList<AgentSnapshot>> SearchActiveAsync(string? search, int limit, CancellationToken ct = default)
+    {
+        var query = db.Users.AsNoTracking().Where(u => u.IsActive && u.UserType == UserType.Agent);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(u =>
+                EF.Functions.Like(u.DisplayName.En, $"%{term}%") ||
+                EF.Functions.Like(u.DisplayName.Ar, $"%{term}%"));
+        }
+
+        return await query
+            .OrderBy(u => u.DisplayName.En)
+            .Take(limit)
+            .Select(u => new AgentSnapshot(u.Id, u.DisplayName, u.IsActive, u.AvailabilityStatus, u.MaxConcurrentTickets, u.DepartmentId, u.JobTitle))
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlySet<Guid>> FilterByPermissionAsync(
+        IEnumerable<Guid> userIds, string permission, CancellationToken ct = default)
+    {
+        var ids = userIds.Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            return new HashSet<Guid>();
+        }
+
+        var matches = await db.UserRoles
+            .Where(ur => ids.Contains(ur.UserId))
+            .Join(db.RolePermissions, ur => ur.RoleId, rp => rp.RoleId, (ur, rp) => new { ur.UserId, rp.Permission.Key })
+            .Where(x => x.Key == permission)
+            .Select(x => x.UserId)
+            .Distinct()
+            .ToListAsync(ct);
+
+        return matches.ToHashSet();
+    }
 }

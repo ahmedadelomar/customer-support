@@ -89,6 +89,22 @@ public interface IAgentDirectory
     Task<IReadOnlyDictionary<Guid, AgentSnapshot>> GetManyAsync(IEnumerable<Guid> agentIds, CancellationToken ct = default);
     /// <summary>Active agents whose home department matches — the fallback candidate pool when a ticket has no team yet.</summary>
     Task<IReadOnlyList<Guid>> GetAgentIdsByDepartmentAsync(Guid departmentId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Active agents whose display name matches <paramref name="search"/> (either language, case
+    /// insensitive), for the mention "@" picker — deliberately not scoped to a team or department,
+    /// since mentioning a colleague outside either is valid (it just triggers the visibility warning).
+    /// </summary>
+    Task<IReadOnlyList<AgentSnapshot>> SearchActiveAsync(string? search, int limit, CancellationToken ct = default);
+
+    /// <summary>
+    /// Of the given user ids, returns the ones holding <paramref name="permission"/> through any role
+    /// they hold. Lives here (Infrastructure) rather than as an <see cref="ICurrentUser"/> method
+    /// because it must answer for an ARBITRARY user, not just the caller — needed to tell whether a
+    /// mentioned colleague can see a ticket via `tickets.view.all` without exposing role/permission
+    /// tables through <c>IAppDbContext</c>.
+    /// </summary>
+    Task<IReadOnlySet<Guid>> FilterByPermissionAsync(IEnumerable<Guid> userIds, string permission, CancellationToken ct = default);
 }
 
 /// <summary>Working-hours arithmetic used by every SLA calculation.</summary>

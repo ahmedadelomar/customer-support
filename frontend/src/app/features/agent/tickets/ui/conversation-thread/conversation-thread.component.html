@@ -26,7 +26,15 @@
               <span>·</span>
               <span>{{ relativeTime(row.message.sentAt) }}</span>
             </div>
-            <p class="whitespace-pre-wrap text-sm text-amber-900">{{ row.message.bodyText }}</p>
+            <p class="whitespace-pre-wrap text-sm text-amber-900">
+              @for (segment of noteSegments(row.message.bodyText); track $index) {
+                @if (segment.kind === 'mention') {
+                  <span class="chip mx-0.5 border-amber-300 bg-amber-100 text-amber-900" [attr.title]="segment.userId">@{{ segment.name }}</span>
+                } @else {
+                  {{ segment.text }}
+                }
+              }
+            </p>
           </div>
         } @else if (row.kind === 'message') {
           <div
@@ -110,16 +118,52 @@
         </p>
       }
 
-      <textarea
-        #composerInput
-        rows="3"
-        class="form-control"
-        [class.border-amber-300]="mode() === 'note'"
-        [placeholder]="(mode() === 'reply' ? 'tickets.composer.replyPlaceholder' : 'tickets.composer.notePlaceholder') | translate"
-        [ngModel]="body()"
-        (ngModelChange)="body.set($event)"
-        (input)="onBodyInput()"
-      ></textarea>
+      @for (name of unviewableMentionNames(); track name) {
+        <p class="mb-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          {{ 'collaboration.composer.cannotViewWarning' | translate: { name } }}
+        </p>
+      }
+
+      @if (collisionWarningName(); as name) {
+        <p class="mb-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          {{ 'collaboration.composer.alsoReplying' | translate: { name } }}
+        </p>
+      }
+
+      <div class="relative">
+        <textarea
+          #composerInput
+          rows="3"
+          class="form-control"
+          [class.border-amber-300]="mode() === 'note'"
+          [placeholder]="(mode() === 'reply' ? 'tickets.composer.replyPlaceholder' : 'tickets.composer.notePlaceholder') | translate"
+          [ngModel]="body()"
+          (ngModelChange)="body.set($event)"
+          (input)="onBodyInput()"
+          (keydown)="onComposerKeydown($event)"
+          (blur)="closeMentionPicker()"
+        ></textarea>
+
+        @if (mentionPickerOpen()) {
+          <ul class="absolute inset-x-0 top-full z-10 mt-1 max-h-56 overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+            @for (candidate of mentionCandidates(); track candidate.id; let i = $index) {
+              <li>
+                <button
+                  type="button"
+                  class="flex w-full items-center justify-between gap-2 px-3 py-1.5 text-start text-sm hover:bg-slate-50"
+                  [class.bg-slate-50]="i === mentionActiveIndex()"
+                  (mousedown)="$event.preventDefault(); selectMention(candidate)"
+                >
+                  <span class="truncate">{{ mentionName(candidate) }}</span>
+                  @if (!candidate.canView) {
+                    <span aria-hidden="true" title="{{ 'collaboration.composer.cannotView' | translate }}">⚠</span>
+                  }
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
 
       <div class="mt-2 flex justify-end">
         <button

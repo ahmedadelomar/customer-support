@@ -294,7 +294,8 @@ public class TicketHistoryCompletenessTests
         var currentUser = AdminUser();
         var handler = new ReplyToTicketCommandHandler(
             db, currentUser, new TicketEventRecorder(db, currentUser, FixedClock()),
-            Substitute.For<IInteractionRecorder>(), Substitute.For<ISlaEngine>(), FixedClock());
+            Substitute.For<IInteractionRecorder>(), Substitute.For<ISlaEngine>(),
+            Substitute.For<INotificationDispatcher>(), FixedClock());
 
         await handler.Handle(
             new ReplyToTicketCommand { TicketId = ticket.Id, BodyText = "Here is your answer" },
@@ -318,7 +319,8 @@ public class TicketHistoryCompletenessTests
 
         var currentUser = AdminUser();
         var handler = new AddInternalNoteCommandHandler(
-            db, currentUser, new TicketEventRecorder(db, currentUser, FixedClock()), FixedClock());
+            db, currentUser, new TicketEventRecorder(db, currentUser, FixedClock()),
+            Substitute.For<INotificationDispatcher>(), FixedClock());
 
         await handler.Handle(
             new AddInternalNoteCommand { TicketId = ticket.Id, BodyText = "Escalated to billing team" },

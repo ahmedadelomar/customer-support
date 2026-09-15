@@ -5,6 +5,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/auth/auth.service';
 import { PERMISSIONS } from '../../core/permissions';
 import { LanguageService } from '../../core/services/language.service';
+import { MentionsBadgeComponent } from './ui/mentions-badge/mentions-badge.component';
 import { ReminderToastComponent } from './ui/reminder-toast/reminder-toast.component';
 
 /** One entry in the side navigation. `permissions` gates visibility the same way the route does. */
@@ -28,7 +29,7 @@ interface NavGroup {
  */
 @Component({
   selector: 'app-agent-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgClass, TranslatePipe, ReminderToastComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgClass, TranslatePipe, ReminderToastComponent, MentionsBadgeComponent],
   templateUrl: './agent-shell.page.html',
 })
 export class AgentShellPage {
@@ -70,6 +71,12 @@ export class AgentShellPage {
           icon: '✓',
           route: '/agent/tasks',
           permissions: [PERMISSIONS.workspace.viewOwnTasks],
+        },
+        {
+          labelKey: 'nav.mentions',
+          icon: '@',
+          route: '/agent/mentions',
+          permissions: [PERMISSIONS.workspace.collaborate],
         },
       ],
     },

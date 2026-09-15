@@ -1,6 +1,8 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { CollaborationHubService } from '../../../collaboration/data-access/collaboration-hub.service';
+import { PresenceBarComponent } from '../../../collaboration/ui/presence-bar/presence-bar.component';
 import { TicketStatusKind } from '../../../../../core/models/enums';
 import { PERMISSIONS } from '../../../../../core/permissions';
 import { LanguageService } from '../../../../../core/services/language.service';
@@ -39,6 +41,7 @@ import { OpenTasksWarningDialogComponent } from '../../ui/open-tasks-warning-dia
     HistoryTabComponent,
     TasksPanelComponent,
     OpenTasksWarningDialogComponent,
+    PresenceBarComponent,
   ],
   templateUrl: './ticket-detail.page.html',
 })
@@ -46,6 +49,7 @@ export class TicketDetailPage {
   readonly #service = inject(TicketsService);
   readonly #language = inject(LanguageService);
   readonly #toast = inject(ToastService);
+  readonly #hub = inject(CollaborationHubService);
 
   readonly permissions = PERMISSIONS;
 
@@ -85,6 +89,15 @@ export class TicketDetailPage {
     // is triggered from an effect-free read in ngOnInit-equivalent position.
     queueMicrotask(() => this.load());
     this.#service.lookups().subscribe((lookups) => this.lookups.set(lookups));
+
+    // Joins the collaboration hub's group for this ticket so presence and the composer's collision
+    // warning work; re-runs (leaving the previous group first) if the route id changes without the
+    // component being recreated, and leaves on destroy via the cleanup callback.
+    effect((onCleanup) => {
+      const ticketId = this.id();
+      void this.#hub.joinTicket(ticketId);
+      onCleanup(() => void this.#hub.leaveTicket(ticketId));
+    });
   }
 
   load(): void {

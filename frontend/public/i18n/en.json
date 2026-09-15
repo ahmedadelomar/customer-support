@@ -42,6 +42,7 @@
     "tickets": "Tickets",
     "customers": "Customers",
     "tasks": "Tasks & Reminders",
+    "mentions": "Mentions",
     "knowledgeBase": "Knowledge Base",
     "quickReplies": "Quick Replies",
     "reports": "Reports",
@@ -342,7 +343,8 @@
         "15": "Department changed",
         "16": "Tags changed",
         "17": "Watcher added",
-        "18": "Follow-up created"
+        "18": "Follow-up created",
+        "19": "Watcher removed"
       },
       "events": {
         "0": "{{actor}} created this ticket",
@@ -363,7 +365,8 @@
         "15": "{{actor}} moved this ticket from {{from}} to {{to}}",
         "16": "{{actor}} changed the tags",
         "17": "{{actor}} added a watcher",
-        "18": "{{actor}} created a follow-up ticket"
+        "18": "{{actor}} created a follow-up ticket",
+        "19": "{{actor}} removed a watcher"
       }
     },
     "properties": {
@@ -436,7 +439,9 @@
       "unassigned": "Ticket unassigned.",
       "confirmWarning": "Assign to {{name}} anyway?",
       "confirmAssign": "Assign anyway",
-      "noCandidates": "No candidate agents were found for this ticket's team or department."
+      "noCandidates": "No candidate agents were found for this ticket's team or department.",
+      "handoverNote": "Handover note (optional)",
+      "handoverNotePlaceholder": "Context for the new assignee — recorded as an internal note."
     },
     "bulkAssign": {
       "title": "Bulk assign",
@@ -682,6 +687,28 @@
     "composer": {
       "insert": "Quick reply",
       "unresolvedWarning": "This reply has unresolved placeholders: {{tokens}}"
+    }
+  },
+  "collaboration": {
+    "mentions": {
+      "title": "Mentions",
+      "empty": "No mentions yet."
+    },
+    "watchers": {
+      "title": "Watchers",
+      "watch": "Watch",
+      "unwatch": "Unwatch",
+      "empty": "No watchers yet.",
+      "automated": "Auto",
+      "automationHint": "Added automatically by an escalation rule."
+    },
+    "composer": {
+      "cannotView": "This colleague cannot currently see this ticket.",
+      "cannotViewWarning": "{{name}} cannot see this ticket (different department). They will be notified but unable to open it.",
+      "alsoReplying": "{{name}} is also replying to this ticket."
+    },
+    "presence": {
+      "viewing": "Also viewing this ticket"
     }
   }
 }

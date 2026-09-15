@@ -28,6 +28,7 @@ const EVENT_ICONS: Record<TicketEventType, string> = {
   [TicketEventType.TagsChanged]: '🏷',
   [TicketEventType.WatcherAdded]: '👁',
   [TicketEventType.FollowUpCreated]: '↪',
+  [TicketEventType.WatcherRemoved]: '👁',
 };
 
 export function ticketEventIcon(eventType: TicketEventType): string {
@@ -92,6 +93,8 @@ export function ticketEventSentence(event: TicketEvent, systemLabel: string): Ev
       return base(17);
     case TicketEventType.FollowUpCreated:
       return base(18);
+    case TicketEventType.WatcherRemoved:
+      return base(19);
     default:
       return base(0);
   }

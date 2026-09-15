@@ -1,0 +1,15 @@
+@if (viewers().length > 0) {
+  <div class="flex items-center -space-x-2 rtl:space-x-reverse" [attr.title]="'collaboration.presence.viewing' | translate">
+    @for (viewer of viewers(); track viewer.userId) {
+      <span
+        class="relative flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-brand-100 text-xs font-semibold text-brand-700"
+        [attr.title]="viewer.displayName"
+      >
+        {{ viewer.displayName.charAt(0) }}
+        @if (viewer.isComposing) {
+          <span class="absolute -end-0.5 -top-0.5 h-2 w-2 rounded-full border border-white bg-emerald-500" aria-hidden="true"></span>
+        }
+      </span>
+    }
+  </div>
+}

@@ -133,6 +133,8 @@
     }
   </div>
 
+  <app-watchers-panel [ticketId]="ticket().id" />
+
   <div class="grid grid-cols-1 gap-3 border-t border-slate-200 pt-3 text-sm">
     <div class="flex justify-between gap-2">
       <span class="text-slate-500">{{ 'tickets.properties.firstResponseDue' | translate }}</span>

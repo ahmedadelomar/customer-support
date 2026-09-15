@@ -216,6 +216,8 @@ export interface AssignTicketRequest {
   agentId?: string;
   teamId?: string;
   force?: boolean;
+  /** Optional context for the new assignee, recorded as an internal note. */
+  handoverNote?: string;
 }
 
 export interface BulkAssignRequest {

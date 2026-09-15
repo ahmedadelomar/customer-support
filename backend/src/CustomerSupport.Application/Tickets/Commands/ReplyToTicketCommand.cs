@@ -2,6 +2,7 @@ using CustomerSupport.Application.Common.Exceptions;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Security;
 using CustomerSupport.Application.Tickets;
+using CustomerSupport.Application.Workspace.Collaboration;
 using CustomerSupport.Domain.Enums;
 using CustomerSupport.Domain.Tickets;
 using FluentValidation;
@@ -41,12 +42,14 @@ public class ReplyToTicketCommandHandler(
     ITicketEventRecorder events,
     IInteractionRecorder interactions,
     ISlaEngine slaEngine,
+    INotificationDispatcher notifications,
     IDateTimeProvider clock)
     : IRequestHandler<ReplyToTicketCommand, Guid>
 {
     public async Task<Guid> Handle(ReplyToTicketCommand request, CancellationToken cancellationToken)
     {
         var ticket = await db.Tickets
+            .Include(t => t.Watchers)
             .WhereBranchAccessible(currentUser)
             .WhereTicketVisible(currentUser)
             .FirstOrDefaultAsync(t => t.Id == request.TicketId, cancellationToken)
@@ -95,6 +98,10 @@ public class ReplyToTicketCommandHandler(
         interactions.Record(
             ticket.CustomerId, ticket.Channel, MessageDirection.Outbound,
             ticket.Subject, Truncate(request.BodyText), ticket.Id, nameof(Ticket), ticket.Id, currentUser.UserId);
+
+        await TicketCollaborationNotifications.NotifyActivityAsync(
+            notifications, ticket, ticket.Watchers, currentUser.UserId!.Value, currentUser.UserName ?? "",
+            isInternalNote: false, cancellationToken);
 
         await db.SaveChangesAsync(cancellationToken);
 

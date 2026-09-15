@@ -1,4 +1,5 @@
 using System.Text;
+using CustomerSupport.Api.Hubs;
 using CustomerSupport.Api.Infrastructure;
 using CustomerSupport.Api.Services;
 using CustomerSupport.Application;
@@ -88,6 +89,12 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddOpenApi();
 
+// --- Real-time (Agent Dashboard / Team collaboration) -------------------------------------------
+// First hub in this codebase — CS-303 (live chat) is specified to reuse it rather than stand up a
+// second transport, so a future ChatHub maps onto this same AddSignalR() call.
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<PresenceTracker>();
+
 builder.Services.AddRequestLocalization(options =>
 {
     // Arabic is the default culture; the Accept-Language header or the ?culture= query overrides it.
@@ -122,6 +129,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<CollaborationHub>("/hubs/collaboration");
 app.MapHealthChecks("/health");
 
 // --- Migrate and seed --------------------------------------------------------------------------

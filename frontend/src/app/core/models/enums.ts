@@ -102,6 +102,7 @@ export enum TicketEventType {
   TagsChanged = 16,
   WatcherAdded = 17,
   FollowUpCreated = 18,
+  WatcherRemoved = 19,
 }
 
 export enum NotificationChannel {

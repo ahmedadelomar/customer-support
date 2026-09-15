@@ -1,12 +1,17 @@
 import { Component, ElementRef, type OnChanges, computed, inject, input, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { AuthService } from '../../../../../core/auth/auth.service';
 import { MessageDirection, TicketEventType } from '../../../../../core/models/enums';
 import { LanguageService } from '../../../../../core/services/language.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
+import { parseMentionSegments } from '../../../../../shared/utils/mention-segments';
 import { relativeTime } from '../../../../../shared/utils/relative-time';
 import { ticketEventIcon, ticketEventSentence } from '../../../../../shared/utils/ticket-event-sentence';
+import { CollaborationHubService } from '../../../collaboration/data-access/collaboration-hub.service';
+import { CollaborationService } from '../../../collaboration/data-access/collaboration.service';
+import type { MentionableUser } from '../../../collaboration/data-access/interfaces/collaboration.interface';
 import { QuickRepliesService } from '../../../quick-replies/data-access/quick-replies.service';
 import type { QuickReply, QuickReplyRenderResult } from '../../../quick-replies/data-access/interfaces/quick-reply.interface';
 import { TicketsService } from '../../data-access/tickets.service';
@@ -18,6 +23,12 @@ type ComposerMode = 'reply' | 'note';
 
 /** Matches only at a word boundary, so a URL path mid-sentence is never expanded. */
 const SHORTCUT_PATTERN = /(?:^|\s)(\/[a-z0-9_-]+)\s$/i;
+
+/** A live, still-being-typed `@name` right before the cursor — no trailing space, unlike the shortcut pattern above. */
+const MENTION_PATTERN = /(?:^|\s)@([\p{L}\p{N}_.-]{0,30})$/u;
+
+/** Structured markers already inserted into the body, so their `canView` can be re-checked as the text changes. */
+const MENTION_MARKER_PATTERN = /@\[([^\]]+)\]\(([0-9a-fA-F-]{36})\)/g;
 
 /** Event types already fully represented by a message bubble — shown inline would just duplicate it. */
 const INLINE_EXCLUDED_EVENTS = new Set([
@@ -43,6 +54,9 @@ type TimelineRow =
 export class ConversationThreadComponent implements OnChanges {
   readonly #service = inject(TicketsService);
   readonly #quickReplies = inject(QuickRepliesService);
+  readonly #collaboration = inject(CollaborationService);
+  readonly #hub = inject(CollaborationHubService);
+  readonly #auth = inject(AuthService);
   readonly #language = inject(LanguageService);
   readonly #toast = inject(ToastService);
   readonly #translate = inject(TranslateService);
@@ -72,7 +86,31 @@ export class ConversationThreadComponent implements OnChanges {
   readonly pendingQuickReplyId = signal<string | null>(null);
   readonly unresolvedTokens = signal<string[]>([]);
 
+  readonly mentionPickerOpen = signal(false);
+  readonly mentionCandidates = signal<MentionableUser[]>([]);
+  readonly mentionActiveIndex = signal(0);
+
   readonly locale = computed(() => this.#language.locale());
+
+  /** Colleagues mentioned in the current draft who would not see the ticket — a warning, not a block. */
+  readonly unviewableMentionNames = computed(() => {
+    const names = new Set<string>();
+    for (const match of this.body().matchAll(MENTION_MARKER_PATTERN)) {
+      const candidate = this.#mentionCache.get(match[2]);
+      if (candidate && !candidate.canView) {
+        names.add(this.#language.pick({ en: candidate.nameEn, ar: candidate.nameAr }));
+      }
+    }
+    return [...names];
+  });
+
+  /** True while another viewer on this ticket is composing and the local agent also has a draft — advisory only, never disables send. */
+  readonly collisionWarningName = computed(() => {
+    if (!this.body().trim()) return null;
+    const me = this.#auth.user()?.id;
+    const other = this.#hub.presence().find((p) => p.isComposing && p.userId !== me);
+    return other?.displayName ?? null;
+  });
 
   // `viewChild` cannot be declared on a native `#private` field.
   private readonly composerInput = viewChild<ElementRef<HTMLTextAreaElement>>('composerInput');
@@ -82,6 +120,12 @@ export class ConversationThreadComponent implements OnChanges {
   /** Rendered body per quick-reply id, scoped to THIS ticket — repeated use of the same shortcut is instant. */
   #renderCache = new Map<string, QuickReplyRenderResult>();
   #expandingShortcut = false;
+
+  /** Every mentionable candidate seen so far this ticket, keyed by id — lets `unviewableMentionNames` re-check `canView` without a round trip per keystroke. */
+  #mentionCache = new Map<string, MentionableUser>();
+  #mentionRangeStart: number | null = null;
+  #mentionRequestId = 0;
+  #isComposingSent = false;
 
   /**
    * Messages plus the non-redundant events that fall within the loaded messages' time window,
@@ -120,6 +164,9 @@ export class ConversationThreadComponent implements OnChanges {
     this.pendingQuickReplyId.set(null);
     this.unresolvedTokens.set([]);
     this.#renderCache.clear();
+    this.#mentionCache.clear();
+    this.mentionPickerOpen.set(false);
+    this.#isComposingSent = false;
     this.load();
     this.#loadShortcutIndex();
   }
@@ -139,6 +186,7 @@ export class ConversationThreadComponent implements OnChanges {
 
   setMode(mode: ComposerMode): void {
     this.mode.set(mode);
+    this.mentionPickerOpen.set(false);
   }
 
   relativeTime(iso: string): string {
@@ -197,13 +245,21 @@ export class ConversationThreadComponent implements OnChanges {
    * shortcut text in place.
    */
   onBodyInput(): void {
-    if (this.#expandingShortcut) return;
+    this.#updateComposingState();
 
     const textarea = this.composerInput()?.nativeElement;
+    const cursor = textarea?.selectionStart ?? this.body().length;
+    const textBeforeCursor = this.body().slice(0, cursor);
+
+    if (this.mode() === 'note') {
+      this.#detectMention(textBeforeCursor, cursor);
+    } else if (this.mentionPickerOpen()) {
+      this.mentionPickerOpen.set(false);
+    }
+
+    if (this.#expandingShortcut) return;
     if (!textarea) return;
 
-    const cursor = textarea.selectionStart ?? this.body().length;
-    const textBeforeCursor = this.body().slice(0, cursor);
     const match = SHORTCUT_PATTERN.exec(textBeforeCursor);
     if (!match) return;
 
@@ -240,6 +296,90 @@ export class ConversationThreadComponent implements OnChanges {
         this.#expandingShortcut = false;
       },
     });
+  }
+
+  /** Detects a live, still-being-typed `@name` right before the cursor and (re)loads its candidate list. */
+  #detectMention(textBeforeCursor: string, cursor: number): void {
+    const match = MENTION_PATTERN.exec(textBeforeCursor);
+    if (!match) {
+      this.mentionPickerOpen.set(false);
+      return;
+    }
+
+    this.#mentionRangeStart = cursor - match[1].length - 1;
+    const query = match[1];
+    const requestId = ++this.#mentionRequestId;
+
+    this.#collaboration.mentionable(this.ticketId(), query || undefined).subscribe({
+      next: (candidates) => {
+        if (requestId !== this.#mentionRequestId) return; // a newer keystroke already superseded this request
+
+        for (const candidate of candidates) {
+          this.#mentionCache.set(candidate.id, candidate);
+        }
+
+        this.mentionCandidates.set(candidates);
+        this.mentionActiveIndex.set(0);
+        this.mentionPickerOpen.set(candidates.length > 0);
+      },
+    });
+  }
+
+  mentionName(user: MentionableUser): string {
+    return this.#language.pick({ en: user.nameEn, ar: user.nameAr });
+  }
+
+  selectMention(user: MentionableUser): void {
+    if (this.#mentionRangeStart === null) return;
+
+    const textarea = this.composerInput()?.nativeElement;
+    const cursor = textarea?.selectionStart ?? this.body().length;
+    this.#replaceRange(this.#mentionRangeStart, cursor, `@[${this.mentionName(user)}](${user.id}) `);
+    this.mentionPickerOpen.set(false);
+    this.#mentionRangeStart = null;
+  }
+
+  closeMentionPicker(): void {
+    this.mentionPickerOpen.set(false);
+  }
+
+  /** Keyboard navigation for the mention picker; falls through to normal typing otherwise. */
+  onComposerKeydown(event: KeyboardEvent): void {
+    if (!this.mentionPickerOpen()) return;
+
+    const count = this.mentionCandidates().length;
+    if (count === 0) return;
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.mentionActiveIndex.update((i) => (i + 1) % count);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.mentionActiveIndex.update((i) => (i - 1 + count) % count);
+    } else if (event.key === 'Enter' || event.key === 'Tab') {
+      event.preventDefault();
+      this.selectMention(this.mentionCandidates()[this.mentionActiveIndex()]);
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeMentionPicker();
+    }
+  }
+
+  noteSegments(bodyText: string) {
+    return parseMentionSegments(bodyText);
+  }
+
+  /** Sends `StartComposing`/`StopComposing` only on an actual state change, not on every keystroke. */
+  #updateComposingState(): void {
+    const composing = this.body().trim().length > 0;
+    if (composing === this.#isComposingSent) return;
+
+    this.#isComposingSent = composing;
+    if (composing) {
+      this.#hub.startComposing(this.ticketId());
+    } else {
+      this.#hub.stopComposing(this.ticketId());
+    }
   }
 
   #insertAtCursor(text: string): void {
@@ -290,6 +430,7 @@ export class ConversationThreadComponent implements OnChanges {
         this.body.set('');
         this.pendingQuickReplyId.set(null);
         this.unresolvedTokens.set([]);
+        this.#updateComposingState();
         this.#toast.success(this.mode() === 'reply' ? 'tickets.replied' : 'tickets.noteAdded');
         this.load();
         this.sent.emit();

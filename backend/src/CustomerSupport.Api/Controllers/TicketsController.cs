@@ -2,6 +2,7 @@ using CustomerSupport.Application.Common.Models;
 using CustomerSupport.Application.Tickets.Commands;
 using CustomerSupport.Application.Tickets.Dtos;
 using CustomerSupport.Application.Tickets.Queries;
+using CustomerSupport.Application.Workspace.Collaboration;
 using CustomerSupport.Application.Workspace.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -255,4 +256,39 @@ public class TicketsController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<IReadOnlyList<AgentTaskDto>>> GetTasks(Guid id, CancellationToken ct)
         => Ok(await Sender.Send(new GetTicketTasksQuery(id), ct));
+
+    /// <summary>Follows the ticket. Idempotent.</summary>
+    [HttpPost("{id:guid}/watch")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Watch(Guid id, CancellationToken ct)
+    {
+        await Sender.Send(new WatchTicketCommand(id), ct);
+        return NoContent();
+    }
+
+    /// <summary>Stops following the ticket. Idempotent.</summary>
+    [HttpPost("{id:guid}/unwatch")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Unwatch(Guid id, CancellationToken ct)
+    {
+        await Sender.Send(new UnwatchTicketCommand(id), ct);
+        return NoContent();
+    }
+
+    /// <summary>The ticket's watchers — the properties-panel sidebar list.</summary>
+    [HttpGet("{id:guid}/watchers")]
+    [ProducesResponseType(typeof(IReadOnlyList<WatcherDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IReadOnlyList<WatcherDto>>> GetWatchers(Guid id, CancellationToken ct)
+        => Ok(await Sender.Send(new GetTicketWatchersQuery(id), ct));
+
+    /// <summary>Colleagues for the "@" mention picker, filtered as the author types.</summary>
+    [HttpGet("{id:guid}/mentionable")]
+    [ProducesResponseType(typeof(IReadOnlyList<MentionableUserDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IReadOnlyList<MentionableUserDto>>> GetMentionable(
+        Guid id, [FromQuery] string? search, CancellationToken ct)
+        => Ok(await Sender.Send(new GetMentionableUsersQuery(id, search), ct));
 }

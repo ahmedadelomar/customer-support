@@ -19,6 +19,20 @@
       <p class="form-error mb-2">{{ errorMessage() }}</p>
     }
 
+    @if (!loading() && candidates().length > 0) {
+      <div class="mb-3">
+        <label class="form-label" for="assign-handover-note">{{ 'tickets.assignment.handoverNote' | translate }}</label>
+        <textarea
+          id="assign-handover-note"
+          class="form-control"
+          rows="2"
+          [placeholder]="'tickets.assignment.handoverNotePlaceholder' | translate"
+          [ngModel]="handoverNote()"
+          (ngModelChange)="handoverNote.set($event)"
+        ></textarea>
+      </div>
+    }
+
     @if (loading()) {
       <div class="space-y-2">
         @for (i of [1, 2, 3]; track i) {
