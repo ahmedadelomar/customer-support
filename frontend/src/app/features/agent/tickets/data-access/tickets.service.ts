@@ -5,6 +5,7 @@ import type { PagedResult } from '../../../../core/models/api.models';
 import { AppConfigService } from '../../../../core/services/app-config.service';
 import type { TicketLookups } from './interfaces/ticket-lookups.interface';
 import type { TicketMessage } from './interfaces/ticket-message.interface';
+import type { TicketHistoryPage, TicketHistoryQuery, TicketTimelinePage } from './interfaces/ticket-event.interface';
 import type {
   AddInternalNoteRequest,
   AssignableAgent,
@@ -103,12 +104,27 @@ export class TicketsService {
     return this.#http.post<void>(`${this.#baseUrl}/${id}/escalate`, request);
   }
 
-  /** Builds the query string, skipping empty values so the URL stays clean. */
+  history(id: string, query: TicketHistoryQuery): Observable<TicketHistoryPage> {
+    return this.#http.get<TicketHistoryPage>(`${this.#baseUrl}/${id}/history`, { params: this.#toParams(query) });
+  }
+
+  timeline(id: string, query: { before?: string; beforeId?: string; pageSize?: number }): Observable<TicketTimelinePage> {
+    return this.#http.get<TicketTimelinePage>(`${this.#baseUrl}/${id}/timeline`, { params: this.#toParams(query) });
+  }
+
+  /** Builds the query string, skipping empty values so the URL stays clean. An array value (e.g.
+   *  `eventTypes`) is appended as repeated keys, matching ASP.NET Core's collection model binding. */
   #toParams(query: object): HttpParams {
     let params = new HttpParams();
 
     for (const [key, value] of Object.entries(query)) {
       if (value === undefined || value === null || value === '') {
+        continue;
+      }
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          params = params.append(key, String(item));
+        }
         continue;
       }
       params = params.set(key, String(value));

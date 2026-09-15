@@ -9,40 +9,46 @@
     } @else if (messages().length === 0) {
       <app-empty-state titleKey="tickets.thread.empty" icon="💬" />
     } @else {
-      @for (message of messages(); track message.id) {
-        @if (message.isInternalNote) {
+      @for (row of timeline(); track row.kind + (row.kind === 'message' ? row.message.id : row.event.id)) {
+        @if (row.kind === 'event') {
+          <div class="flex items-center gap-2 px-1 text-xs text-slate-400">
+            <span aria-hidden="true">{{ eventIcon(row.event) }}</span>
+            <span class="truncate">{{ eventSentenceKey(row.event) | translate: eventSentenceParams(row.event) }}</span>
+            <span class="ms-auto shrink-0" [title]="row.event.occurredAt">{{ relativeTime(row.event.occurredAt) }}</span>
+          </div>
+        } @else if (row.kind === 'message' && row.message.isInternalNote) {
           <div class="w-full rounded-lg border border-amber-200 bg-amber-50 p-3">
             <div class="mb-1 flex items-center gap-2 text-xs text-amber-700">
               <span aria-hidden="true">🔒</span>
               <span class="font-medium">{{ 'tickets.thread.internalNoteBadge' | translate }}</span>
               <span>·</span>
-              <span>{{ message.authorDisplayName }}</span>
+              <span>{{ row.message.authorDisplayName }}</span>
               <span>·</span>
-              <span>{{ relativeTime(message.sentAt) }}</span>
+              <span>{{ relativeTime(row.message.sentAt) }}</span>
             </div>
-            <p class="whitespace-pre-wrap text-sm text-amber-900">{{ message.bodyText }}</p>
+            <p class="whitespace-pre-wrap text-sm text-amber-900">{{ row.message.bodyText }}</p>
           </div>
-        } @else {
+        } @else if (row.kind === 'message') {
           <div
             class="flex"
-            [class.justify-start]="message.direction === MessageDirection.Inbound"
-            [class.justify-end]="message.direction === MessageDirection.Outbound"
+            [class.justify-start]="row.message.direction === MessageDirection.Inbound"
+            [class.justify-end]="row.message.direction === MessageDirection.Outbound"
           >
             <div
               class="max-w-[80%] rounded-lg p-3"
-              [class.bg-slate-100]="message.direction === MessageDirection.Inbound"
-              [class.bg-brand-50]="message.direction === MessageDirection.Outbound"
+              [class.bg-slate-100]="row.message.direction === MessageDirection.Inbound"
+              [class.bg-brand-50]="row.message.direction === MessageDirection.Outbound"
             >
               <div class="mb-1 flex items-center gap-2 text-xs text-slate-500">
-                <span class="font-medium text-slate-700">{{ message.authorDisplayName }}</span>
+                <span class="font-medium text-slate-700">{{ row.message.authorDisplayName }}</span>
                 <span>·</span>
-                <span>{{ relativeTime(message.sentAt) }}</span>
+                <span>{{ relativeTime(row.message.sentAt) }}</span>
               </div>
-              <p class="whitespace-pre-wrap text-sm text-slate-800">{{ message.bodyText }}</p>
+              <p class="whitespace-pre-wrap text-sm text-slate-800">{{ row.message.bodyText }}</p>
 
-              @if (message.attachments.length) {
+              @if (row.message.attachments.length) {
                 <div class="mt-2 flex flex-wrap gap-1.5">
-                  @for (attachment of message.attachments; track attachment.id) {
+                  @for (attachment of row.message.attachments; track attachment.id) {
                     <span class="chip border-slate-200 bg-white text-slate-700">📎 {{ attachment.fileName }}</span>
                   }
                 </div>

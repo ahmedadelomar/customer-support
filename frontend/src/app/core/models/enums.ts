@@ -81,6 +81,29 @@ export enum AiSuggestionStatus {
   Expired = 4,
 }
 
+/** Every mutation appended to the ticket timeline (Ticket Management / Ticket history). */
+export enum TicketEventType {
+  Created = 0,
+  StatusChanged = 1,
+  PriorityChanged = 2,
+  CategoryChanged = 3,
+  Assigned = 4,
+  Unassigned = 5,
+  Escalated = 6,
+  MessageAdded = 7,
+  InternalNoteAdded = 8,
+  AttachmentAdded = 9,
+  SlaBreached = 10,
+  Merged = 11,
+  Reopened = 12,
+  Resolved = 13,
+  Closed = 14,
+  DepartmentChanged = 15,
+  TagsChanged = 16,
+  WatcherAdded = 17,
+  FollowUpCreated = 18,
+}
+
 /** Translation key for an enum member, e.g. `enums.channel.1` for WhatsApp. */
 export function enumTranslationKey(group: string, value: number): string {
   return `enums.${group}.${value}`;

@@ -231,4 +231,20 @@ public class TicketsController : ApiControllerBase
         await Sender.Send(command with { TicketId = id }, ct);
         return NoContent();
     }
+
+    /// <summary>Keyset-paged event timeline. Automation is excluded unless <c>includeSystem</c> is set.</summary>
+    [HttpGet("{id:guid}/history")]
+    [ProducesResponseType(typeof(TicketHistoryPageDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<TicketHistoryPageDto>> GetHistory(
+        Guid id, [FromQuery] GetTicketHistoryQuery query, CancellationToken ct)
+        => Ok(await Sender.Send(query with { TicketId = id }, ct));
+
+    /// <summary>Keyset-paged, chronologically merged events and messages.</summary>
+    [HttpGet("{id:guid}/timeline")]
+    [ProducesResponseType(typeof(TicketTimelinePageDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<TicketTimelinePageDto>> GetTimeline(
+        Guid id, [FromQuery] GetTicketTimelineQuery query, CancellationToken ct)
+        => Ok(await Sender.Send(query with { TicketId = id }, ct));
 }

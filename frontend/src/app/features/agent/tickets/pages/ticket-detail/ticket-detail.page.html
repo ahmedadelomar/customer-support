@@ -72,6 +72,9 @@
             (sent)="refresh()"
           />
         }
+        @case ('history') {
+          <app-history-tab [ticketId]="t.id" />
+        }
         @default {
           <div class="card p-8 text-center text-slate-500">{{ 'common.comingSoon' | translate }}</div>
         }

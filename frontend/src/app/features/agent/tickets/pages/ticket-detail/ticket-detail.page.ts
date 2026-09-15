@@ -15,6 +15,7 @@ import { MergeDialogComponent } from './ui/merge-dialog/merge-dialog.component';
 import { AssignDialogComponent } from './ui/assign-dialog/assign-dialog.component';
 import { ResolveDialogComponent } from './ui/resolve-dialog/resolve-dialog.component';
 import { EscalateDialogComponent } from './ui/escalate-dialog/escalate-dialog.component';
+import { HistoryTabComponent } from './ui/history-tab/history-tab.component';
 
 /**
  * Ticket detail screen: customer panel, conversation thread and properties panel — the three-column
@@ -33,6 +34,7 @@ import { EscalateDialogComponent } from './ui/escalate-dialog/escalate-dialog.co
     AssignDialogComponent,
     ResolveDialogComponent,
     EscalateDialogComponent,
+    HistoryTabComponent,
   ],
   templateUrl: './ticket-detail.page.html',
 })

@@ -1,0 +1,89 @@
+<div class="mb-4 flex flex-wrap items-center gap-3">
+  <div class="relative">
+    <button type="button" class="btn-secondary" (click)="toggleFilterPanel()">
+      {{ 'tickets.history.filterByType' | translate }}
+      @if (typeFilter().length) {
+        <span class="chip ms-1 border-brand-200 bg-brand-50 text-brand-700">{{ typeFilter().length }}</span>
+      }
+    </button>
+
+    @if (filterOpen()) {
+      <div class="absolute z-20 mt-1 max-h-72 w-64 overflow-y-auto rounded-lg border border-slate-200 bg-white p-2 shadow-lg">
+        @for (type of eventTypeOptions; track type) {
+          <label class="flex items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-slate-50">
+            <input
+              type="checkbox"
+              [checked]="isTypeChecked(type)"
+              (change)="toggleType(type, $any($event.target).checked)"
+            />
+            <span>{{ 'tickets.history.eventTypeLabel.' + type | translate }}</span>
+          </label>
+        }
+        @if (typeFilter().length) {
+          <button type="button" class="mt-1 w-full text-start text-xs text-brand-700 hover:underline" (click)="clearTypeFilter()">
+            {{ 'common.clearFilters' | translate }}
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <label class="ms-auto flex items-center gap-2 text-sm text-slate-600">
+    <input type="checkbox" [checked]="showSystem()" (change)="toggleShowSystem()" />
+    {{ 'tickets.history.showSystemEvents' | translate }}
+    @if (hiddenSystemCount() > 0) {
+      <span class="chip border-slate-200 bg-slate-50 text-slate-500">
+        {{ 'tickets.history.hiddenCount' | translate: { count: hiddenSystemCount() } }}
+      </span>
+    }
+  </label>
+</div>
+
+@if (loading()) {
+  <div class="space-y-3">
+    @for (i of [1, 2, 3]; track i) {
+      <div class="card h-14 animate-pulse"></div>
+    }
+  </div>
+} @else if (groups().length === 0) {
+  <div class="card">
+    <app-empty-state titleKey="tickets.history.empty" icon="◷" />
+  </div>
+} @else {
+  <div class="space-y-6">
+    @for (group of groups(); track group.key) {
+      <section>
+        <h3 class="sticky top-0 z-10 mb-2 bg-slate-50 py-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          {{ group.label }}
+        </h3>
+
+        <ul class="space-y-1.5">
+          @for (entry of group.items; track entry.id) {
+            <li class="card flex items-center gap-3 px-3 py-2 text-sm">
+              <span class="shrink-0 text-base" aria-hidden="true">{{ icon(entry) }}</span>
+              <span class="min-w-0 flex-1 truncate text-slate-700">
+                {{ sentenceKey(entry) | translate: sentenceParams(entry) }}
+              </span>
+              @if (entry.isSystemGenerated) {
+                <span class="chip shrink-0 border-slate-200 bg-slate-50 text-slate-500">
+                  {{ 'tickets.history.automated' | translate }}
+                </span>
+              }
+              <span class="shrink-0 text-xs text-slate-400" [title]="entry.occurredAt">
+                {{ relativeTime(entry.occurredAt) }}
+              </span>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  </div>
+
+  @if (hasMore()) {
+    <div #sentinel class="flex justify-center py-4">
+      @if (loadingMore()) {
+        <span class="text-sm text-slate-400">{{ 'common.loading' | translate }}</span>
+      }
+    </div>
+  }
+}
