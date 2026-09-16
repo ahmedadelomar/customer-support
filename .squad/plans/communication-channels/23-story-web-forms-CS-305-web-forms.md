@@ -197,12 +197,12 @@ The submissions viewer lists submissions with status, submitter, timestamp and t
 
 ## Done Criteria
 
-- [ ] Form definitions are data; adding a form needs no schema change or deployment.
-- [ ] Server-side validation against the schema, with cached regexes carrying a match timeout.
-- [ ] Payload is stored before ticket creation, and failures are retryable both automatically and manually.
-- [ ] Captcha and per-form per-IP rate limiting are enforced.
-- [ ] Customer matching avoids duplicate profiles.
-- [ ] Submitted values are escaped in the ticket description.
-- [ ] The builder previews with the same renderer the public page uses.
+- [x] Form definitions are data; adding a form needs no schema change or deployment.
+- [x] Server-side validation against the schema, with cached regexes carrying a match timeout.
+- [x] Payload is stored before ticket creation, and failures are retryable both automatically and manually.
+- [x] Captcha and per-form per-IP rate limiting are enforced.
+- [x] Customer matching avoids duplicate profiles.
+- [x] Submitted values are escaped in the ticket description.
+- [x] The builder previews with the same renderer the public page uses.
 
 **STOP HERE. Report to the user and wait for confirmation before proceeding to the next story.**
