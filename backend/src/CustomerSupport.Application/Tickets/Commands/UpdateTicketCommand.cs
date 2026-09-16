@@ -39,7 +39,7 @@ public class UpdateTicketCommandValidator : AbstractValidator<UpdateTicketComman
     }
 }
 
-public class UpdateTicketCommandHandler(IAppDbContext db, ITicketEventRecorder events, IDateTimeProvider clock)
+public class UpdateTicketCommandHandler(IAppDbContext db, ITicketEventRecorder events, ISlaEngine sla, IDateTimeProvider clock)
     : IRequestHandler<UpdateTicketCommand>
 {
     public async Task Handle(UpdateTicketCommand request, CancellationToken cancellationToken)
@@ -51,6 +51,8 @@ public class UpdateTicketCommandHandler(IAppDbContext db, ITicketEventRecorder e
             ?? throw new NotFoundException(nameof(Ticket), request.Id);
 
         TicketReadOnlyGuard.EnsureEditable(ticket, ticket.Status.IsTerminal);
+
+        var reapplySlaPolicy = false;
 
         if (ticket.CategoryId != request.CategoryId)
         {
@@ -64,6 +66,7 @@ public class UpdateTicketCommandHandler(IAppDbContext db, ITicketEventRecorder e
                 oldDisplay: oldCategory.Name.En, newDisplay: newCategory.Name.En);
 
             ticket.CategoryId = newCategory.Id;
+            reapplySlaPolicy = true; // policy selection can key off the category
         }
 
         if (ticket.PriorityId != request.PriorityId)
@@ -78,6 +81,7 @@ public class UpdateTicketCommandHandler(IAppDbContext db, ITicketEventRecorder e
                 oldDisplay: oldPriority.Name.En, newDisplay: newPriority.Name.En);
 
             ticket.PriorityId = newPriority.Id;
+            reapplySlaPolicy = true; // SlaTarget is keyed by priority
         }
 
         ticket.Subject = request.Subject;
@@ -106,5 +110,12 @@ public class UpdateTicketCommandHandler(IAppDbContext db, ITicketEventRecorder e
         }
 
         await db.SaveChangesAsync(cancellationToken);
+
+        if (reapplySlaPolicy)
+        {
+            // Re-applying is an upsert (CS-501): the existing clocks are updated in place, never
+            // duplicated, so a priority bounced back and forth cannot leave stale rows behind.
+            await sla.ApplyPolicyAsync(ticket.Id, cancellationToken);
+        }
     }
 }

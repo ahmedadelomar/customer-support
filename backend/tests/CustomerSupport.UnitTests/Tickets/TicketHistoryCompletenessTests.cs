@@ -11,6 +11,7 @@ using CustomerSupport.Infrastructure.Services;
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Xunit;
 
@@ -123,7 +124,8 @@ public class TicketHistoryCompletenessTests
         var handler = new CreateTicketCommandHandler(
             db, currentUser,
             FakeReferenceNumbers(), new TicketEventRecorder(db, currentUser, FixedClock()),
-            Substitute.For<IInteractionRecorder>(), FixedClock());
+            Substitute.For<IInteractionRecorder>(), Substitute.For<ISlaEngine>(), Substitute.For<IAssignmentEngine>(),
+            FixedClock(), NullLogger<CreateTicketCommandHandler>.Instance);
 
         var ticketId = await handler.Handle(
             new CreateTicketCommand { CustomerId = customer.Id, Subject = "Help", Description = "Need help", CategoryId = category.Id },
@@ -150,7 +152,8 @@ public class TicketHistoryCompletenessTests
         await db.SaveChangesAsync();
 
         var currentUser = AdminUser();
-        var handler = new UpdateTicketCommandHandler(db, new TicketEventRecorder(db, currentUser, FixedClock()), FixedClock());
+        var handler = new UpdateTicketCommandHandler(
+            db, new TicketEventRecorder(db, currentUser, FixedClock()), Substitute.For<ISlaEngine>(), FixedClock());
 
         await handler.Handle(
             new UpdateTicketCommand

@@ -30,6 +30,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUserService>();
 builder.Services.AddScoped<IAuditContextAccessor, AuditContextAccessor>();
+builder.Services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
 
 // --- Authentication ----------------------------------------------------------------------------
 var jwtKey = builder.Configuration["Jwt:Key"]
@@ -153,6 +154,7 @@ app.UseMiddleware<MustChangePasswordMiddleware>();
 
 app.MapControllers();
 app.MapHub<CollaborationHub>("/hubs/collaboration");
+app.MapHub<NotificationsHub>("/hubs/notifications");
 app.MapHealthChecks("/health");
 
 // --- Migrate and seed --------------------------------------------------------------------------

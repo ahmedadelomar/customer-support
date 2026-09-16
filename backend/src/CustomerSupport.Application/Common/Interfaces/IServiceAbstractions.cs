@@ -117,6 +117,17 @@ public interface IBusinessCalendarCalculator
     Task<int> WorkingMinutesBetweenAsync(Guid calendarId, DateTimeOffset from, DateTimeOffset to, CancellationToken ct = default);
 }
 
+/// <summary>
+/// Drops a calendar's cached hours and holidays. <see cref="IBusinessCalendarCalculator"/> caches
+/// calendars aggressively (it runs on every ticket create, status change and breach-sweep tick), so
+/// the calendar admin commands call this the moment a calendar's hours or holidays change — otherwise
+/// an edit would silently not take effect for up to the cache's lifetime.
+/// </summary>
+public interface IBusinessCalendarCacheInvalidator
+{
+    void Invalidate(Guid calendarId);
+}
+
 /// <summary>Selects and applies the SLA policy for a ticket and maintains its clocks.</summary>
 public interface ISlaEngine
 {
@@ -126,11 +137,54 @@ public interface ISlaEngine
     Task OnResolvedAsync(Guid ticketId, CancellationToken ct = default);
 }
 
+/// <summary>The rule tester's read-only answer: what one rule would do against a real ticket, without acting on it.</summary>
+public record AssignmentPreview(bool ConditionsMatched, Guid? ChosenAgentId, int CandidateCount, int EligibleCount, string Reason);
+
 /// <summary>Evaluates assignment rules and picks the agent for a ticket.</summary>
 public interface IAssignmentEngine
 {
     /// <summary>Returns the chosen agent, or null when the ticket should stay in a team queue.</summary>
     Task<Guid?> AssignAsync(Guid ticketId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Evaluates ONE rule against an existing ticket and reports what would happen — the rule
+    /// tester. Never mutates the ticket, the rule's match statistics, or the decision log.
+    /// </summary>
+    Task<AssignmentPreview> PreviewRuleAsync(Guid ticketId, Guid ruleId, CancellationToken ct = default);
+}
+
+/// <summary>
+/// Delivers one already-composed notification through an external channel (email, SMS or push).
+/// Until CS-301/CS-302/CS-304 (the real channel providers) land, the registered implementation is a
+/// logging placeholder — the outbox dispatcher job (CS-504) is built against this interface so
+/// swapping in a real sender later is a DI registration change, not a call-site change.
+/// </summary>
+public interface IExternalNotificationSender
+{
+    Task SendAsync(
+        NotificationChannel channel,
+        string? recipientEmail,
+        string? recipientPhone,
+        string title,
+        string body,
+        string? link,
+        CancellationToken ct = default);
+}
+
+/// <summary>The shape pushed to a connected client the instant a notification row commits.</summary>
+public record RealtimeNotification(
+    Guid Id, string EventType, string TitleEn, string TitleAr, string BodyEn, string BodyAr,
+    string? Link, string Severity, DateTimeOffset CreatedAt);
+
+/// <summary>
+/// Pushes a notification to a signed-in user's connected clients over SignalR. Implemented in the
+/// API project, where the hub type lives — Infrastructure depends only on this interface, the same
+/// inversion <see cref="ICurrentUser"/> already uses, so the real-time push interceptor never
+/// references SignalR or hub types directly.
+/// </summary>
+public interface IRealtimeNotifier
+{
+    Task NotifyAsync(Guid userId, RealtimeNotification notification, CancellationToken ct = default);
 }
 
 /// <summary>Fan-out for alerts: writes the in-app row then dispatches to the opted-in channels.</summary>

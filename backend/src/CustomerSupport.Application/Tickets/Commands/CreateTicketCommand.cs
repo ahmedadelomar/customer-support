@@ -6,6 +6,7 @@ using CustomerSupport.Domain.Tickets;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace CustomerSupport.Application.Tickets.Commands;
 
@@ -43,7 +44,10 @@ public class CreateTicketCommandHandler(
     IReferenceNumberGenerator numbers,
     ITicketEventRecorder events,
     IInteractionRecorder interactions,
-    IDateTimeProvider clock)
+    ISlaEngine sla,
+    IAssignmentEngine assignment,
+    IDateTimeProvider clock,
+    ILogger<CreateTicketCommandHandler> logger)
     : IRequestHandler<CreateTicketCommand, Guid>
 {
     public async Task<Guid> Handle(CreateTicketCommand request, CancellationToken cancellationToken)
@@ -105,6 +109,22 @@ public class CreateTicketCommandHandler(
             ticket.Subject, Truncate(ticket.Description), ticket.Id, nameof(Ticket), ticket.Id);
 
         await db.SaveChangesAsync(cancellationToken);
+
+        // After the save, so the engine reads committed state — it performs its own SaveChangesAsync
+        // for the clocks and the denormalised due-date columns (CS-501).
+        await sla.ApplyPolicyAsync(ticket.Id, cancellationToken);
+
+        // Outside the creation transaction and never allowed to fail it (CS-502): a routing problem
+        // is a staffing question to fix, not a reason a customer's ticket fails to exist.
+        try
+        {
+            await assignment.AssignAsync(ticket.Id, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Automatic assignment failed for ticket {TicketId}.", ticket.Id);
+        }
+
         return ticket.Id;
     }
 

@@ -4,11 +4,12 @@ using CustomerSupport.Domain.Tickets;
 namespace CustomerSupport.Application.Tickets.Assignment;
 
 /// <summary>
-/// The notification copy for assignment changes, centralised so Assign, Claim, Unassign and bulk
-/// assignment all read the same wording — and so CS-504 (real channel fan-out) only has one place to
-/// touch once <see cref="INotificationDispatcher"/> grows beyond the in-app row.
+/// The notification copy for assignment changes, centralised so Assign, Claim, Unassign, bulk
+/// assignment and automatic assignment (CS-502, from Infrastructure) all read the same wording — and
+/// so CS-504 (real channel fan-out) only has one place to touch once <see cref="INotificationDispatcher"/>
+/// grows beyond the in-app row. Public so the assignment engine can reuse it across the layer boundary.
 /// </summary>
-internal static class TicketAssignmentNotifications
+public static class TicketAssignmentNotifications
 {
     public static Task Assigned(INotificationDispatcher notifications, Ticket ticket, Guid agentId, CancellationToken ct) =>
         notifications.DispatchAsync(

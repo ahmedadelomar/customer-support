@@ -1,3 +1,4 @@
+using CustomerSupport.Application.Automation;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Localization;
 using CustomerSupport.Application.Files;
@@ -34,6 +35,7 @@ public static class DependencyInjection
 
         services.AddScoped<AuditableEntityInterceptor>();
         services.AddScoped<AuditLogInterceptor>();
+        services.AddScoped<NotificationRealtimeInterceptor>();
 
         services.AddDbContext<AppDbContext>((sp, options) =>
         {
@@ -55,7 +57,8 @@ public static class DependencyInjection
 
             options.AddInterceptors(
                 sp.GetRequiredService<AuditableEntityInterceptor>(),
-                sp.GetRequiredService<AuditLogInterceptor>());
+                sp.GetRequiredService<AuditLogInterceptor>(),
+                sp.GetRequiredService<NotificationRealtimeInterceptor>());
         });
 
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
@@ -95,7 +98,26 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IContactVerificationSender, LoggingContactVerificationSender>();
         services.AddScoped<IAttachmentOwnerAuthorizer, AttachmentOwnerAuthorizer>();
-        services.AddScoped<ISlaEngine, NoOpSlaEngine>();
+
+        // SLA and Automation / Response and resolution targets (CS-501). IConditionEvaluator is the
+        // one allow-listed field map shared with automatic assignment (CS-502) and escalation
+        // (CS-503) rule evaluation, so a field either works everywhere or is rejected everywhere.
+        services.AddScoped<IConditionEvaluator, ConditionEvaluator>();
+        services.AddScoped<IBusinessCalendarCalculator, BusinessCalendarCalculator>();
+        services.AddScoped<IBusinessCalendarCacheInvalidator, BusinessCalendarCacheInvalidator>();
+        services.AddScoped<ISlaEngine, SlaEngine>();
+
+        // SLA and Automation / Automatic assignment (CS-502). IRuleEvaluator is also reused, as-is,
+        // by escalation rule evaluation (CS-503).
+        services.AddScoped<IRuleEvaluator, RuleEvaluator>();
+        services.AddScoped<IAssignmentEngine, AssignmentEngine>();
+
+        // SLA and Automation / Escalation rules (CS-503).
+        services.AddScoped<IEscalationEngine, EscalationEngine>();
+
+        // SLA and Automation / Alerts and notifications (CS-504). The real email/SMS/push senders
+        // are CS-301/302/304's job; this logs instead until those land.
+        services.AddScoped<IExternalNotificationSender, LoggingExternalNotificationSender>();
         services.AddSingleton<IFileStorage, LocalFileStorage>();
         services.AddSingleton<IVirusScanner, NoOpVirusScanner>();
 
@@ -139,6 +161,34 @@ public static class DependencyInjection
                 .ForJob(auditJobKey)
                 .WithIdentity($"{nameof(AuditRetentionJob)}-trigger")
                 .WithCronSchedule("0 0 3 * * ?"));
+
+            // SLA breach sweep (SLA and Automation / Response and resolution targets) — every
+            // minute, so a breach is detected by a background pass rather than only when someone
+            // opens the ticket.
+            var slaSweepJobKey = new JobKey(nameof(SlaBreachSweepJob));
+            q.AddJob<SlaBreachSweepJob>(opts => opts.WithIdentity(slaSweepJobKey));
+            q.AddTrigger(opts => opts
+                .ForJob(slaSweepJobKey)
+                .WithIdentity($"{nameof(SlaBreachSweepJob)}-trigger")
+                .WithSimpleSchedule(s => s.WithIntervalInMinutes(1).RepeatForever()));
+
+            // Escalation evaluation (SLA and Automation / Escalation rules) — every 5 minutes, so
+            // at-risk tickets escalate whether or not anyone has the ticket open.
+            var escalationJobKey = new JobKey(nameof(EscalationEvaluationJob));
+            q.AddJob<EscalationEvaluationJob>(opts => opts.WithIdentity(escalationJobKey));
+            q.AddTrigger(opts => opts
+                .ForJob(escalationJobKey)
+                .WithIdentity($"{nameof(EscalationEvaluationJob)}-trigger")
+                .WithSimpleSchedule(s => s.WithIntervalInMinutes(5).RepeatForever()));
+
+            // Outbox dispatch (SLA and Automation / Alerts and notifications) — every 30 seconds,
+            // so a deferred (quiet-hours) or retried external notification does not sit long.
+            var outboxJobKey = new JobKey(nameof(OutboxDispatcherJob));
+            q.AddJob<OutboxDispatcherJob>(opts => opts.WithIdentity(outboxJobKey));
+            q.AddTrigger(opts => opts
+                .ForJob(outboxJobKey)
+                .WithIdentity($"{nameof(OutboxDispatcherJob)}-trigger")
+                .WithSimpleSchedule(s => s.WithIntervalInSeconds(30).RepeatForever()));
         });
         services.AddQuartzHostedService(opts => opts.WaitForJobsToComplete = true);
 
