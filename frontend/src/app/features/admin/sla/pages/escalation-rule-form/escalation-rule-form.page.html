@@ -1,0 +1,205 @@
+<app-page-header [titleKey]="isEdit ? 'sla.escalationRules.editTitle' : 'sla.escalationRules.newTitle'">
+  <a routerLink="/admin/sla/escalation-rules" class="btn-secondary">{{ 'common.back' | translate }}</a>
+  <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">
+    {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+  </button>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-96 animate-pulse"></div>
+} @else {
+  <div class="grid gap-4 lg:grid-cols-[1fr_22rem]">
+    <div class="space-y-4">
+      <div class="card space-y-4 p-4">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="form-label" for="esc-name-en">{{ 'sla.escalationRules.nameEn' | translate }}</label>
+            <input id="esc-name-en" class="form-control" [ngModel]="nameEn()" (ngModelChange)="nameEn.set($event)" />
+          </div>
+          <div>
+            <label class="form-label" for="esc-name-ar">{{ 'sla.escalationRules.nameAr' | translate }}</label>
+            <input id="esc-name-ar" class="form-control" dir="rtl" [ngModel]="nameAr()" (ngModelChange)="nameAr.set($event)" />
+          </div>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="form-label" for="esc-order">{{ 'sla.assignmentRules.evaluationOrder' | translate }}</label>
+            <input id="esc-order" type="number" class="form-control" [ngModel]="evaluationOrder()" (ngModelChange)="evaluationOrder.set($event)" />
+          </div>
+          <label class="flex items-end gap-2 pb-2 text-sm text-slate-700">
+            <input type="checkbox" [ngModel]="isActive()" (ngModelChange)="isActive.set($event)" />
+            {{ 'common.active' | translate }}
+          </label>
+        </div>
+      </div>
+
+      <div class="card space-y-3 p-4">
+        <h2 class="text-sm font-semibold text-slate-800">{{ 'sla.escalationRules.triggerTitle' | translate }}</h2>
+
+        <div>
+          <label class="form-label" for="esc-trigger">{{ 'sla.escalationRules.trigger' | translate }}</label>
+          <select id="esc-trigger" class="form-control" [ngModel]="trigger()" (ngModelChange)="trigger.set($event)">
+            @for (t of triggers; track t.value) {
+              <option [ngValue]="t.value">{{ t.labelKey | translate }}</option>
+            }
+          </select>
+        </div>
+
+        @switch (currentTrigger()?.thresholdKind) {
+          @case ('percent') {
+            <div>
+              <label class="form-label" for="esc-threshold-percent">{{ 'sla.escalationRules.thresholdPercent' | translate }}</label>
+              <input id="esc-threshold-percent" type="number" min="1" max="100" class="form-control w-32" [ngModel]="thresholdPercent()" (ngModelChange)="thresholdPercent.set($event)" />
+            </div>
+          }
+          @case ('minutes') {
+            <div>
+              <label class="form-label" for="esc-threshold-minutes">{{ 'sla.escalationRules.thresholdMinutes' | translate }}</label>
+              <input id="esc-threshold-minutes" type="number" min="1" class="form-control w-32" [ngModel]="thresholdMinutes()" (ngModelChange)="thresholdMinutes.set($event)" />
+              <p class="mt-1 text-xs text-slate-500">{{ 'sla.escalationRules.thresholdMinutesHint' | translate }}</p>
+            </div>
+          }
+          @case ('count') {
+            <div>
+              <label class="form-label" for="esc-threshold-count">{{ 'sla.escalationRules.thresholdCount' | translate }}</label>
+              <input id="esc-threshold-count" type="number" min="1" class="form-control w-32" [ngModel]="thresholdCount()" (ngModelChange)="thresholdCount.set($event)" />
+            </div>
+          }
+        }
+
+        @if (currentTrigger()?.value === 0) {
+          <div>
+            <label class="form-label" for="esc-target-type">{{ 'sla.escalationRules.targetType' | translate }}</label>
+            <select id="esc-target-type" class="form-control w-48" [ngModel]="targetType()" (ngModelChange)="targetType.set($event)">
+              <option [ngValue]="null">{{ 'sla.escalationRules.targetTypeEither' | translate }}</option>
+              <option [ngValue]="0">{{ 'sla.escalationRules.targetTypeFirstResponse' | translate }}</option>
+              <option [ngValue]="1">{{ 'sla.escalationRules.targetTypeResolution' | translate }}</option>
+            </select>
+          </div>
+        }
+      </div>
+
+      <div class="card space-y-2 p-4">
+        <h2 class="text-sm font-semibold text-slate-800">{{ 'sla.conditionsTitle' | translate }}</h2>
+        <p class="text-xs text-slate-500">{{ 'sla.escalationRules.conditionsHint' | translate }}</p>
+        <app-condition-builder [fields]="conditionFields()" [rows]="conditions()" (rowsChange)="conditions.set($event)" />
+      </div>
+
+      <div class="card space-y-3 p-4">
+        <h2 class="text-sm font-semibold text-slate-800">{{ 'sla.escalationRules.actionTitle' | translate }}</h2>
+
+        <div>
+          <label class="form-label" for="esc-action">{{ 'sla.escalationRules.action' | translate }}</label>
+          <select id="esc-action" class="form-control" [ngModel]="action()" (ngModelChange)="action.set($event)">
+            @for (a of actions; track a.value) {
+              <option [ngValue]="a.value">{{ a.labelKey | translate }}</option>
+            }
+          </select>
+        </div>
+
+        @if (currentAction()?.value === 0) {
+          <div>
+            <label class="form-label" for="esc-notify-role">{{ 'sla.escalationRules.notifyRole' | translate }}</label>
+            <select id="esc-notify-role" class="form-control" [ngModel]="actionNotifyRoleId()" (ngModelChange)="actionNotifyRoleId.set($event)">
+              <option value="">{{ 'sla.escalationRules.notifyRoleNone' | translate }}</option>
+              @for (r of roles(); track r.id) {
+                <option [value]="r.id">{{ roleName(r) }}</option>
+              }
+            </select>
+            <p class="mt-1 text-xs text-slate-500">{{ 'sla.escalationRules.notifyManagerHint' | translate }}</p>
+          </div>
+        }
+
+        @if (currentAction()?.target === 'user-or-team') {
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class="form-label" for="esc-target-user">{{ 'sla.assignmentRules.targetUser' | translate }}</label>
+              <select id="esc-target-user" class="form-control" [ngModel]="actionTargetUserId()" (ngModelChange)="actionTargetUserId.set($event)">
+                <option value="">{{ 'common.select' | translate }}</option>
+                @for (u of users(); track u.id) {
+                  <option [value]="u.id">{{ userName(u) }}</option>
+                }
+              </select>
+            </div>
+            <div>
+              <label class="form-label" for="esc-target-team">{{ 'sla.assignmentRules.targetTeam' | translate }}</label>
+              <select id="esc-target-team" class="form-control" [ngModel]="actionTargetTeamId()" (ngModelChange)="actionTargetTeamId.set($event)">
+                <option value="">{{ 'common.select' | translate }}</option>
+                @for (t of teams(); track t.id) {
+                  <option [value]="t.id">{{ teamName(t) }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        }
+
+        @if (currentAction()?.target === 'user') {
+          <div>
+            <label class="form-label" for="esc-target-watcher">{{ 'sla.escalationRules.watcherUser' | translate }}</label>
+            <select id="esc-target-watcher" class="form-control" [ngModel]="actionTargetUserId()" (ngModelChange)="actionTargetUserId.set($event)">
+              <option value="">{{ 'common.select' | translate }}</option>
+              @for (u of users(); track u.id) {
+                <option [value]="u.id">{{ userName(u) }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        @if (currentAction()?.target === 'department') {
+          <div>
+            <label class="form-label" for="esc-target-department">{{ 'sla.assignmentRules.targetDepartment' | translate }}</label>
+            <select id="esc-target-department" class="form-control" [ngModel]="actionTargetDepartmentId()" (ngModelChange)="actionTargetDepartmentId.set($event)">
+              <option value="">{{ 'common.select' | translate }}</option>
+              @for (d of departments(); track d.id) {
+                <option [value]="d.id">{{ departmentName(d) }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="form-label" for="esc-cooldown">{{ 'sla.escalationRules.cooldownMinutes' | translate }}</label>
+            <input id="esc-cooldown" type="number" min="0" class="form-control" [ngModel]="cooldownMinutes()" (ngModelChange)="cooldownMinutes.set($event)" />
+            <p class="mt-1 text-xs text-slate-500">{{ 'sla.escalationRules.cooldownHint' | translate }}</p>
+          </div>
+          <div>
+            <label class="form-label" for="esc-max-fires">{{ 'sla.escalationRules.maxFires' | translate }}</label>
+            <input id="esc-max-fires" type="number" min="0" class="form-control" [ngModel]="maxFiresPerTicket()" (ngModelChange)="maxFiresPerTicket.set($event)" />
+            <p class="mt-1 text-xs text-slate-500">{{ 'sla.escalationRules.maxFiresHint' | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card h-fit space-y-3 p-4">
+      <h2 class="text-sm font-semibold text-slate-800">{{ 'sla.tester.title' | translate }}</h2>
+
+      @if (!isEdit) {
+        <p class="text-xs text-slate-500">{{ 'sla.tester.needsSave' | translate }}</p>
+      } @else {
+        <p class="text-xs text-slate-500">{{ 'sla.escalationRules.testerHint' | translate }}</p>
+
+        <button type="button" class="btn-primary w-full" [disabled]="testerRunning()" (click)="runTest()">
+          {{ 'sla.tester.run' | translate }}
+        </button>
+
+        @if (testerResults(); as results) {
+          @if (results.length === 0) {
+            <p class="text-xs text-slate-500">{{ 'sla.escalationRules.testerEmpty' | translate }}</p>
+          } @else {
+            <ul class="divide-y divide-slate-100 rounded-lg border border-slate-200 text-sm">
+              @for (match of results; track match.ticketId) {
+                <li class="p-2">
+                  <span class="font-medium">{{ match.ticketNumber }}</span>
+                  <p class="text-xs text-slate-500">{{ match.reason }}</p>
+                </li>
+              }
+            </ul>
+          }
+        }
+      }
+    </div>
+  </div>
+}

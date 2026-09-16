@@ -1,0 +1,46 @@
+<div class="space-y-2">
+  @if (rows().length === 0) {
+    <p class="text-xs text-slate-500">{{ 'sla.conditions.empty' | translate }}</p>
+  }
+
+  @for (row of rows(); track $index) {
+    <div class="flex flex-wrap items-center gap-2">
+      <select
+        class="form-control w-40"
+        [ngModel]="row.field"
+        (ngModelChange)="updateField($index, $event)"
+      >
+        @for (field of fields(); track field) {
+          <option [value]="field">{{ field }}</option>
+        }
+      </select>
+
+      <select
+        class="form-control w-36"
+        [ngModel]="row.operator"
+        (ngModelChange)="updateOperator($index, $event)"
+      >
+        @for (op of operators; track op) {
+          <option [value]="op">{{ 'sla.conditions.operator.' + op | translate }}</option>
+        }
+      </select>
+
+      @if (needsValue(row.operator)) {
+        <input
+          class="form-control min-w-40 flex-1"
+          [ngModel]="row.value"
+          (ngModelChange)="updateValue($index, $event)"
+          [placeholder]="isListOperator(row.operator) ? ('sla.conditions.listValueHint' | translate) : ''"
+        />
+      }
+
+      <button type="button" class="btn-secondary px-2 py-1 text-xs text-rose-600" (click)="removeRow($index)">
+        {{ 'common.remove' | translate }}
+      </button>
+    </div>
+  }
+
+  <button type="button" class="btn-secondary text-xs" (click)="addRow()">
+    {{ 'sla.conditions.add' | translate }}
+  </button>
+</div>

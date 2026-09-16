@@ -1,0 +1,63 @@
+<div class="relative">
+  <button
+    type="button"
+    class="relative rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+    [attr.aria-label]="'notifications.bell.label' | translate"
+    [attr.aria-expanded]="open()"
+    (click)="toggle()"
+  >
+    <span aria-hidden="true">🔔</span>
+    @if (unreadCount() > 0) {
+      <span class="absolute -top-0.5 -end-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-semibold text-white">
+        {{ unreadCount() > 99 ? '99+' : unreadCount() }}
+      </span>
+    }
+  </button>
+
+  @if (open()) {
+    <div
+      #panel
+      class="absolute end-0 z-40 mt-2 w-80 max-w-[90vw] rounded-xl border border-slate-200 bg-white shadow-lg"
+      role="dialog"
+      [attr.aria-label]="'notifications.bell.title' | translate"
+    >
+      <div class="flex items-center justify-between border-b border-slate-100 p-3">
+        <h2 class="text-sm font-semibold text-slate-800">{{ 'notifications.bell.title' | translate }}</h2>
+        <button type="button" class="text-xs text-brand-600 hover:underline" (click)="markAllRead()">
+          {{ 'notifications.bell.markAllRead' | translate }}
+        </button>
+      </div>
+
+      <div class="max-h-96 overflow-y-auto">
+        @if (notifications().length === 0 && !loading()) {
+          <p class="p-6 text-center text-sm text-slate-500">{{ 'notifications.bell.empty' | translate }}</p>
+        }
+
+        @for (notification of notifications(); track notification.id) {
+          <button
+            type="button"
+            class="block w-full border-s-2 p-3 text-start hover:bg-slate-50"
+            [class]="notification.readAt ? 'border-transparent' : 'border-brand-500 bg-brand-50/40'"
+            (click)="openNotification(notification)"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <span class="text-sm font-medium text-slate-900">{{ title(notification) }}</span>
+              <span class="shrink-0 text-[11px] text-slate-400">{{ timeAgo(notification) }}</span>
+            </div>
+            <p class="mt-0.5 text-xs" [class]="severityClasses(notification)">{{ body(notification) }}</p>
+          </button>
+        }
+
+        @if (loading()) {
+          <div class="p-3 text-center text-xs text-slate-400">{{ 'common.loading' | translate }}</div>
+        }
+      </div>
+
+      @if (hasMore() && notifications().length > 0) {
+        <button type="button" class="block w-full border-t border-slate-100 p-2 text-center text-xs text-brand-600 hover:bg-slate-50" (click)="loadMore()">
+          {{ 'notifications.bell.loadMore' | translate }}
+        </button>
+      }
+    </div>
+  }
+</div>

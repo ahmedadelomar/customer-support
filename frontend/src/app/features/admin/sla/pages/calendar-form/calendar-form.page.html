@@ -1,0 +1,92 @@
+<app-page-header [titleKey]="isEdit ? 'sla.calendars.editTitle' : 'sla.calendars.newTitle'">
+  <a routerLink="/admin/sla/calendars" class="btn-secondary">{{ 'common.back' | translate }}</a>
+  <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">
+    {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+  </button>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-96 animate-pulse"></div>
+} @else {
+  <div class="space-y-4">
+    <div class="card space-y-4 p-4">
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="form-label" for="cal-name-en">{{ 'sla.calendars.nameEn' | translate }}</label>
+          <input id="cal-name-en" class="form-control" [ngModel]="nameEn()" (ngModelChange)="nameEn.set($event)" />
+        </div>
+        <div>
+          <label class="form-label" for="cal-name-ar">{{ 'sla.calendars.nameAr' | translate }}</label>
+          <input id="cal-name-ar" class="form-control" dir="rtl" [ngModel]="nameAr()" (ngModelChange)="nameAr.set($event)" />
+        </div>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="form-label" for="cal-timezone">{{ 'sla.calendars.timeZone' | translate }}</label>
+          <select id="cal-timezone" class="form-control" [ngModel]="timeZoneId()" (ngModelChange)="timeZoneId.set($event)">
+            @for (tz of timeZones; track tz) {
+              <option [value]="tz">{{ tz }}</option>
+            }
+          </select>
+        </div>
+        <div class="flex items-end gap-4">
+          <label class="flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" [ngModel]="isTwentyFourSeven()" (ngModelChange)="isTwentyFourSeven.set($event)" />
+            {{ 'sla.calendars.twentyFourSeven' | translate }}
+          </label>
+          <label class="flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" [ngModel]="isDefault()" (ngModelChange)="isDefault.set($event)" />
+            {{ 'sla.policies.isDefault' | translate }}
+          </label>
+        </div>
+      </div>
+    </div>
+
+    @if (!isTwentyFourSeven()) {
+      <div class="card space-y-2 p-4">
+        <h2 class="text-sm font-semibold text-slate-800">{{ 'sla.calendars.hoursTitle' | translate }}</h2>
+        <p class="text-xs text-slate-500">{{ 'sla.calendars.hoursHint' | translate }}</p>
+
+        @for (window of hours(); track $index) {
+          <div class="flex flex-wrap items-center gap-2">
+            <select class="form-control w-36" [ngModel]="window.dayOfWeek" (ngModelChange)="updateWindow($index, { dayOfWeek: $event })">
+              @for (day of days; track day.value) {
+                <option [value]="day.value">{{ day.labelKey | translate }}</option>
+              }
+            </select>
+            <input type="time" class="form-control w-32" [ngModel]="window.startTime.slice(0,5)" (ngModelChange)="updateWindow($index, { startTime: $event + ':00' })" />
+            <span class="text-slate-400">{{ 'sla.calendars.to' | translate }}</span>
+            <input type="time" class="form-control w-32" [ngModel]="window.endTime.slice(0,5)" (ngModelChange)="updateWindow($index, { endTime: $event + ':00' })" />
+            <button type="button" class="btn-secondary px-2 py-1 text-xs text-rose-600" (click)="removeWindow($index)">
+              {{ 'common.remove' | translate }}
+            </button>
+          </div>
+        }
+
+        <button type="button" class="btn-secondary text-xs" (click)="addWindow()">{{ 'sla.calendars.addWindow' | translate }}</button>
+      </div>
+    }
+
+    <div class="card space-y-2 p-4">
+      <h2 class="text-sm font-semibold text-slate-800">{{ 'sla.calendars.holidaysTitle' | translate }}</h2>
+
+      @for (holiday of holidays(); track $index) {
+        <div class="flex flex-wrap items-center gap-2">
+          <input type="date" class="form-control w-40" [ngModel]="holiday.date" (ngModelChange)="updateHoliday($index, { date: $event })" />
+          <input class="form-control w-36" [placeholder]="'sla.calendars.holidayNameEn' | translate" [ngModel]="holiday.nameEn" (ngModelChange)="updateHoliday($index, { nameEn: $event })" />
+          <input class="form-control w-36" dir="rtl" [placeholder]="'sla.calendars.holidayNameAr' | translate" [ngModel]="holiday.nameAr" (ngModelChange)="updateHoliday($index, { nameAr: $event })" />
+          <label class="flex items-center gap-1.5 text-xs text-slate-600">
+            <input type="checkbox" [ngModel]="holiday.isRecurringAnnually" (ngModelChange)="updateHoliday($index, { isRecurringAnnually: $event })" />
+            {{ 'sla.calendars.recurringAnnually' | translate }}
+          </label>
+          <button type="button" class="btn-secondary px-2 py-1 text-xs text-rose-600" (click)="removeHoliday($index)">
+            {{ 'common.remove' | translate }}
+          </button>
+        </div>
+      }
+
+      <button type="button" class="btn-secondary text-xs" (click)="addHoliday()">{{ 'sla.calendars.addHoliday' | translate }}</button>
+    </div>
+  </div>
+}

@@ -1,0 +1,163 @@
+<app-page-header [titleKey]="isEdit ? 'sla.assignmentRules.editTitle' : 'sla.assignmentRules.newTitle'">
+  <a routerLink="/admin/sla/assignment-rules" class="btn-secondary">{{ 'common.back' | translate }}</a>
+  <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">
+    {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+  </button>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-96 animate-pulse"></div>
+} @else {
+  <div class="grid gap-4 lg:grid-cols-[1fr_22rem]">
+    <div class="space-y-4">
+      <div class="card space-y-4 p-4">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="form-label" for="rule-name-en">{{ 'sla.assignmentRules.nameEn' | translate }}</label>
+            <input id="rule-name-en" class="form-control" [ngModel]="nameEn()" (ngModelChange)="nameEn.set($event)" />
+          </div>
+          <div>
+            <label class="form-label" for="rule-name-ar">{{ 'sla.assignmentRules.nameAr' | translate }}</label>
+            <input id="rule-name-ar" class="form-control" dir="rtl" [ngModel]="nameAr()" (ngModelChange)="nameAr.set($event)" />
+          </div>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="form-label" for="rule-order">{{ 'sla.assignmentRules.evaluationOrder' | translate }}</label>
+            <input id="rule-order" type="number" class="form-control" [ngModel]="evaluationOrder()" (ngModelChange)="evaluationOrder.set($event)" />
+          </div>
+          <label class="flex items-end gap-2 pb-2 text-sm text-slate-700">
+            <input type="checkbox" [ngModel]="isActive()" (ngModelChange)="isActive.set($event)" />
+            {{ 'common.active' | translate }}
+          </label>
+        </div>
+      </div>
+
+      <div class="card space-y-2 p-4">
+        <h2 class="text-sm font-semibold text-slate-800">{{ 'sla.conditionsTitle' | translate }}</h2>
+        <p class="text-xs text-slate-500">{{ 'sla.assignmentRules.conditionsHint' | translate }}</p>
+        <app-condition-builder [fields]="conditionFields()" [rows]="conditions()" (rowsChange)="conditions.set($event)" />
+      </div>
+
+      <div class="card space-y-3 p-4">
+        <h2 class="text-sm font-semibold text-slate-800">{{ 'sla.assignmentRules.strategyTitle' | translate }}</h2>
+
+        <div>
+          <label class="form-label" for="rule-strategy">{{ 'sla.assignmentRules.strategy' | translate }}</label>
+          <select id="rule-strategy" class="form-control" [ngModel]="strategy()" (ngModelChange)="strategy.set($event)">
+            @for (s of strategies; track s.value) {
+              <option [ngValue]="s.value">{{ s.labelKey | translate }}</option>
+            }
+          </select>
+          <p class="mt-1 text-xs text-slate-500">
+            {{ currentStrategyExplainKey() | translate }}
+          </p>
+        </div>
+
+        @if (needsTeamOrDepartment()) {
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class="form-label" for="rule-department">{{ 'sla.assignmentRules.targetDepartment' | translate }}</label>
+              <select id="rule-department" class="form-control" [ngModel]="targetDepartmentId()" (ngModelChange)="targetDepartmentId.set($event)">
+                <option value="">{{ 'common.select' | translate }}</option>
+                @for (d of departments(); track d.id) {
+                  <option [value]="d.id">{{ departmentName(d) }}</option>
+                }
+              </select>
+            </div>
+            <div>
+              <label class="form-label" for="rule-team">{{ 'sla.assignmentRules.targetTeam' | translate }}</label>
+              <select id="rule-team" class="form-control" [ngModel]="targetTeamId()" (ngModelChange)="targetTeamId.set($event)">
+                <option value="">{{ 'common.select' | translate }}</option>
+                @for (t of filteredTeams(); track t.id) {
+                  <option [value]="t.id">{{ teamName(t) }}</option>
+                }
+              </select>
+              @if (strategy() === 0) {
+                <p class="mt-1 text-xs text-amber-600">{{ 'sla.assignmentRules.roundRobinNeedsTeam' | translate }}</p>
+              }
+            </div>
+          </div>
+        }
+
+        @if (needsUser()) {
+          <div>
+            <label class="form-label" for="rule-user">{{ 'sla.assignmentRules.targetUser' | translate }}</label>
+            <select id="rule-user" class="form-control" [ngModel]="targetUserId()" (ngModelChange)="targetUserId.set($event)">
+              <option value="">{{ 'common.select' | translate }}</option>
+              @for (u of users(); track u.id) {
+                <option [value]="u.id">{{ userName(u) }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        <div class="flex flex-wrap gap-4">
+          <label class="flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" [ngModel]="respectAgentAvailability()" (ngModelChange)="respectAgentAvailability.set($event)" />
+            {{ 'sla.assignmentRules.respectAvailability' | translate }}
+          </label>
+          <label class="flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" [ngModel]="stopProcessing()" (ngModelChange)="stopProcessing.set($event)" />
+            {{ 'sla.assignmentRules.stopProcessing' | translate }}
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card h-fit space-y-3 p-4">
+      <h2 class="text-sm font-semibold text-slate-800">{{ 'sla.tester.title' | translate }}</h2>
+
+      @if (!isEdit) {
+        <p class="text-xs text-slate-500">{{ 'sla.tester.needsSave' | translate }}</p>
+      } @else {
+        <p class="text-xs text-slate-500">{{ 'sla.tester.hint' | translate }}</p>
+
+        <div class="flex gap-2">
+          <input
+            class="form-control flex-1"
+            [placeholder]="'sla.tester.searchPlaceholder' | translate"
+            [ngModel]="testerSearch()"
+            (ngModelChange)="testerSearch.set($event)"
+            (keydown.enter)="searchTickets()"
+          />
+          <button type="button" class="btn-secondary" (click)="searchTickets()">{{ 'common.search' | translate }}</button>
+        </div>
+
+        @if (testerResults().length > 0) {
+          <ul class="divide-y divide-slate-100 rounded-lg border border-slate-200 text-sm">
+            @for (t of testerResults(); track t.id) {
+              <li>
+                <button type="button" class="block w-full p-2 text-start hover:bg-slate-50" (click)="selectTicket(t)">
+                  <span class="font-medium">{{ t.number }}</span> — {{ t.subject }}
+                </button>
+              </li>
+            }
+          </ul>
+        }
+
+        @if (testerSelectedTicket(); as ticket) {
+          <div class="rounded-lg border border-slate-200 p-2 text-sm">
+            <span class="font-medium">{{ ticket.number }}</span> — {{ ticket.subject }}
+          </div>
+          <button type="button" class="btn-primary w-full" [disabled]="testerRunning()" (click)="runTest()">
+            {{ 'sla.tester.run' | translate }}
+          </button>
+        }
+
+        @if (testerResult(); as result) {
+          <div class="rounded-lg border p-3 text-sm" [class]="result.conditionsMatched ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-slate-50'">
+            <p class="font-medium">{{ (result.conditionsMatched ? 'sla.tester.matched' : 'sla.tester.notMatched') | translate }}</p>
+            <p class="mt-1 text-slate-600">{{ result.reason }}</p>
+            @if (result.conditionsMatched) {
+              <p class="mt-1 text-xs text-slate-500">
+                {{ 'sla.tester.candidates' | translate: { candidates: result.candidateCount, eligible: result.eligibleCount } }}
+              </p>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+}

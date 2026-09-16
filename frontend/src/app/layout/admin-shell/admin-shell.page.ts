@@ -5,6 +5,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/auth/auth.service';
 import { PERMISSIONS } from '../../core/permissions';
 import { LanguageService } from '../../core/services/language.service';
+import { NotificationBellComponent } from '../notifications/ui/notification-bell/notification-bell.component';
 
 interface NavItem {
   labelKey: string;
@@ -20,7 +21,7 @@ interface NavItem {
  */
 @Component({
   selector: 'app-admin-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgClass, TranslatePipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgClass, TranslatePipe, NotificationBellComponent],
   templateUrl: './admin-shell.page.html',
 })
 export class AdminShellPage {
@@ -56,6 +57,30 @@ export class AdminShellPage {
       icon: '◷',
       route: '/admin/ticket-statuses',
       permissions: [PERMISSIONS.tickets.manageStatuses],
+    },
+    {
+      labelKey: 'sla.policies.title',
+      icon: '⏱',
+      route: '/admin/sla/policies',
+      permissions: [PERMISSIONS.sla.managePolicies],
+    },
+    {
+      labelKey: 'sla.calendars.title',
+      icon: '📅',
+      route: '/admin/sla/calendars',
+      permissions: [PERMISSIONS.sla.manageCalendars],
+    },
+    {
+      labelKey: 'sla.assignmentRules.title',
+      icon: '🔀',
+      route: '/admin/sla/assignment-rules',
+      permissions: [PERMISSIONS.sla.manageAssignmentRules],
+    },
+    {
+      labelKey: 'sla.escalationRules.title',
+      icon: '📣',
+      route: '/admin/sla/escalation-rules',
+      permissions: [PERMISSIONS.sla.manageEscalationRules],
     },
     {
       labelKey: 'nav.branches',

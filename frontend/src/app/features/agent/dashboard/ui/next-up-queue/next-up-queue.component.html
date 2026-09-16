@@ -26,15 +26,11 @@
           {{ priorityName(item) }}
         </span>
 
-        <span class="shrink-0 text-xs" [class]="dueBadgeClasses(item)">
-          @if (item.isResolutionBreached || item.isFirstResponseBreached) {
-            {{ 'tickets.kpis.breached' | translate }}
-          } @else if (item.resolutionDueAt) {
-            {{ relativeTime(item.resolutionDueAt) }}
-          } @else {
-            {{ 'tickets.noDueDate' | translate }}
-          }
-        </span>
+        <app-sla-badge
+          class="shrink-0"
+          [dueAt]="item.resolutionDueAt"
+          [isBreached]="item.isResolutionBreached || item.isFirstResponseBreached"
+        />
 
         <a class="btn-secondary shrink-0 px-3 py-1.5 text-xs" [routerLink]="['/agent/tickets', item.id]">
           {{ 'dashboard.queue.open' | translate }}

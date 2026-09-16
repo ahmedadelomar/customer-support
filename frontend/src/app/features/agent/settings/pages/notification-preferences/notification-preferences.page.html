@@ -1,0 +1,67 @@
+<app-page-header titleKey="notifications.preferences.title" subtitleKey="notifications.preferences.subtitle">
+  <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">
+    {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+  </button>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-64 animate-pulse"></div>
+} @else {
+  <div class="space-y-4">
+    <div class="card space-y-2 p-4">
+      <h2 class="text-sm font-semibold text-slate-800">{{ 'notifications.preferences.quietHoursTitle' | translate }}</h2>
+      <p class="text-xs text-slate-500">{{ 'notifications.preferences.quietHoursHint' | translate }}</p>
+      <div class="flex flex-wrap items-center gap-3">
+        <div>
+          <label class="form-label" for="quiet-start">{{ 'notifications.preferences.quietHoursStart' | translate }}</label>
+          <input id="quiet-start" type="time" class="form-control w-32" [ngModel]="quietHoursStart()" (ngModelChange)="quietHoursStart.set($event)" />
+        </div>
+        <div>
+          <label class="form-label" for="quiet-end">{{ 'notifications.preferences.quietHoursEnd' | translate }}</label>
+          <input id="quiet-end" type="time" class="form-control w-32" [ngModel]="quietHoursEnd()" (ngModelChange)="quietHoursEnd.set($event)" />
+        </div>
+      </div>
+    </div>
+
+    @for (group of groups(); track group.area) {
+      <div class="card overflow-x-auto p-4">
+        <h2 class="mb-2 text-sm font-semibold text-slate-800">{{ group.labelKey | translate }}</h2>
+        <table class="w-full min-w-[32rem] text-sm">
+          <thead>
+            <tr class="text-xs text-slate-500">
+              <th class="p-2 text-start">{{ 'notifications.preferences.event' | translate }}</th>
+              <th class="p-2 text-center">{{ 'notifications.preferences.inApp' | translate }}</th>
+              <th class="p-2 text-center">{{ 'notifications.preferences.email' | translate }}</th>
+              <th class="p-2 text-center">{{ 'notifications.preferences.sms' | translate }}</th>
+              <th class="p-2 text-center">{{ 'notifications.preferences.push' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of group.rows; track row.eventType) {
+              <tr class="border-t border-slate-100">
+                <td class="p-2">
+                  <span>{{ 'notifications.eventType.' + row.eventType | translate }}</span>
+                  @if (row.isUsingDefault) {
+                    <span class="chip ms-1 border-slate-200 bg-slate-100 text-slate-500">{{ 'common.default' | translate }}</span>
+                  }
+                </td>
+                <td class="p-2 text-center">
+                  <input type="checkbox" [ngModel]="row.viaInApp" (ngModelChange)="toggle(row.eventType, 'viaInApp', $event)" />
+                </td>
+                <td class="p-2 text-center">
+                  <input type="checkbox" [ngModel]="row.viaEmail" (ngModelChange)="toggle(row.eventType, 'viaEmail', $event)" />
+                </td>
+                <td class="p-2 text-center">
+                  <input type="checkbox" [ngModel]="row.viaSms" (ngModelChange)="toggle(row.eventType, 'viaSms', $event)" />
+                </td>
+                <td class="p-2 text-center">
+                  <input type="checkbox" [ngModel]="row.viaPush" (ngModelChange)="toggle(row.eventType, 'viaPush', $event)" />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}

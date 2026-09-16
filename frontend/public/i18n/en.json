@@ -37,7 +37,13 @@
     "language": {
       "ar": "Arabic",
       "en": "English"
-    }
+    },
+    "deleted": "Deleted.",
+    "created": "Created.",
+    "updated": "Updated.",
+    "remove": "Remove",
+    "default": "Default",
+    "notFound": "Not found."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -999,6 +1005,249 @@
       "Reports": "Reports",
       "Administration": "Administration",
       "Integrations": "Integrations"
+    }
+  },
+  "sla": {
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "conditionsTitle": "Conditions",
+    "conditions": {
+      "empty": "No conditions — this rule matches every ticket.",
+      "add": "Add condition",
+      "listValueHint": "Comma-separated values",
+      "operator": {
+        "Equals": "Equals",
+        "NotEquals": "Not equals",
+        "In": "In",
+        "NotIn": "Not in",
+        "Contains": "Contains",
+        "GreaterThan": "Greater than",
+        "LessThan": "Less than",
+        "IsNull": "Is empty",
+        "IsNotNull": "Is not empty"
+      }
+    },
+    "tester": {
+      "title": "Rule tester",
+      "needsSave": "Save the rule first to use the tester.",
+      "hint": "Pick an existing ticket to see what this rule would do, without changing anything.",
+      "searchPlaceholder": "Search by ticket number or subject",
+      "run": "Run test",
+      "matched": "Conditions matched",
+      "notMatched": "Conditions did not match",
+      "candidates": "{{candidates}} candidate(s), {{eligible}} eligible"
+    },
+    "badge": {
+      "none": "No SLA",
+      "left": "{{hours}}h {{minutes}}m left",
+      "overdue": "Overdue by {{hours}}h {{minutes}}m",
+      "paused": "Paused ({{hours}}h {{minutes}}m)"
+    },
+    "policies": {
+      "title": "SLA Policies",
+      "subtitle": "Response and resolution targets by priority.",
+      "add": "New policy",
+      "newTitle": "New SLA policy",
+      "editTitle": "Edit SLA policy",
+      "nameEn": "Name (English)",
+      "nameAr": "Name (Arabic)",
+      "description": "Description",
+      "calendar": "Business calendar",
+      "evaluationOrder": "Evaluation order",
+      "warningThreshold": "Warning threshold (%)",
+      "isDefault": "Default policy",
+      "pauseOnPendingCustomer": "Pause resolution clock on Pending Customer",
+      "conditionsTitle": "Conditions",
+      "conditionsHint": "All conditions must match for this policy to apply. Leave empty for a policy that matches any ticket (typically the default).",
+      "targetsTitle": "Targets by priority",
+      "targetsHint": "Working minutes allowed before each commitment is due. Leave a priority at 0 to give it no clock.",
+      "targetsCoverageHint": "A non-default policy needs a target for every active priority, or a ticket at an uncovered priority will get no clock.",
+      "priority": "Priority",
+      "firstResponseMinutes": "First response (minutes)",
+      "resolutionMinutes": "Resolution (minutes)",
+      "previewTitle": "Preview",
+      "previewNeedsSave": "Save the policy first to use the preview.",
+      "arrivalTime": "Arrival time",
+      "runPreview": "Compute due times",
+      "summary": "{{calendar}} · order {{order}} · {{targets}} target(s)"
+    },
+    "calendars": {
+      "title": "Business Calendars",
+      "subtitle": "Working hours and holidays SLA targets measure against.",
+      "add": "New calendar",
+      "newTitle": "New business calendar",
+      "editTitle": "Edit business calendar",
+      "nameEn": "Name (English)",
+      "nameAr": "Name (Arabic)",
+      "timeZone": "Time zone",
+      "twentyFourSeven": "24/7",
+      "inUseHint": "This calendar is used by an SLA policy and cannot be deleted.",
+      "needsHoursOrTwentyFourSeven": "A calendar needs at least one working window, or must be marked 24/7.",
+      "hoursTitle": "Working hours",
+      "hoursHint": "Add one row per working window. Multiple windows on the same day make a split shift.",
+      "addWindow": "Add window",
+      "to": "to",
+      "holidaysTitle": "Holidays",
+      "holidayNameEn": "Name (English)",
+      "holidayNameAr": "Name (Arabic)",
+      "recurringAnnually": "Recurs every year",
+      "addHoliday": "Add holiday",
+      "day": {
+        "sunday": "Sunday",
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday"
+      }
+    },
+    "assignmentRules": {
+      "title": "Assignment Rules",
+      "subtitle": "Rules route new tickets to an agent automatically.",
+      "add": "New rule",
+      "newTitle": "New assignment rule",
+      "editTitle": "Edit assignment rule",
+      "nameEn": "Name (English)",
+      "nameAr": "Name (Arabic)",
+      "evaluationOrder": "Evaluation order",
+      "conditionsHint": "All conditions must match for this rule to apply. Leave empty to match every ticket.",
+      "strategyTitle": "Routing strategy",
+      "strategy": "Strategy",
+      "targetDepartment": "Target department",
+      "targetTeam": "Target team",
+      "targetUser": "Target agent",
+      "roundRobinNeedsTeam": "Round robin needs a target team — it advances that team’s rotation cursor.",
+      "respectAvailability": "Skip agents who are away or over capacity",
+      "stopProcessing": "Stop evaluating later rules once this one matches",
+      "stats": "{{matches}} match(es) · last matched {{lastMatched}}",
+      "neverMatched": "never",
+      "strategyOption": {
+        "roundRobin": "Round robin",
+        "loadBalanced": "Load balanced",
+        "skillBased": "Skill based",
+        "direct": "Direct",
+        "queueOnly": "Queue only"
+      },
+      "strategyExplain": {
+        "roundRobin": "Cycles through the target team’s members in order, so work is spread evenly over time.",
+        "loadBalanced": "Picks whoever on the target has the fewest open tickets right now.",
+        "skillBased": "Picks the highest-skilled agent for this ticket’s category among the target’s members.",
+        "direct": "Always assigns to one specific agent.",
+        "queueOnly": "Leaves the ticket in the team queue for an agent to pick up — nobody is assigned automatically."
+      }
+    },
+    "escalationRules": {
+      "title": "Escalation Rules",
+      "subtitle": "At-risk tickets escalate on a timer, whether or not anyone is watching.",
+      "add": "New rule",
+      "newTitle": "New escalation rule",
+      "editTitle": "Edit escalation rule",
+      "nameEn": "Name (English)",
+      "nameAr": "Name (Arabic)",
+      "conditionsHint": "Extra conditions narrowing which tickets this rule applies to, on top of its trigger.",
+      "triggerTitle": "Trigger",
+      "trigger": "Trigger",
+      "thresholdPercent": "Threshold (% of SLA target consumed)",
+      "thresholdMinutes": "Threshold (idle minutes)",
+      "thresholdMinutesHint": "Measured in working minutes, so a ticket left over a weekend does not escalate the moment work resumes on Sunday.",
+      "thresholdCount": "Threshold (count)",
+      "targetType": "SLA commitment watched",
+      "targetTypeEither": "Either commitment",
+      "targetTypeFirstResponse": "First response",
+      "targetTypeResolution": "Resolution",
+      "actionTitle": "Action",
+      "action": "Action",
+      "notifyRole": "Also notify role",
+      "notifyRoleNone": "No additional role",
+      "notifyManagerHint": "Always notifies the ticket’s department manager, if one is set; the role above is notified in addition.",
+      "watcherUser": "Agent to add as watcher",
+      "cooldownMinutes": "Cooldown (minutes)",
+      "cooldownHint": "Prevents this rule firing again on the same ticket within this window.",
+      "maxFires": "Max fires per ticket",
+      "maxFiresHint": "Zero means unlimited.",
+      "stats": "{{fires}} fire(s) · last fired {{lastFired}}",
+      "testerHint": "Lists the currently open tickets this rule would fire on right now. Fires nothing.",
+      "testerEmpty": "No open tickets currently match this rule.",
+      "triggerOption": {
+        "approachingBreach": "Approaching SLA breach",
+        "breached": "SLA already breached",
+        "noAgentResponse": "No agent response",
+        "customerReplyCount": "Customer reply count",
+        "reopenCount": "Reopen count"
+      },
+      "actionOption": {
+        "notifyManager": "Notify manager",
+        "reassign": "Reassign",
+        "raisePriority": "Raise priority",
+        "changeDepartment": "Change department",
+        "increaseEscalationLevel": "Increase escalation level",
+        "addWatcher": "Add watcher"
+      }
+    },
+    "log": {
+      "title": "Automation Decision Log",
+      "subtitle": "Every assignment and escalation rule evaluation — matched, skipped or failed.",
+      "ticketId": "Ticket ID",
+      "ruleType": "Rule type",
+      "assignmentRule": "Assignment rule",
+      "escalationRule": "Escalation rule",
+      "outcome": "Outcome",
+      "matched": "Matched",
+      "skipped": "Skipped",
+      "failed": "Failed",
+      "occurredAt": "Occurred at",
+      "ticket": "Ticket",
+      "rule": "Rule",
+      "reason": "Reason"
+    }
+  },
+  "notifications": {
+    "bell": {
+      "label": "Notifications",
+      "title": "Notifications",
+      "empty": "No notifications yet.",
+      "markAllRead": "Mark all read",
+      "loadMore": "Load more"
+    },
+    "preferences": {
+      "title": "Notification Preferences",
+      "subtitle": "Choose how you’re alerted for each kind of event.",
+      "navLabel": "Notifications",
+      "quietHoursTitle": "Quiet hours",
+      "quietHoursHint": "External channels (email, SMS, push) are deferred during this window. In-app notifications and critical alerts always come through immediately.",
+      "quietHoursStart": "Start",
+      "quietHoursEnd": "End",
+      "event": "Event",
+      "inApp": "In-app",
+      "email": "Email",
+      "sms": "SMS",
+      "push": "Push",
+      "area": {
+        "tickets": "Tickets",
+        "sla": "SLA",
+        "tasks": "Tasks",
+        "collaboration": "Collaboration"
+      }
+    },
+    "eventType": {
+      "ticket": {
+        "assigned": "A ticket is assigned to you",
+        "unassigned": "A ticket is unassigned from you",
+        "transferred": "A ticket you owned is transferred",
+        "mentioned": "You’re @mentioned",
+        "escalated": "A ticket you’re involved with escalates"
+      },
+      "sla": {
+        "warning": "A ticket is approaching its SLA target",
+        "breached": "An SLA target is breached"
+      },
+      "task": {
+        "assigned": "A task is assigned to you"
+      },
+      "reminder": {
+        "due": "A reminder is due"
+      }
     }
   }
 }

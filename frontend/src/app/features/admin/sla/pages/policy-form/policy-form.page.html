@@ -1,0 +1,149 @@
+<app-page-header [titleKey]="isEdit ? 'sla.policies.editTitle' : 'sla.policies.newTitle'">
+  <a routerLink="/admin/sla/policies" class="btn-secondary">{{ 'common.back' | translate }}</a>
+  <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">
+    {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+  </button>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-96 animate-pulse"></div>
+} @else {
+  <div class="grid gap-4 lg:grid-cols-[1fr_20rem]">
+    <div class="space-y-4">
+      <div class="card space-y-4 p-4">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="form-label" for="policy-name-en">{{ 'sla.policies.nameEn' | translate }}</label>
+            <input id="policy-name-en" class="form-control" [ngModel]="nameEn()" (ngModelChange)="nameEn.set($event)" />
+          </div>
+          <div>
+            <label class="form-label" for="policy-name-ar">{{ 'sla.policies.nameAr' | translate }}</label>
+            <input id="policy-name-ar" class="form-control" dir="rtl" [ngModel]="nameAr()" (ngModelChange)="nameAr.set($event)" />
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label" for="policy-description">{{ 'sla.policies.description' | translate }}</label>
+          <textarea id="policy-description" class="form-control" rows="2" [ngModel]="description()" (ngModelChange)="description.set($event)"></textarea>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div>
+            <label class="form-label" for="policy-calendar">{{ 'sla.policies.calendar' | translate }}</label>
+            <select id="policy-calendar" class="form-control" [ngModel]="businessCalendarId()" (ngModelChange)="businessCalendarId.set($event)">
+              @for (option of calendarOptions(); track option.id) {
+                <option [value]="option.id">{{ option.name }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="policy-order">{{ 'sla.policies.evaluationOrder' | translate }}</label>
+            <input id="policy-order" type="number" class="form-control" [ngModel]="evaluationOrder()" (ngModelChange)="evaluationOrder.set($event)" />
+          </div>
+          <div>
+            <label class="form-label" for="policy-warning">{{ 'sla.policies.warningThreshold' | translate }}</label>
+            <input id="policy-warning" type="number" min="1" max="99" class="form-control" [ngModel]="warningThresholdPercent()" (ngModelChange)="warningThresholdPercent.set($event)" />
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-4">
+          <label class="flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" [ngModel]="isDefault()" (ngModelChange)="isDefault.set($event)" />
+            {{ 'sla.policies.isDefault' | translate }}
+          </label>
+          <label class="flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" [ngModel]="isActive()" (ngModelChange)="isActive.set($event)" />
+            {{ 'common.active' | translate }}
+          </label>
+          <label class="flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" [ngModel]="pauseOnPendingCustomer()" (ngModelChange)="pauseOnPendingCustomer.set($event)" />
+            {{ 'sla.policies.pauseOnPendingCustomer' | translate }}
+          </label>
+        </div>
+      </div>
+
+      <div class="card space-y-2 p-4">
+        <h2 class="text-sm font-semibold text-slate-800">{{ 'sla.policies.conditionsTitle' | translate }}</h2>
+        <p class="text-xs text-slate-500">{{ 'sla.policies.conditionsHint' | translate }}</p>
+        <app-condition-builder [fields]="conditionFields()" [rows]="conditions()" (rowsChange)="conditions.set($event)" />
+      </div>
+
+      <div class="card space-y-2 p-4">
+        <h2 class="text-sm font-semibold text-slate-800">{{ 'sla.policies.targetsTitle' | translate }}</h2>
+        <p class="text-xs text-slate-500">{{ 'sla.policies.targetsHint' | translate }}</p>
+
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[28rem] text-sm">
+            <thead>
+              <tr class="text-start text-xs text-slate-500">
+                <th class="p-2 text-start">{{ 'sla.policies.priority' | translate }}</th>
+                <th class="p-2 text-start">{{ 'sla.policies.firstResponseMinutes' | translate }}</th>
+                <th class="p-2 text-start">{{ 'sla.policies.resolutionMinutes' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of targets(); track row.priorityId; let i = $index) {
+                <tr class="border-t border-slate-100">
+                  <td class="p-2 font-medium text-slate-700">{{ row.priorityName }}</td>
+                  <td class="p-2">
+                    <input
+                      type="number" min="0" class="form-control w-28"
+                      [ngModel]="row.firstResponseMinutes"
+                      (ngModelChange)="updateTarget(i, 'firstResponseMinutes', $event)"
+                    />
+                    <span class="ms-1 text-xs text-slate-400">{{ humanDuration(row.firstResponseMinutes) }}</span>
+                  </td>
+                  <td class="p-2">
+                    <input
+                      type="number" min="0" class="form-control w-28"
+                      [ngModel]="row.resolutionMinutes"
+                      (ngModelChange)="updateTarget(i, 'resolutionMinutes', $event)"
+                    />
+                    <span class="ms-1 text-xs text-slate-400">{{ humanDuration(row.resolutionMinutes) }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="text-xs text-amber-600">{{ 'sla.policies.targetsCoverageHint' | translate }}</p>
+      </div>
+    </div>
+
+    <div class="card h-fit space-y-3 p-4">
+      <h2 class="text-sm font-semibold text-slate-800">{{ 'sla.policies.previewTitle' | translate }}</h2>
+
+      @if (!isEdit) {
+        <p class="text-xs text-slate-500">{{ 'sla.policies.previewNeedsSave' | translate }}</p>
+      } @else {
+        <div>
+          <label class="form-label" for="preview-priority">{{ 'sla.policies.priority' | translate }}</label>
+          <select id="preview-priority" class="form-control" [ngModel]="previewPriorityId()" (ngModelChange)="previewPriorityId.set($event)">
+            <option value="">{{ 'common.select' | translate }}</option>
+            @for (row of targets(); track row.priorityId) {
+              <option [value]="row.priorityId">{{ row.priorityName }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="preview-arrival">{{ 'sla.policies.arrivalTime' | translate }}</label>
+          <input id="preview-arrival" type="datetime-local" class="form-control" [ngModel]="previewArrival()" (ngModelChange)="previewArrival.set($event)" />
+        </div>
+        <button type="button" class="btn-secondary w-full" [disabled]="!previewPriorityId() || previewing()" (click)="runPreview()">
+          {{ 'sla.policies.runPreview' | translate }}
+        </button>
+
+        @if (previewResult()) {
+          <div class="rounded-lg border border-slate-200 p-3 text-sm">
+            @if (previewResult()!.note) {
+              <p class="text-amber-600">{{ previewResult()!.note }}</p>
+            } @else {
+              <p><span class="text-slate-500">{{ 'sla.policies.firstResponseMinutes' | translate }}:</span> {{ previewResult()!.firstResponseDueAt | date: 'medium' }}</p>
+              <p class="mt-1"><span class="text-slate-500">{{ 'sla.policies.resolutionMinutes' | translate }}:</span> {{ previewResult()!.resolutionDueAt | date: 'medium' }}</p>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+}

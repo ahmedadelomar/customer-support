@@ -151,7 +151,7 @@
 </div>
 
 <ng-template #slaTemplate let-row>
-  <span [class]="slaClasses(row)">{{ slaLabel(row) }}</span>
+  <app-sla-badge [dueAt]="row.resolutionDueAt" [isBreached]="row.isFirstResponseBreached || row.isResolutionBreached" />
 </ng-template>
 
 @if (canBulkAssign() && selectedTicketIds().length > 0) {

@@ -1,0 +1,46 @@
+<app-page-header titleKey="sla.assignmentRules.title" subtitleKey="sla.assignmentRules.subtitle">
+  <a routerLink="/admin/sla/log" class="btn-secondary">{{ 'sla.log.title' | translate }}</a>
+  <a routerLink="/admin/sla/assignment-rules/new" class="btn-primary">{{ 'sla.assignmentRules.add' | translate }}</a>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-64 animate-pulse"></div>
+} @else if (rules().length === 0) {
+  <div class="card p-8 text-center text-slate-500">{{ 'common.noResults' | translate }}</div>
+} @else {
+  <div class="card divide-y divide-slate-100">
+    @for (rule of rules(); track rule.id; let i = $index) {
+      <div class="flex flex-wrap items-center gap-3 p-3" [class.opacity-50]="!rule.isActive">
+        <div class="flex flex-col gap-0.5">
+          <button type="button" class="text-slate-400 hover:text-slate-700 disabled:opacity-30" [disabled]="i === 0" (click)="moveUp(i)">▲</button>
+          <button type="button" class="text-slate-400 hover:text-slate-700 disabled:opacity-30" [disabled]="i === rules().length - 1" (click)="moveDown(i)">▼</button>
+        </div>
+
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <a [routerLink]="['/admin/sla/assignment-rules', rule.id]" class="font-medium text-slate-900 hover:underline">{{ name(rule) }}</a>
+            <span class="chip border-slate-200 bg-slate-100 text-slate-600">{{ strategyLabelKey(rule) | translate }}</span>
+            @if (!rule.isActive) {
+              <span class="chip border-slate-200 bg-slate-100 text-slate-500">{{ 'admin.categories.inactive' | translate }}</span>
+            }
+          </div>
+          <p class="mt-0.5 text-xs text-slate-500">
+            {{ 'sla.assignmentRules.stats' | translate: { matches: rule.matchCount, lastMatched: (rule.lastMatchedAt | date: 'short') || ('sla.assignmentRules.neverMatched' | translate) } }}
+          </p>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button type="button" class="btn-secondary px-2 py-1 text-xs" (click)="toggleActive(rule)">
+            {{ (rule.isActive ? 'sla.deactivate' : 'sla.activate') | translate }}
+          </button>
+          <a [routerLink]="['/admin/sla/assignment-rules', rule.id]" class="btn-secondary px-2 py-1 text-xs">
+            {{ 'common.edit' | translate }}
+          </a>
+          <button type="button" class="btn-secondary px-2 py-1 text-xs text-rose-600" (click)="delete(rule)">
+            {{ 'common.delete' | translate }}
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+}

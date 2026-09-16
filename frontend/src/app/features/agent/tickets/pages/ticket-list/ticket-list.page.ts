@@ -13,6 +13,7 @@ import type { DataTableColumn, SortState } from '../../../../../shared/ui/data-t
 import { PageHeaderComponent } from '../../../../../shared/ui/page-header/page-header.component';
 import { PaginationComponent } from '../../../../../shared/ui/pagination/pagination.component';
 import { SearchInputComponent } from '../../../../../shared/ui/search-input/search-input.component';
+import { SlaBadgeComponent } from '../../../../../shared/ui/sla-badge/sla-badge.component';
 import { StateCardComponent } from '../../../../../shared/ui/state-card/state-card.component';
 import { relativeTime } from '../../../../../shared/utils/relative-time';
 import { SavedTicketViewsService } from '../../data-access/saved-ticket-views.service';
@@ -41,6 +42,7 @@ import { BulkAssignDialogComponent } from '../../ui/bulk-assign-dialog/bulk-assi
     PageHeaderComponent,
     PaginationComponent,
     SearchInputComponent,
+    SlaBadgeComponent,
     StateCardComponent,
     HasPermissionDirective,
     BulkAssignDialogComponent,
@@ -280,7 +282,7 @@ export class TicketListPage implements OnInit {
     void this.#router.navigate(['/agent/tickets', row.id]);
   }
 
-  /** Relative due-date label; the caller styles it red/amber via `slaClasses`. */
+  /** Plain-text value for the SLA column — the visible cell renders `app-sla-badge` instead (see `slaTemplate`). */
   slaLabel(row: TicketListItem): string {
     if (row.isFirstResponseBreached || row.isResolutionBreached) {
       return this.#translate.instant('tickets.kpis.breached');
@@ -289,16 +291,6 @@ export class TicketListPage implements OnInit {
       return this.#translate.instant('tickets.noDueDate');
     }
     return relativeTime(row.resolutionDueAt, this.locale());
-  }
-
-  slaClasses(row: TicketListItem): string {
-    if (row.isFirstResponseBreached || row.isResolutionBreached) {
-      return 'text-rose-600 font-medium';
-    }
-    if (row.resolutionDueAt && new Date(row.resolutionDueAt).getTime() - Date.now() < 2 * 60 * 60 * 1000) {
-      return 'text-amber-600 font-medium';
-    }
-    return 'text-slate-600';
   }
 
   // --- Saved views -----------------------------------------------------------------------

@@ -1,0 +1,69 @@
+<app-page-header titleKey="sla.log.title" subtitleKey="sla.log.subtitle" />
+
+<div class="card mb-4 flex flex-wrap items-end gap-3 p-3">
+  <div>
+    <label class="form-label" for="log-ticket">{{ 'sla.log.ticketId' | translate }}</label>
+    <input id="log-ticket" class="form-control w-56" [ngModel]="ticketId()" (ngModelChange)="ticketId.set($event)" />
+  </div>
+  <div>
+    <label class="form-label" for="log-rule-type">{{ 'sla.log.ruleType' | translate }}</label>
+    <select id="log-rule-type" class="form-control w-44" [ngModel]="ruleType()" (ngModelChange)="ruleType.set($event)">
+      <option value="">{{ 'common.all' | translate }}</option>
+      <option value="AssignmentRule">{{ 'sla.log.assignmentRule' | translate }}</option>
+      <option value="EscalationRule">{{ 'sla.log.escalationRule' | translate }}</option>
+    </select>
+  </div>
+  <div>
+    <label class="form-label" for="log-outcome">{{ 'sla.log.outcome' | translate }}</label>
+    <select id="log-outcome" class="form-control w-40" [ngModel]="outcome()" (ngModelChange)="outcome.set($event)">
+      <option value="">{{ 'common.all' | translate }}</option>
+      <option value="Matched">{{ 'sla.log.matched' | translate }}</option>
+      <option value="Skipped">{{ 'sla.log.skipped' | translate }}</option>
+      <option value="Failed">{{ 'sla.log.failed' | translate }}</option>
+    </select>
+  </div>
+  <button type="button" class="btn-primary" (click)="load()">{{ 'common.search' | translate }}</button>
+  <button type="button" class="btn-secondary" (click)="clearFilters()">{{ 'common.clearFilters' | translate }}</button>
+</div>
+
+@if (loading()) {
+  <div class="card h-64 animate-pulse"></div>
+} @else if (logs().length === 0) {
+  <div class="card p-8 text-center text-slate-500">{{ 'common.noResults' | translate }}</div>
+} @else {
+  <div class="card overflow-x-auto">
+    <table class="w-full min-w-[40rem] text-sm">
+      <thead>
+        <tr class="border-b border-slate-100 text-start text-xs text-slate-500">
+          <th class="p-2 text-start">{{ 'sla.log.occurredAt' | translate }}</th>
+          <th class="p-2 text-start">{{ 'sla.log.ticket' | translate }}</th>
+          <th class="p-2 text-start">{{ 'sla.log.rule' | translate }}</th>
+          <th class="p-2 text-start">{{ 'sla.log.outcome' | translate }}</th>
+          <th class="p-2 text-start">{{ 'sla.log.reason' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (log of logs(); track log.id) {
+          <tr class="border-b border-slate-50">
+            <td class="p-2 whitespace-nowrap text-slate-500">{{ log.occurredAt | date: 'short' }}</td>
+            <td class="p-2 whitespace-nowrap">
+              @if (log.ticketNumber) {
+                <a [routerLink]="['/agent/tickets', log.ticketId]" class="text-brand-600 hover:underline">{{ log.ticketNumber }}</a>
+              } @else {
+                {{ log.ticketId }}
+              }
+            </td>
+            <td class="p-2 whitespace-nowrap">
+              {{ log.ruleName }}
+              <span class="text-xs text-slate-400">({{ (log.ruleType === 'AssignmentRule' ? 'sla.log.assignmentRule' : 'sla.log.escalationRule') | translate }})</span>
+            </td>
+            <td class="p-2">
+              <span class="chip" [class]="outcomeClasses(log.outcome)">{{ log.outcome }}</span>
+            </td>
+            <td class="p-2 text-slate-600">{{ log.reason || log.error }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

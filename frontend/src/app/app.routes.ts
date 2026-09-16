@@ -73,6 +73,14 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/agent/collaboration/collaboration.routes').then((m) => m.COLLABORATION_ROUTES),
       },
+      {
+        path: 'settings/notifications',
+        data: { titleKey: 'notifications.preferences.title' },
+        loadComponent: () =>
+          import('./features/agent/settings/pages/notification-preferences/notification-preferences.page').then(
+            (m) => m.NotificationPreferencesPage,
+          ),
+      },
     ],
   },
 
@@ -141,6 +149,12 @@ export const routes: Routes = [
         data: { titleKey: 'admin.departments.title', permissions: [PERMISSIONS.tickets.view] },
         loadChildren: () =>
           import('./features/admin/organization/organization.routes').then((m) => m.ORGANIZATION_ROUTES),
+      },
+      {
+        path: 'sla',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'nav.slaAutomation', permissions: [PERMISSIONS.sla.view] },
+        loadChildren: () => import('./features/admin/sla/sla.routes').then((m) => m.SLA_ROUTES),
       },
     ],
   },

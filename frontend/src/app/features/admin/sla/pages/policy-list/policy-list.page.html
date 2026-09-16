@@ -1,0 +1,44 @@
+<app-page-header titleKey="sla.policies.title" subtitleKey="sla.policies.subtitle">
+  <a routerLink="/admin/sla/policies/new" class="btn-primary">{{ 'sla.policies.add' | translate }}</a>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-64 animate-pulse"></div>
+} @else if (policies().length === 0) {
+  <div class="card p-8 text-center text-slate-500">{{ 'common.noResults' | translate }}</div>
+} @else {
+  <div class="card divide-y divide-slate-100">
+    @for (policy of policies(); track policy.id) {
+      <div class="flex flex-wrap items-center gap-3 p-3" [class.opacity-50]="!policy.isActive">
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="font-medium text-slate-900">{{ name(policy) }}</span>
+            @if (policy.isDefault) {
+              <span class="chip border-brand-200 bg-brand-50 text-brand-700">{{ 'common.default' | translate }}</span>
+            }
+            @if (!policy.isActive) {
+              <span class="chip border-slate-200 bg-slate-100 text-slate-500">{{ 'admin.categories.inactive' | translate }}</span>
+            }
+          </div>
+          <p class="mt-0.5 text-xs text-slate-500">
+            {{ 'sla.policies.summary' | translate: { calendar: calendarName(policy), order: policy.evaluationOrder, targets: policy.targets.length } }}
+          </p>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button type="button" class="btn-secondary px-2 py-1 text-xs" (click)="edit(policy)">
+            {{ 'common.edit' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn-secondary px-2 py-1 text-xs text-rose-600"
+            [disabled]="policy.isDefault"
+            (click)="delete(policy)"
+          >
+            {{ 'common.delete' | translate }}
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+}

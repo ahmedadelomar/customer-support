@@ -3,6 +3,7 @@ import { Component, type OnChanges, computed, inject, input, output, signal } fr
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WatchersPanelComponent } from '../../../collaboration/ui/watchers-panel/watchers-panel.component';
+import { SlaBadgeComponent } from '../../../../../shared/ui/sla-badge/sla-badge.component';
 import { TicketStatusKind } from '../../../../../core/models/enums';
 import { LanguageService } from '../../../../../core/services/language.service';
 import { ToastService } from '../../../../../core/services/toast.service';
@@ -31,7 +32,7 @@ interface StatusKindGroup {
  */
 @Component({
   selector: 'app-properties-panel',
-  imports: [FormsModule, TranslatePipe, DatePipe, WatchersPanelComponent],
+  imports: [FormsModule, TranslatePipe, DatePipe, WatchersPanelComponent, SlaBadgeComponent],
   templateUrl: './properties-panel.component.html',
 })
 export class PropertiesPanelComponent implements OnChanges {
