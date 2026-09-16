@@ -94,10 +94,16 @@ public static class DependencyInjection
         services.AddScoped<IAttachmentOwnerAuthorizer, AttachmentOwnerAuthorizer>();
         services.AddScoped<ISlaEngine, NoOpSlaEngine>();
         services.AddSingleton<IFileStorage, LocalFileStorage>();
-        services.AddSingleton<IAttachmentPolicyProvider, AttachmentPolicyProvider>();
-        services.AddSingleton<IAutoCloseSettingsProvider, AutoCloseSettingsProvider>();
-        services.AddSingleton<IAuditRetentionSettings, AuditRetentionSettings>();
         services.AddSingleton<IVirusScanner, NoOpVirusScanner>();
+
+        // Runtime configuration (Security & Administration / System configuration). These three read
+        // through ISettingsProvider, which holds a DbContext, so they are scoped rather than
+        // singletons — a singleton depending on a scoped service is a captive dependency.
+        services.AddMemoryCache();
+        services.AddScoped<ISettingsProvider, SettingsProvider>();
+        services.AddScoped<IAttachmentPolicyProvider, AttachmentPolicyProvider>();
+        services.AddScoped<IAutoCloseSettingsProvider, AutoCloseSettingsProvider>();
+        services.AddScoped<IAuditRetentionSettings, AuditRetentionSettings>();
         services.AddScoped<DbSeeder>();
 
         // Hourly auto-close sweep (Ticket Management / Status workflow and escalation). The package

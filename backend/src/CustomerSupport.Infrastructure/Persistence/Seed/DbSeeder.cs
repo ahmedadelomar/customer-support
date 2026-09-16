@@ -1,4 +1,5 @@
 using CustomerSupport.Application.Common.Security;
+using CustomerSupport.Application.Common.Settings;
 using CustomerSupport.Domain.Common;
 using CustomerSupport.Domain.Enums;
 using CustomerSupport.Domain.Identity;
@@ -39,6 +40,7 @@ public class DbSeeder(
     public async Task SeedAsync(CancellationToken ct = default)
     {
         await SeedPermissionsAsync(ct);
+        await SeedSystemSettingsAsync(ct);
         await SeedRolesAsync(ct);
         var branchId = await SeedBranchAndDepartmentsAsync(ct);
         await SeedTicketLookupsAsync(ct);
@@ -70,6 +72,40 @@ public class DbSeeder(
 
         await db.SaveChangesAsync(ct);
         logger.LogInformation("Seeded {Count} permission(s).", missing.Count);
+    }
+
+    /// <summary>
+    /// Inserts only the global rows that do not exist yet, so an administrator's edits survive every
+    /// restart. <c>SettingKeys</c> is the single source for keys, types and defaults.
+    /// </summary>
+    private async Task SeedSystemSettingsAsync(CancellationToken ct)
+    {
+        var existing = await db.SystemSettings
+            .Where(s => s.BranchId == null)
+            .Select(s => s.Key)
+            .ToListAsync(ct);
+
+        var missing = SettingKeys.All.Where(d => !existing.Contains(d.Key)).ToList();
+
+        if (missing.Count == 0)
+        {
+            return;
+        }
+
+        db.SystemSettings.AddRange(missing.Select(d => new SystemSetting
+        {
+            Key = d.Key,
+            Value = d.DefaultValue,
+            DataType = d.DataType,
+            Category = d.Category,
+            Name = new LocalizedText(d.NameEn, d.NameAr),
+            Description = d.DescriptionEn,
+            IsSecret = d.IsSecret,
+            IsSystem = true,
+        }));
+
+        await db.SaveChangesAsync(ct);
+        logger.LogInformation("Seeded {Count} system setting(s).", missing.Count);
     }
 
     private async Task SeedRolesAsync(CancellationToken ct)

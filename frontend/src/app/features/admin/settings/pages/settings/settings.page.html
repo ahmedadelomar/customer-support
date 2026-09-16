@@ -1,0 +1,119 @@
+<app-page-header titleKey="admin.settings.title" subtitleKey="admin.settings.subtitle" />
+
+@if (loading()) {
+  <div class="space-y-3">
+    @for (i of [1, 2, 3]; track i) {
+      <div class="card h-40 animate-pulse"></div>
+    }
+  </div>
+} @else {
+  <div class="space-y-4">
+    @for (category of categories(); track category.category) {
+      <section class="card p-4">
+        <header class="mb-3 flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <h2 class="text-sm font-semibold text-slate-900">
+            {{ 'admin.settings.categories.' + category.category | translate }}
+          </h2>
+          <button
+            type="button"
+            class="btn-primary px-3 py-1.5 text-xs"
+            [disabled]="!isDirty(category) || savingCategory() === category.category"
+            (click)="save(category)"
+          >
+            {{ (savingCategory() === category.category ? 'common.saving' : 'common.save') | translate }}
+          </button>
+        </header>
+
+        <div class="space-y-4">
+          @for (setting of category.settings; track setting.key) {
+            <div class="grid gap-2 sm:grid-cols-[1fr_20rem]">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-sm font-medium text-slate-800">{{ name(setting) }}</span>
+
+                  <span
+                    class="chip text-[11px]"
+                    [class.border-brand-200]="setting.source === SettingSource.Branch"
+                    [class.bg-brand-50]="setting.source === SettingSource.Branch"
+                    [class.text-brand-700]="setting.source === SettingSource.Branch"
+                    [class.border-slate-200]="setting.source !== SettingSource.Branch"
+                    [class.bg-slate-50]="setting.source !== SettingSource.Branch"
+                    [class.text-slate-500]="setting.source !== SettingSource.Branch"
+                  >
+                    {{ sourceLabelKey(setting.source) | translate }}
+                  </span>
+
+                  @if (setting.isSecret) {
+                    <span class="chip border-amber-200 bg-amber-50 text-[11px] text-amber-700">
+                      {{ 'admin.settings.secret' | translate }}
+                    </span>
+                  }
+                </div>
+
+                @if (description(setting)) {
+                  <p class="mt-0.5 text-xs text-slate-500">{{ description(setting) }}</p>
+                }
+                <p class="mt-0.5 font-mono text-[11px] text-slate-400">{{ setting.key }}</p>
+
+                @if (error(setting.key); as message) {
+                  <p class="form-error mt-1">{{ message }}</p>
+                }
+              </div>
+
+              <div>
+                @switch (setting.dataType) {
+                  @case ('bool') {
+                    <label class="flex items-center gap-2 text-sm text-slate-700">
+                      <input
+                        type="checkbox"
+                        class="h-4 w-4 rounded border-slate-300"
+                        [checked]="boolValue(setting)"
+                        (change)="setBool(setting, !boolValue(setting))"
+                      />
+                      {{ (boolValue(setting) ? 'common.enabled' : 'common.disabled') | translate }}
+                    </label>
+                  }
+                  @case ('int') {
+                    <input
+                      type="number"
+                      class="form-control"
+                      [ngModel]="value(setting)"
+                      (ngModelChange)="setValue(setting, $event)"
+                    />
+                  }
+                  @case ('json') {
+                    <textarea
+                      rows="3"
+                      class="form-control font-mono text-xs"
+                      [ngModel]="value(setting)"
+                      (ngModelChange)="setValue(setting, $event)"
+                    ></textarea>
+                  }
+                  @default {
+                    <input
+                      [type]="setting.isSecret ? 'password' : 'text'"
+                      class="form-control"
+                      [autocomplete]="setting.isSecret ? 'new-password' : 'off'"
+                      [ngModel]="value(setting)"
+                      (ngModelChange)="setValue(setting, $event)"
+                    />
+                  }
+                }
+
+                @if (setting.source === SettingSource.Branch && currentBranchId(); as branchId) {
+                  <button
+                    type="button"
+                    class="mt-1 text-xs text-brand-700 hover:underline"
+                    (click)="removeOverride(setting, branchId)"
+                  >
+                    {{ 'admin.settings.removeOverride' | translate }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  </div>
+}

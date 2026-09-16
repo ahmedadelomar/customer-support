@@ -121,6 +121,13 @@ export const routes: Routes = [
         data: { titleKey: 'admin.audit.title', permissions: [PERMISSIONS.administration.viewAuditLogs] },
         loadChildren: () => import('./features/admin/audit/audit.routes').then((m) => m.AUDIT_ROUTES),
       },
+      {
+        path: 'settings',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'nav.settings', permissions: [PERMISSIONS.administration.manageSettings] },
+        loadChildren: () =>
+          import('./features/admin/settings/settings.routes').then((m) => m.SETTINGS_ROUTES),
+      },
     ],
   },
 

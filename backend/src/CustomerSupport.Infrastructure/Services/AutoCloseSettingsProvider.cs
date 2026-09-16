@@ -1,11 +1,17 @@
 using CustomerSupport.Application.Common.Interfaces;
-using Microsoft.Extensions.Configuration;
+using CustomerSupport.Application.Common.Settings;
 
 namespace CustomerSupport.Infrastructure.Services;
 
-/// <summary>Reads the auto-close window from configuration. See the remark on <see cref="IAutoCloseSettingsProvider"/> for why this isn't backed by <c>SystemSetting</c> yet.</summary>
-public class AutoCloseSettingsProvider(IConfiguration configuration) : IAutoCloseSettingsProvider
+/// <summary>
+/// Reads the auto-close window from the settings table (<c>tickets.autoCloseResolvedAfterDays</c>),
+/// falling back to the compiled-in default when no row exists.
+/// </summary>
+public class AutoCloseSettingsProvider(ISettingsProvider settings) : IAutoCloseSettingsProvider
 {
-    public Task<double> GetAutoCloseResolvedAfterDaysAsync(CancellationToken ct = default) =>
-        Task.FromResult(configuration.GetValue("Tickets:AutoCloseResolvedAfterDays", 3.0));
+    public async Task<double> GetAutoCloseResolvedAfterDaysAsync(CancellationToken ct = default) =>
+        await settings.GetAsync(
+            SettingKeys.TicketsAutoCloseResolvedAfterDays,
+            double.Parse(SettingKeys.Find(SettingKeys.TicketsAutoCloseResolvedAfterDays)!.DefaultValue),
+            ct: ct);
 }

@@ -1,0 +1,101 @@
+namespace CustomerSupport.Application.Common.Settings;
+
+/// <summary>One configurable setting: its key, type, category and compiled-in default.</summary>
+/// <remarks>
+/// The default lives here, not only in the seeded row, so a missing or deleted row still resolves to
+/// a usable value. Code should never have to null-check configuration.
+/// </remarks>
+public record SettingDefinition(
+    string Key,
+    string DataType,
+    string Category,
+    string DefaultValue,
+    string NameEn,
+    string NameAr,
+    string? DescriptionEn = null,
+    string? DescriptionAr = null,
+    bool IsSecret = false);
+
+/// <summary>
+/// The single source of truth for runtime settings (Security &amp; Administration / System
+/// configuration). The seeder inserts from this list and <c>ISettingsProvider</c> falls back to it,
+/// so the table and the code defaults cannot disagree.
+/// </summary>
+public static class SettingKeys
+{
+    public const string AuditRetentionDays = "audit.retentionDays";
+    public const string TicketsNumberPrefix = "tickets.numberPrefix";
+    public const string TicketsAutoCloseResolvedAfterDays = "tickets.autoCloseResolvedAfterDays";
+    public const string SlaWarningThresholdPercent = "sla.warningThresholdPercent";
+    public const string AttachmentsMaxBytes = "attachments.maxBytes";
+    public const string AttachmentsAllowedExtensions = "attachments.allowedExtensions";
+    public const string PortalEnabled = "portal.enabled";
+    public const string AiEnabled = "ai.enabled";
+    public const string CsatEnabled = "csat.enabled";
+    public const string CsatSurveyExpiryDays = "csat.surveyExpiryDays";
+
+    /// <summary>
+    /// Settings safe to expose without authentication, for the portal's pre-sign-in shell. Anything
+    /// not on this list is never returned by the public endpoint, whatever its category.
+    /// </summary>
+    public static readonly IReadOnlySet<string> PublicKeys = new HashSet<string>(StringComparer.Ordinal)
+    {
+        PortalEnabled,
+    };
+
+    public static IReadOnlyList<SettingDefinition> All { get; } =
+    [
+        new(AuditRetentionDays, "int", "Audit", "400",
+            "Audit retention (days)", "مدة حفظ سجل التدقيق (أيام)",
+            "How long audit entries are kept. 0 keeps them forever.",
+            "مدة الاحتفاظ بسجلات التدقيق. القيمة 0 تعني الاحتفاظ دائمًا."),
+
+        new(TicketsNumberPrefix, "string", "Tickets", "TCK",
+            "Ticket number prefix", "بادئة رقم التذكرة",
+            "Prefix used when generating ticket reference numbers.",
+            "البادئة المستخدمة عند توليد أرقام التذاكر."),
+
+        new(TicketsAutoCloseResolvedAfterDays, "int", "Tickets", "7",
+            "Auto-close resolved after (days)", "الإغلاق التلقائي بعد الحل (أيام)",
+            "Resolved tickets with no further reply are closed after this many days.",
+            "تُغلق التذاكر المحلولة دون رد إضافي بعد هذا العدد من الأيام."),
+
+        new(SlaWarningThresholdPercent, "int", "Sla", "80",
+            "SLA warning threshold (%)", "حد تحذير اتفاقية الخدمة (٪)",
+            "Percentage of the SLA target at which a ticket is flagged as approaching breach.",
+            "النسبة من هدف اتفاقية الخدمة التي تُعلَّم عندها التذكرة كقريبة من الإخلال."),
+
+        new(AttachmentsMaxBytes, "int", "Attachments", "26214400",
+            "Maximum attachment size (bytes)", "الحد الأقصى لحجم المرفق (بايت)",
+            "Uploads larger than this are rejected.",
+            "تُرفض الملفات التي تتجاوز هذا الحجم."),
+
+        new(AttachmentsAllowedExtensions, "string", "Attachments", "pdf,png,jpg,jpeg,docx,xlsx,csv,txt",
+            "Allowed attachment types", "أنواع المرفقات المسموح بها",
+            "Comma-separated list of permitted file extensions.",
+            "قائمة بالامتدادات المسموح بها مفصولة بفواصل."),
+
+        new(PortalEnabled, "bool", "Portal", "true",
+            "Customer portal enabled", "تفعيل بوابة العملاء",
+            "Turns the customer self-service portal on or off.",
+            "تشغيل أو إيقاف بوابة الخدمة الذاتية للعملاء."),
+
+        new(AiEnabled, "bool", "Ai", "false",
+            "AI features enabled", "تفعيل ميزات الذكاء الاصطناعي",
+            "Master switch for every AI-assisted feature.",
+            "مفتاح رئيسي لكل الميزات المدعومة بالذكاء الاصطناعي."),
+
+        new(CsatEnabled, "bool", "Csat", "true",
+            "Satisfaction surveys enabled", "تفعيل استبيانات الرضا",
+            "Sends a satisfaction survey when a ticket is resolved.",
+            "إرسال استبيان رضا عند حل التذكرة."),
+
+        new(CsatSurveyExpiryDays, "int", "Csat", "14",
+            "Survey expiry (days)", "انتهاء صلاحية الاستبيان (أيام)",
+            "How long a satisfaction survey link stays valid.",
+            "المدة التي يبقى فيها رابط الاستبيان صالحًا."),
+    ];
+
+    public static SettingDefinition? Find(string key) =>
+        All.FirstOrDefault(d => string.Equals(d.Key, key, StringComparison.Ordinal));
+}
