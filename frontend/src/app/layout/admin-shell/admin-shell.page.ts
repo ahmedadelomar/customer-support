@@ -58,6 +58,12 @@ export class AdminShellPage {
       permissions: [PERMISSIONS.tickets.manageStatuses],
     },
     {
+      labelKey: 'nav.branches',
+      icon: '🏬',
+      route: '/admin/organization/branches',
+      permissions: [PERMISSIONS.administration.manageBranches],
+    },
+    {
       labelKey: 'nav.departments',
       icon: '🏢',
       route: '/admin/organization/departments',

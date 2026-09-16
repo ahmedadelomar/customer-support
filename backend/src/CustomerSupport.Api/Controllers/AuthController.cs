@@ -57,6 +57,18 @@ public class AuthController : ApiControllerBase
         [FromBody] ChangePasswordRequest request, CancellationToken ct)
         => Ok(await Sender.Send(new ChangePasswordCommand(request.CurrentPassword, request.NewPassword), ct));
 
+    /// <summary>
+    /// Switches the caller's active branch and returns a fresh session scoped to it. Refused for a
+    /// branch outside the caller's accessible set.
+    /// </summary>
+    [HttpPost("switch-branch")]
+    [ProducesResponseType(typeof(AuthResultDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<AuthResultDto>> SwitchBranch(
+        [FromBody] SwitchBranchRequest request, CancellationToken ct)
+        => Ok(await Sender.Send(new SwitchBranchCommand(request.BranchId, ClientIp), ct));
+
     private string? ClientIp => HttpContext.Connection.RemoteIpAddress?.ToString();
 }
 
@@ -65,3 +77,5 @@ public record LoginRequest(string UserName, string Password);
 public record RefreshRequest(string RefreshToken);
 
 public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
+
+public record SwitchBranchRequest(Guid BranchId);

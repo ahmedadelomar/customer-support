@@ -123,6 +123,9 @@ public interface IUserAdminService
 
     /// <summary>Role ids held by one user, for the self-lockout guard on permission edits.</summary>
     Task<IReadOnlyList<Guid>> GetRoleIdsForUserAsync(Guid userId, CancellationToken ct = default);
+
+    /// <summary>Active user count per branch id, for the branch list and its deactivation guard.</summary>
+    Task<IReadOnlyDictionary<Guid, int>> CountByBranchAsync(CancellationToken ct = default);
 }
 
 /// <summary>

@@ -1,0 +1,124 @@
+<app-page-header titleKey="admin.branches.title" subtitleKey="admin.branches.subtitle">
+  <button
+    *hasPermission="permissions.administration.manageBranches"
+    type="button"
+    class="btn-primary"
+    (click)="openCreate()"
+  >
+    {{ 'admin.branches.create' | translate }}
+  </button>
+</app-page-header>
+
+@if (errorMessage(); as message) {
+  <p class="card mb-4 border-rose-200 bg-rose-50 p-3 text-sm text-rose-700" role="alert">{{ message }}</p>
+}
+
+<div class="card p-4">
+  @if (loading()) {
+    <div class="space-y-2">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="h-14 animate-pulse rounded-lg bg-slate-100"></div>
+      }
+    </div>
+  } @else if (branches().length === 0) {
+    <app-empty-state titleKey="admin.branches.empty" icon="🏬" />
+  } @else {
+    <ul class="divide-y divide-slate-100">
+      @for (branch of branches(); track branch.id) {
+        <li class="flex flex-wrap items-center justify-between gap-3 py-3">
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="truncate text-sm font-medium text-slate-900">{{ name(branch) }}</span>
+              <span class="chip border-slate-200 bg-slate-50 font-mono text-[11px] text-slate-500">
+                {{ branch.code }}
+              </span>
+              @if (!branch.isActive) {
+                <span class="chip border-slate-200 bg-slate-100 text-[11px] text-slate-500">
+                  {{ 'admin.branches.inactive' | translate }}
+                </span>
+              }
+            </div>
+            <p class="mt-1 text-xs text-slate-500">
+              {{ branch.timeZoneId ?? '—' }}
+              ·
+              {{ 'admin.branches.userCount' | translate: { count: branch.userCount } }}
+              ·
+              {{ 'admin.branches.openTicketCount' | translate: { count: branch.openTicketCount } }}
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2" *hasPermission="permissions.administration.manageBranches">
+            <button type="button" class="btn-secondary px-3 py-1.5 text-xs" (click)="openEdit(branch)">
+              {{ 'common.edit' | translate }}
+            </button>
+
+            @if (branch.isActive) {
+              <button
+                type="button"
+                class="btn-secondary px-3 py-1.5 text-xs text-rose-600"
+                (click)="setActive(branch, false)"
+              >
+                {{ 'admin.branches.deactivate' | translate }}
+              </button>
+            } @else {
+              <button type="button" class="btn-secondary px-3 py-1.5 text-xs" (click)="setActive(branch, true)">
+                {{ 'admin.branches.activate' | translate }}
+              </button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>
+
+<app-modal
+  [open]="formOpen()"
+  [titleKey]="editing() ? 'admin.branches.edit' : 'admin.branches.create'"
+  (closed)="closeForm()"
+>
+  <div class="space-y-3">
+    @if (!editing()) {
+      <div>
+        <label class="form-label" for="branch-code">{{ 'admin.branches.form.code' | translate }}</label>
+        <input id="branch-code" class="form-control" [ngModel]="code()" (ngModelChange)="code.set($event)" />
+      </div>
+    }
+
+    <div>
+      <label class="form-label" for="branch-name-en">{{ 'admin.branches.form.nameEn' | translate }}</label>
+      <input id="branch-name-en" class="form-control" [ngModel]="nameEn()" (ngModelChange)="nameEn.set($event)" />
+    </div>
+
+    <div>
+      <label class="form-label" for="branch-name-ar">{{ 'admin.branches.form.nameAr' | translate }}</label>
+      <input id="branch-name-ar" class="form-control" dir="rtl" [ngModel]="nameAr()" (ngModelChange)="nameAr.set($event)" />
+    </div>
+
+    <div>
+      <label class="form-label" for="branch-timezone">{{ 'admin.branches.form.timeZone' | translate }}</label>
+      <select id="branch-timezone" class="form-control" [ngModel]="timeZoneId()" (ngModelChange)="timeZoneId.set($event)">
+        @for (zone of timeZones; track zone) {
+          <option [value]="zone">{{ zone }}</option>
+        }
+      </select>
+    </div>
+
+    <div>
+      <label class="form-label" for="branch-address">{{ 'admin.branches.form.address' | translate }}</label>
+      <input id="branch-address" class="form-control" [ngModel]="address()" (ngModelChange)="address.set($event)" />
+    </div>
+
+    <div>
+      <label class="form-label" for="branch-phone">{{ 'admin.branches.form.phone' | translate }}</label>
+      <input id="branch-phone" class="form-control" [ngModel]="phoneNumber()" (ngModelChange)="phoneNumber.set($event)" />
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button type="button" class="btn-secondary" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
+      <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">
+        {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+      </button>
+    </div>
+  </div>
+</app-modal>

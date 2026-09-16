@@ -18,4 +18,10 @@ export const ORGANIZATION_ROUTES: Routes = [
     data: { titleKey: 'admin.teams.title', permissions: [PERMISSIONS.administration.manageTeams] },
     loadComponent: () => import('./pages/team-list/team-list.page').then((m) => m.TeamListPage),
   },
+  {
+    path: 'branches',
+    canActivate: [permissionGuard],
+    data: { titleKey: 'admin.branches.title', permissions: [PERMISSIONS.administration.manageBranches] },
+    loadComponent: () => import('./pages/branch-list/branch-list.page').then((m) => m.BranchListPage),
+  },
 ];

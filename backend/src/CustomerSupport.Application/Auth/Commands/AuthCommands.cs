@@ -90,6 +90,33 @@ public class LogoutCommandHandler(ITokenService tokens, IAuditRecorder audit, IC
 }
 
 /// <summary>
+/// Switches the caller's active branch and re-issues the token (Platform / Branch scoping).
+/// </summary>
+/// <remarks>
+/// No <c>[RequirePermission]</c>: the right to work in a branch is carried by the user's accessible
+/// set, not by a permission key, and <see cref="ITokenService.SwitchBranchAsync"/> enforces it. That
+/// check is what stops this endpoint from becoming a way to mint a token for any branch at all.
+/// </remarks>
+public record SwitchBranchCommand(Guid BranchId, string? IpAddress = null) : IRequest<AuthResultDto>;
+
+public class SwitchBranchCommandValidator : AbstractValidator<SwitchBranchCommand>
+{
+    public SwitchBranchCommandValidator() => RuleFor(x => x.BranchId).NotEmpty();
+}
+
+public class SwitchBranchCommandHandler(ITokenService tokens, ICurrentUser currentUser)
+    : IRequestHandler<SwitchBranchCommand, AuthResultDto>
+{
+    public Task<AuthResultDto> Handle(SwitchBranchCommand request, CancellationToken cancellationToken)
+    {
+        var userId = currentUser.UserId
+            ?? throw new Common.Exceptions.ForbiddenException("Not signed in.");
+
+        return tokens.SwitchBranchAsync(userId, request.BranchId, request.IpAddress, cancellationToken);
+    }
+}
+
+/// <summary>
 /// Changes the caller's own password and clears <c>MustChangePassword</c>. Returns a fresh session:
 /// the old access token still carries the <c>must_change_password</c> claim, so without new tokens the
 /// caller would remain locked out of every other endpoint by the middleware that enforces it.

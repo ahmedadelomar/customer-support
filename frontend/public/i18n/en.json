@@ -64,7 +64,8 @@
       "administration": "Administration"
     },
     "departments": "Departments",
-    "teams": "Teams"
+    "teams": "Teams",
+    "branches": "Branches"
   },
   "auth": {
     "signIn": "Sign in",
@@ -738,6 +739,30 @@
         "nameEn": "Name (English)",
         "nameAr": "Name (Arabic)",
         "active": "Active"
+      }
+    },
+    "branches": {
+      "title": "Branches",
+      "subtitle": "Where data is scoped. Lookups stay global; customers and tickets do not.",
+      "create": "New branch",
+      "edit": "Edit branch",
+      "created": "Branch created.",
+      "updated": "Branch updated.",
+      "activated": "Branch activated.",
+      "deactivated": "Branch deactivated.",
+      "empty": "No branches defined.",
+      "inactive": "Inactive",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "userCount": "{{count}} users",
+      "openTicketCount": "{{count}} open tickets",
+      "form": {
+        "code": "Code",
+        "nameEn": "Name (English)",
+        "nameAr": "Name (Arabic)",
+        "timeZone": "Time zone",
+        "address": "Address",
+        "phone": "Phone"
       }
     }
   },

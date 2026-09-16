@@ -60,6 +60,16 @@ export class AuthService {
       .pipe(tap((result) => this.#applySession(result)));
   }
 
+  /**
+   * Switches the active branch. The server re-issues the token with the new `branch` claim, so
+   * server-side scoping follows the UI rather than the two drifting apart.
+   */
+  switchBranch(branchId: string): Observable<AuthResult> {
+    return this.#http
+      .post<AuthResult>(`${this.#config.apiUrl}/api/auth/switch-branch`, { branchId })
+      .pipe(tap((result) => this.#applySession(result)));
+  }
+
   logout(redirect = true): void {
     this.#user.set(null);
     this.#accessToken.set(null);

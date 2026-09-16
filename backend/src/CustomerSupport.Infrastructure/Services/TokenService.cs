@@ -113,6 +113,34 @@ public class TokenService(
         return result;
     }
 
+    public async Task<AuthResultDto> SwitchBranchAsync(
+        Guid userId, Guid branchId, string? ip, CancellationToken ct = default)
+    {
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId, ct)
+            ?? throw new ForbiddenException("Invalid session.");
+
+        var accessible = ParseBranchIds(user.AccessibleBranchIds);
+
+        // An empty accessible set means unrestricted (head office), matching WhereBranchAccessible.
+        if (accessible.Count > 0 && !accessible.Contains(branchId))
+        {
+            throw new ForbiddenException("You do not have access to that branch.");
+        }
+
+        var exists = await db.Branches.AnyAsync(b => b.Id == branchId && b.IsActive && !b.IsDeleted, ct);
+        if (!exists)
+        {
+            throw new NotFoundException("Branch", branchId);
+        }
+
+        // Persisted rather than held only in the token: it survives a refresh and keeps one source of
+        // truth for "which branch am I working in", which is what the scoping helpers already read.
+        user.BranchId = branchId;
+        await db.SaveChangesAsync(ct);
+
+        return await IssueAsync(user, ip, ct);
+    }
+
     public async Task LogoutAsync(string refreshToken, CancellationToken ct = default)
     {
         var hash = Hash(refreshToken);

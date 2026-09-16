@@ -307,6 +307,13 @@ public class UserAdminService(
     public async Task<IReadOnlyList<Guid>> GetRoleIdsForUserAsync(Guid userId, CancellationToken ct = default) =>
         await db.UserRoles.Where(ur => ur.UserId == userId).Select(ur => ur.RoleId).ToListAsync(ct);
 
+    public async Task<IReadOnlyDictionary<Guid, int>> CountByBranchAsync(CancellationToken ct = default) =>
+        await db.Users.AsNoTracking()
+            .Where(u => u.IsActive && !u.IsDeleted && u.BranchId != null)
+            .GroupBy(u => u.BranchId!.Value)
+            .Select(g => new { BranchId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.BranchId, x => x.Count, ct);
+
     private async Task<Dictionary<Guid, IReadOnlyList<RoleSummaryDto>>> RolesByUserAsync(
         IReadOnlyList<Guid> userIds, CancellationToken ct)
     {

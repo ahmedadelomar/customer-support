@@ -5,6 +5,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/auth/auth.service';
 import { PERMISSIONS } from '../../core/permissions';
 import { LanguageService } from '../../core/services/language.service';
+import { BranchSwitcherComponent } from './ui/branch-switcher/branch-switcher.component';
 import { MentionsBadgeComponent } from './ui/mentions-badge/mentions-badge.component';
 import { ReminderToastComponent } from './ui/reminder-toast/reminder-toast.component';
 
@@ -29,7 +30,7 @@ interface NavGroup {
  */
 @Component({
   selector: 'app-agent-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgClass, TranslatePipe, ReminderToastComponent, MentionsBadgeComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgClass, TranslatePipe, ReminderToastComponent, MentionsBadgeComponent, BranchSwitcherComponent],
   templateUrl: './agent-shell.page.html',
 })
 export class AgentShellPage {

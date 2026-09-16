@@ -18,6 +18,16 @@ public interface ITokenService
     /// <summary>Rotates a refresh token. Reusing an already-rotated token revokes the whole chain.</summary>
     Task<AuthResultDto> RefreshAsync(string refreshToken, string? ip, CancellationToken ct = default);
 
+    /// <summary>
+    /// Re-issues the token with a different active branch (Platform / Branch scoping).
+    /// </summary>
+    /// <remarks>
+    /// The branch must be in the caller's accessible set, or they must be unrestricted. Without that
+    /// check the switcher is a privilege-escalation vector: any user could mint a token scoped to a
+    /// branch they were never granted.
+    /// </remarks>
+    Task<AuthResultDto> SwitchBranchAsync(Guid userId, Guid branchId, string? ip, CancellationToken ct = default);
+
     /// <summary>Revokes a refresh token. Idempotent — an unknown or already-revoked token is not an error.</summary>
     Task LogoutAsync(string refreshToken, CancellationToken ct = default);
 }
