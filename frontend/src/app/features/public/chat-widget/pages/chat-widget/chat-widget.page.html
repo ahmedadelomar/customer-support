@@ -1,0 +1,84 @@
+<div class="flex h-screen flex-col bg-white">
+  <div class="flex items-center justify-between bg-brand-700 px-4 py-3 text-white">
+    <span class="font-medium">{{ 'chat.widget.title' | translate }}</span>
+    <button type="button" class="text-white/80 hover:text-white" (click)="close()" [attr.aria-label]="'common.close' | translate">✕</button>
+  </div>
+
+  <div class="flex-1 space-y-2 overflow-y-auto p-3">
+    @if (!session()) {
+      <p class="text-sm text-slate-500">{{ 'chat.widget.intro' | translate }}</p>
+    }
+
+    @for (message of messages(); track message.id) {
+      <div class="flex" [class.justify-end]="message.authorType === ChatAuthorType.Agent">
+        <div
+          class="max-w-[80%] rounded-lg p-2.5 text-sm"
+          [class.bg-slate-100]="message.authorType !== ChatAuthorType.Agent"
+          [class.bg-brand-50]="message.authorType === ChatAuthorType.Agent"
+        >
+          <div class="mb-0.5 text-xs font-medium text-slate-500">{{ authorLabel(message) }}</div>
+          <p class="whitespace-pre-wrap text-slate-800">{{ message.body }}</p>
+        </div>
+      </div>
+    }
+
+    @if (remoteTyping()) {
+      <p class="text-xs italic text-slate-400">{{ 'chat.widget.agentTyping' | translate }}</p>
+    }
+
+    @if (isWaiting() && !showOfflineForm()) {
+      <p class="rounded-lg bg-amber-50 px-3 py-2 text-center text-xs text-amber-700">
+        {{ 'chat.widget.waiting' | translate: { seconds: waitingSeconds() } }}
+      </p>
+    }
+
+    @if (showOfflineForm() && !isEnded()) {
+      <div class="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+        <p class="text-xs text-amber-800">{{ 'chat.widget.offlineHint' | translate }}</p>
+        <input
+          class="form-control text-sm" [placeholder]="'chat.widget.namePlaceholder' | translate"
+          [ngModel]="offlineName()" (ngModelChange)="offlineName.set($event)"
+        />
+        <input
+          type="email" class="form-control text-sm" [placeholder]="'chat.widget.emailPlaceholder' | translate"
+          [ngModel]="offlineEmail()" (ngModelChange)="offlineEmail.set($event)"
+        />
+        <button type="button" class="btn-primary w-full text-sm" [disabled]="!offlineEmail()" (click)="submitOfflineForm()">
+          {{ 'chat.widget.offlineSubmit' | translate }}
+        </button>
+      </div>
+    }
+
+    @if (isEnded()) {
+      <div class="space-y-2 rounded-lg bg-slate-50 p-3 text-center">
+        <p class="text-sm text-slate-700">{{ 'chat.widget.ended' | translate }}</p>
+        @if (!ratingSubmitted()) {
+          <div class="flex justify-center gap-1">
+            @for (star of [1, 2, 3, 4, 5]; track star) {
+              <button type="button" class="text-xl" (click)="rate(star)">⭐</button>
+            }
+          </div>
+        } @else {
+          <p class="text-xs text-emerald-600">{{ 'chat.widget.thanksForRating' | translate }}</p>
+        }
+      </div>
+    }
+  </div>
+
+  @if (!isEnded()) {
+    <div class="border-t border-slate-200 p-3">
+      <div class="flex gap-2">
+        <input
+          class="form-control flex-1 text-sm"
+          [placeholder]="'chat.widget.messagePlaceholder' | translate"
+          [ngModel]="draft()"
+          (ngModelChange)="onDraftInput($event)"
+          (keydown.enter)="send()"
+        />
+        <button type="button" class="btn-primary" [disabled]="starting() || !draft().trim()" (click)="send()">
+          {{ 'chat.widget.send' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+</div>

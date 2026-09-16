@@ -20,6 +20,13 @@ export const routes: Routes = [
   },
 
   {
+    // Fully public, no shell and no auth guard — this is the page an embedding site's iframe
+    // loads (Communication Channels / Live chat, CS-303's widget).
+    path: 'widget/chat',
+    loadComponent: () => import('./features/public/chat-widget/pages/chat-widget/chat-widget.page').then((m) => m.ChatWidgetPage),
+  },
+
+  {
     path: 'change-password',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -72,6 +79,12 @@ export const routes: Routes = [
         data: { titleKey: 'nav.mentions', permissions: [PERMISSIONS.workspace.collaborate] },
         loadChildren: () =>
           import('./features/agent/collaboration/collaboration.routes').then((m) => m.COLLABORATION_ROUTES),
+      },
+      {
+        path: 'chat',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'nav.chatConsole', permissions: [PERMISSIONS.channels.handleLiveChat] },
+        loadChildren: () => import('./features/agent/chat/chat.routes').then((m) => m.CHAT_ROUTES),
       },
       {
         path: 'settings/notifications',

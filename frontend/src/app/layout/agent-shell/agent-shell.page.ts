@@ -80,6 +80,12 @@ export class AgentShellPage {
           route: '/agent/mentions',
           permissions: [PERMISSIONS.workspace.collaborate],
         },
+        {
+          labelKey: 'nav.chatConsole',
+          icon: '💬',
+          route: '/agent/chat',
+          permissions: [PERMISSIONS.channels.handleLiveChat],
+        },
       ],
     },
     {
