@@ -94,6 +94,12 @@ export class AdminShellPage {
       permissions: [PERMISSIONS.administration.viewAuditLogs],
     },
     {
+      labelKey: 'nav.branding',
+      icon: '🎨',
+      route: '/admin/branding',
+      permissions: [PERMISSIONS.administration.manageBranding],
+    },
+    {
       labelKey: 'nav.settings',
       icon: '⚙',
       route: '/admin/settings',

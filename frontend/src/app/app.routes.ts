@@ -129,6 +129,13 @@ export const routes: Routes = [
           import('./features/admin/settings/settings.routes').then((m) => m.SETTINGS_ROUTES),
       },
       {
+        path: 'branding',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'admin.branding.title', permissions: [PERMISSIONS.administration.manageBranding] },
+        loadChildren: () =>
+          import('./features/admin/branding/branding.routes').then((m) => m.BRANDING_ROUTES),
+      },
+      {
         path: 'organization',
         canActivate: [permissionGuard],
         data: { titleKey: 'admin.departments.title', permissions: [PERMISSIONS.tickets.view] },

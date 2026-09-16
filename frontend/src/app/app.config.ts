@@ -13,6 +13,7 @@ import { routes } from './app.routes';
 import { authInterceptor } from './core/http/auth.interceptor';
 import { errorInterceptor } from './core/http/error.interceptor';
 import { languageInterceptor } from './core/http/language.interceptor';
+import { BrandingService } from './core/services/branding.service';
 import { LanguageService } from './core/services/language.service';
 
 export const appConfig: ApplicationConfig = {
@@ -42,5 +43,8 @@ export const appConfig: ApplicationConfig = {
 
     // Resolve the language before the first render so the page never flashes the wrong direction.
     provideAppInitializer(() => inject(LanguageService).initialise()),
+
+    // Applied before the first render so the page never flashes the shipped theme and then repaints.
+    provideAppInitializer(() => inject(BrandingService).initialise()),
   ],
 };

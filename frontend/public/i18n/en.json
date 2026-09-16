@@ -65,7 +65,8 @@
     },
     "departments": "Departments",
     "teams": "Teams",
-    "branches": "Branches"
+    "branches": "Branches",
+    "branding": "Branding"
   },
   "auth": {
     "signIn": "Sign in",
@@ -764,6 +765,30 @@
         "address": "Address",
         "phone": "Phone"
       }
+    },
+    "branding": {
+      "title": "Branding",
+      "subtitle": "Your identity, applied at runtime with no rebuild.",
+      "saved": "Branding saved.",
+      "overrideRemoved": "Branch override removed.",
+      "removeOverride": "Remove branch override",
+      "branch": "Applies to",
+      "globalDefault": "All branches (global default)",
+      "inheriting": "This branch currently inherits the global theme. Saving creates an override for it.",
+      "productNameEn": "Product name (English)",
+      "productNameAr": "Product name (Arabic)",
+      "primaryColor": "Primary colour",
+      "secondaryColor": "Secondary colour",
+      "supportEmail": "Support email",
+      "supportPhone": "Support phone",
+      "logo": "Logo",
+      "logoHint": "PNG, JPEG or WebP, up to 2MB. SVG is not accepted — it can carry scripts.",
+      "portalCss": "Portal custom CSS",
+      "portalCssHint": "Applied to the customer portal only. Imports and scripts are stripped on save.",
+      "preview": "Preview",
+      "sampleChip": "Sample chip",
+      "sampleCard": "Sample card",
+      "sampleAccent": "Accent text"
     }
   },
   "validation": {

@@ -1,0 +1,176 @@
+<app-page-header titleKey="admin.branding.title" subtitleKey="admin.branding.subtitle">
+  @if (isBranchOverride()) {
+    <button type="button" class="btn-secondary" (click)="removeOverride()">
+      {{ 'admin.branding.removeOverride' | translate }}
+    </button>
+  }
+  <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">
+    {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+  </button>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-96 animate-pulse"></div>
+} @else {
+  <div class="grid gap-4 lg:grid-cols-[1fr_22rem]">
+    <div class="card space-y-4 p-4">
+      @if (branches().length > 1) {
+        <div>
+          <label class="form-label" for="branding-branch">{{ 'admin.branding.branch' | translate }}</label>
+          <select
+            id="branding-branch"
+            class="form-control"
+            [ngModel]="branchId()"
+            (ngModelChange)="onBranchChange($event)"
+          >
+            <option value="">{{ 'admin.branding.globalDefault' | translate }}</option>
+            @for (branch of branches(); track branch.id) {
+              <option [value]="branch.id">{{ branchName(branch) }}</option>
+            }
+          </select>
+          @if (branchId() && !isBranchOverride()) {
+            <p class="mt-1 text-xs text-slate-500">{{ 'admin.branding.inheriting' | translate }}</p>
+          }
+        </div>
+      }
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="form-label" for="branding-name-en">{{ 'admin.branding.productNameEn' | translate }}</label>
+          <input id="branding-name-en" class="form-control" [ngModel]="productNameEn()" (ngModelChange)="productNameEn.set($event)" />
+        </div>
+
+        <div>
+          <label class="form-label" for="branding-name-ar">{{ 'admin.branding.productNameAr' | translate }}</label>
+          <input id="branding-name-ar" class="form-control" dir="rtl" [ngModel]="productNameAr()" (ngModelChange)="productNameAr.set($event)" />
+        </div>
+
+        <div>
+          <label class="form-label" for="branding-primary">{{ 'admin.branding.primaryColor' | translate }}</label>
+          <div class="flex gap-2">
+            <input
+              id="branding-primary"
+              type="color"
+              class="h-10 w-12 rounded border border-slate-300"
+              [ngModel]="primaryColor()"
+              (ngModelChange)="primaryColor.set($event)"
+            />
+            <input
+              class="form-control font-mono"
+              [ngModel]="primaryColor()"
+              (ngModelChange)="primaryColor.set($event)"
+            />
+          </div>
+          @for (message of fieldErrors('PrimaryColor'); track message) {
+            <p class="form-error" role="alert">{{ message }}</p>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="branding-secondary">{{ 'admin.branding.secondaryColor' | translate }}</label>
+          <div class="flex gap-2">
+            <input
+              id="branding-secondary"
+              type="color"
+              class="h-10 w-12 rounded border border-slate-300"
+              [ngModel]="secondaryColor()"
+              (ngModelChange)="secondaryColor.set($event)"
+            />
+            <input
+              class="form-control font-mono"
+              [ngModel]="secondaryColor()"
+              (ngModelChange)="secondaryColor.set($event)"
+            />
+          </div>
+          @for (message of fieldErrors('SecondaryColor'); track message) {
+            <p class="form-error" role="alert">{{ message }}</p>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="branding-support-email">{{ 'admin.branding.supportEmail' | translate }}</label>
+          <input id="branding-support-email" type="email" class="form-control" [ngModel]="supportEmail()" (ngModelChange)="supportEmail.set($event)" />
+        </div>
+
+        <div>
+          <label class="form-label" for="branding-support-phone">{{ 'admin.branding.supportPhone' | translate }}</label>
+          <input id="branding-support-phone" class="form-control" [ngModel]="supportPhone()" (ngModelChange)="supportPhone.set($event)" />
+        </div>
+      </div>
+
+      <div>
+        <label class="form-label" for="branding-logo">{{ 'admin.branding.logo' | translate }}</label>
+        <input
+          id="branding-logo"
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          class="form-control"
+          [disabled]="uploading()"
+          (change)="uploadLogo($event)"
+        />
+        <p class="mt-1 text-xs text-slate-500">{{ 'admin.branding.logoHint' | translate }}</p>
+        @for (message of fieldErrors('file'); track message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+        @if (logoUrl()) {
+          <p class="mt-1 truncate font-mono text-[11px] text-slate-400">{{ logoUrl() }}</p>
+        }
+      </div>
+
+      <div>
+        <label class="form-label" for="branding-css">{{ 'admin.branding.portalCss' | translate }}</label>
+        <textarea
+          id="branding-css"
+          rows="4"
+          class="form-control font-mono text-xs"
+          [ngModel]="portalCustomCss()"
+          (ngModelChange)="portalCustomCss.set($event)"
+        ></textarea>
+        <p class="mt-1 text-xs text-slate-500">{{ 'admin.branding.portalCssHint' | translate }}</p>
+      </div>
+    </div>
+
+    <!-- Preview: draft tokens scoped to this element, never to :root, so the admin screen itself
+         does not restyle while the colour picker is being dragged. -->
+    <div class="card p-4" [style]="previewStyle()">
+      <h2 class="mb-3 text-sm font-semibold text-slate-800">{{ 'admin.branding.preview' | translate }}</h2>
+
+      <div class="overflow-hidden rounded-lg border border-slate-200">
+        <div class="flex items-center gap-2 p-3 text-white" [style.background]="previewPrimary()">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-xs font-bold">
+            {{ (lang() === 'ar' ? productNameAr() : productNameEn()).charAt(0) }}
+          </span>
+          <span class="truncate text-sm font-semibold">
+            {{ lang() === 'ar' ? productNameAr() : productNameEn() }}
+          </span>
+        </div>
+
+        <div class="space-y-3 p-3">
+          <button
+            type="button"
+            class="w-full rounded-lg px-4 py-2 text-sm font-medium text-white"
+            [style.background]="previewPrimary()"
+          >
+            {{ 'common.save' | translate }}
+          </button>
+
+          <span
+            class="chip"
+            [style.background]="previewPrimarySoft()"
+            [style.color]="previewPrimary()"
+            [style.borderColor]="previewPrimary()"
+          >
+            {{ 'admin.branding.sampleChip' | translate }}
+          </span>
+
+          <div class="rounded-lg border border-slate-200 p-2">
+            <p class="text-xs text-slate-500">{{ 'admin.branding.sampleCard' | translate }}</p>
+            <p class="mt-1 text-sm font-medium" [style.color]="previewAccent()">
+              {{ 'admin.branding.sampleAccent' | translate }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
