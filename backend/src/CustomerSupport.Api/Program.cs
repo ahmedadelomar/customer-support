@@ -97,7 +97,7 @@ builder.Services.AddRateLimiter(options =>
 
 // --- CORS: the Angular dev server and the deployed front end ------------------------------------
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-    ?? ["http://localhost:4200"];
+    ?? ["http://localhost:4300"];
 
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
     .WithOrigins(allowedOrigins)

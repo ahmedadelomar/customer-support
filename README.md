@@ -42,11 +42,11 @@ npm install
 npm start
 ```
 
-Then open <http://localhost:4200> and sign in with **`admin`** / the `SEED_ADMIN_PASSWORD` you set.
+Then open <http://localhost:4300> and sign in with **`admin`** / the `SEED_ADMIN_PASSWORD` you set.
 
 | | |
 |---|---|
-| Web | <http://localhost:4200> |
+| Web | <http://localhost:4300> |
 | API | <http://localhost:5256> |
 | API docs | <http://localhost:5256/scalar/v1> |
 | Health | <http://localhost:5256/health> |
