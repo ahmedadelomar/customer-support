@@ -10,8 +10,10 @@
 
   <!-- Side navigation. `start-0` and `-translate-x` flip automatically under dir="rtl". -->
   <aside
+    #drawer
     class="fixed inset-y-0 z-40 flex w-64 flex-col border-e border-slate-200 bg-white transition-transform lg:static lg:translate-x-0 start-0"
     [ngClass]="sidebarOpen() ? 'translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full lg:!translate-x-0'"
+    (keydown)="onDrawerKeydown($event)"
   >
     <div class="flex h-16 items-center gap-2 border-b border-slate-200 px-4">
       <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-700 text-sm font-bold text-white">
@@ -20,7 +22,7 @@
       <span class="truncate font-semibold text-slate-900">{{ 'app.name' | translate }}</span>
     </div>
 
-    <nav class="flex-1 overflow-y-auto px-2 py-4">
+    <nav id="agent-nav-drawer" class="flex-1 overflow-y-auto px-2 py-4">
       @for (group of navigation(); track group.labelKey) {
         <p class="px-3 pb-1 pt-3 text-xs font-medium uppercase tracking-wide text-slate-400">
           {{ group.labelKey | translate }}
@@ -44,10 +46,12 @@
   <div class="flex min-w-0 flex-1 flex-col">
     <header class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-200 bg-white px-4">
       <button
+        #menuButton
         type="button"
         class="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
         [attr.aria-label]="'common.menu' | translate"
         [attr.aria-expanded]="sidebarOpen()"
+        aria-controls="agent-nav-drawer"
         (click)="toggleSidebar()"
       >
         ☰

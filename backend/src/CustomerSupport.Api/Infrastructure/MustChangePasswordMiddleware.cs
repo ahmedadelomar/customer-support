@@ -1,3 +1,4 @@
+using CustomerSupport.Application.Common.Localization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CustomerSupport.Api.Infrastructure;
@@ -21,7 +22,7 @@ public class MustChangePasswordMiddleware(RequestDelegate next)
         "/api/auth/login",
     ];
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context, IMessageLocalizer localizer)
     {
         var mustChange = context.User.Identity?.IsAuthenticated == true &&
                          context.User.HasClaim("must_change_password", "true");
@@ -35,8 +36,8 @@ public class MustChangePasswordMiddleware(RequestDelegate next)
         var problem = new ProblemDetails
         {
             Status = StatusCodes.Status409Conflict,
-            Title = "Password change required",
-            Detail = "You must change your password before using the application.",
+            Title = localizer[MessageKeys.PasswordChangeRequired],
+            Detail = localizer[MessageKeys.PasswordChangeRequiredDetail],
             Instance = $"{context.Request.Method} {context.Request.Path}",
         };
 

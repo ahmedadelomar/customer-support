@@ -1,4 +1,5 @@
 using CustomerSupport.Application.Common.Interfaces;
+using CustomerSupport.Application.Common.Localization;
 using CustomerSupport.Application.Common.Models;
 using CustomerSupport.Application.Common.Security;
 using CustomerSupport.Application.Customers.Dtos;
@@ -43,10 +44,22 @@ public class GetCustomersQueryHandler(IAppDbContext db)
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var term = request.Search.Trim();
+
+            // Arabic spelling variants are typed interchangeably — "أحمد" and "احمد" are the same
+            // name. The term is folded here and the stored Arabic name is folded in SQL by the
+            // chained REPLACE below, so the match works whichever spelling either side used.
+            // Both providers translate string.Replace, so this needs no collation change.
+            var folded = ArabicText.Normalize(term);
+
             query = query.Where(c =>
                 EF.Functions.Like(c.Code, $"%{term}%") ||
                 EF.Functions.Like(c.DisplayName.En, $"%{term}%") ||
                 EF.Functions.Like(c.DisplayName.Ar, $"%{term}%") ||
+                EF.Functions.Like(
+                    c.DisplayName.Ar
+                        .Replace("أ", "ا").Replace("إ", "ا").Replace("آ", "ا")
+                        .Replace("ة", "ه").Replace("ى", "ي").Replace("ـ", ""),
+                    $"%{folded}%") ||
                 (c.PrimaryEmail != null && EF.Functions.Like(c.PrimaryEmail, $"%{term}%")) ||
                 (c.PrimaryPhone != null && EF.Functions.Like(c.PrimaryPhone, $"%{term}%")) ||
                 (c.NationalIdOrCr != null && EF.Functions.Like(c.NationalIdOrCr, $"%{term}%")));

@@ -1,9 +1,11 @@
 using CustomerSupport.Application.Common.Interfaces;
+using CustomerSupport.Application.Common.Localization;
 using CustomerSupport.Application.Files;
 using CustomerSupport.Application.Tickets.Assignment;
 using CustomerSupport.Application.Workspace.QuickReplies;
 using CustomerSupport.Infrastructure.Identity;
 using CustomerSupport.Infrastructure.Jobs;
+using CustomerSupport.Infrastructure.Localization;
 using CustomerSupport.Infrastructure.Persistence;
 using CustomerSupport.Infrastructure.Persistence.Interceptors;
 using CustomerSupport.Infrastructure.Persistence.Seed;
@@ -78,6 +80,7 @@ public static class DependencyInjection
             .AddDefaultTokenProviders();
 
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+        services.AddSingleton<IMessageLocalizer, MessageLocalizer>();
         services.AddScoped<IReferenceNumberGenerator, ReferenceNumberGenerator>();
         services.AddScoped<ITicketEventRecorder, TicketEventRecorder>();
         services.AddScoped<IInteractionRecorder, InteractionRecorder>();

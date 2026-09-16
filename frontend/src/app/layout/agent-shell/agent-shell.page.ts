@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../core/auth/auth.service';
@@ -157,12 +157,78 @@ export class AgentShellPage {
       .filter((group) => group.items.length > 0);
   });
 
+  // `viewChild` cannot be declared on a native `#private` field.
+  private readonly drawer = viewChild<ElementRef<HTMLElement>>('drawer');
+  private readonly menuButton = viewChild<ElementRef<HTMLButtonElement>>('menuButton');
+
   toggleSidebar(): void {
-    this.sidebarOpen.update((open) => !open);
+    const opening = !this.sidebarOpen();
+    this.sidebarOpen.set(opening);
+
+    if (opening) {
+      // Move focus into the drawer so a keyboard user lands where the visual focus went.
+      queueMicrotask(() => this.#focusable()[0]?.focus());
+    }
   }
 
   closeSidebar(): void {
+    if (!this.sidebarOpen()) {
+      return;
+    }
+
     this.sidebarOpen.set(false);
+
+    // Return focus to what opened it, rather than dropping the user at the top of the document.
+    queueMicrotask(() => this.menuButton()?.nativeElement.focus());
+  }
+
+  /**
+   * Keeps Tab inside the open drawer. Without this, tabbing walks into the page behind a drawer
+   * that is visually covering it, which is disorienting with a screen reader and unusable with one.
+   * Only active while the drawer is open; above `lg` it never opens, so the desktop layout is unaffected.
+   */
+  onDrawerKeydown(event: KeyboardEvent): void {
+    if (!this.sidebarOpen()) {
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeSidebar();
+      return;
+    }
+
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    const items = this.#focusable();
+    if (items.length === 0) {
+      return;
+    }
+
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = document.activeElement;
+
+    if (event.shiftKey && active === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  #focusable(): HTMLElement[] {
+    const root = this.drawer()?.nativeElement;
+    if (!root) {
+      return [];
+    }
+
+    return [
+      ...root.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input, select, textarea'),
+    ].filter((element) => element.offsetParent !== null);
   }
 
   toggleLanguage(): void {

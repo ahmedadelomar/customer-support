@@ -28,6 +28,33 @@ body {
   font-family: 'Tajawal', 'Inter', system-ui, sans-serif;
 }
 
+/* Keyboard users must always be able to see where they are. Browsers hide the default ring for
+   mouse clicks via :focus-visible, so this costs pointer users nothing. */
+:focus-visible {
+  @apply outline-none ring-2 ring-brand-500 ring-offset-1;
+}
+
+/* Coarse pointers (touch) get roomier controls than a mouse needs. */
+@media (pointer: coarse) {
+  .btn,
+  .form-control {
+    @apply px-4 py-2.5;
+  }
+
+  /* Icon-only controls — row action menus, dialog close buttons — are the usual offenders. */
+  button:not(.btn),
+  a[role='button'] {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+  }
+}
+
+/* Nothing may make the page itself scroll sideways; wide content scrolls inside its own container. */
+html,
+body {
+  overflow-x: hidden;
+}
+
 /* Utility layer shared by every feature so form and table styling stays consistent. */
 @layer components {
   .form-label {
@@ -49,6 +76,9 @@ body {
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm
            font-medium transition disabled:cursor-not-allowed disabled:opacity-50;
+
+    /* 44px is the smallest reliably tappable target; below it, misses become common on phones. */
+    min-height: 2.75rem;
   }
 
   .btn-primary {

@@ -1,4 +1,5 @@
 using CustomerSupport.Application.Common.Exceptions;
+using CustomerSupport.Application.Common.Localization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,8 +9,14 @@ namespace CustomerSupport.Api.Infrastructure;
 /// Maps application exceptions to RFC 7807 problem details, so the Angular error interceptor sees one
 /// consistent shape and internal messages never leak to clients.
 /// </summary>
+/// <remarks>
+/// Titles are localised from the request's culture, which <c>AddRequestLocalization</c> resolves from
+/// the <c>Accept-Language</c> header the client sends on every call. The detail is the exception's own
+/// message: those come from handlers and validators, which own their own wording.
+/// </remarks>
 public class GlobalExceptionHandler(
     IProblemDetailsService problemDetails,
+    IMessageLocalizer localizer,
     ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
@@ -19,19 +26,19 @@ public class GlobalExceptionHandler(
     {
         var (status, title, detail) = exception switch
         {
-            ValidationException => (StatusCodes.Status400BadRequest, "Validation failed", exception.Message),
-            NotFoundException => (StatusCodes.Status404NotFound, "Resource not found", exception.Message),
-            ConflictException => (StatusCodes.Status409Conflict, "Conflict", exception.Message),
-            DuplicateContactException => (StatusCodes.Status409Conflict, "Duplicate contact", exception.Message),
-            AssignmentWarningException => (StatusCodes.Status409Conflict, "Assignment warning", exception.Message),
-            StatusKindChangeWarningException => (StatusCodes.Status409Conflict, "Status kind change warning", exception.Message),
-            OpenTasksWarningException => (StatusCodes.Status409Conflict, "Open tasks warning", exception.Message),
-            ForbiddenException => (StatusCodes.Status403Forbidden, "Forbidden", exception.Message),
-            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Unauthorized", "Authentication is required."),
+            ValidationException => (StatusCodes.Status400BadRequest, localizer[MessageKeys.ValidationFailed], exception.Message),
+            NotFoundException => (StatusCodes.Status404NotFound, localizer[MessageKeys.NotFound], exception.Message),
+            ConflictException => (StatusCodes.Status409Conflict, localizer[MessageKeys.Conflict], exception.Message),
+            DuplicateContactException => (StatusCodes.Status409Conflict, localizer[MessageKeys.DuplicateContact], exception.Message),
+            AssignmentWarningException => (StatusCodes.Status409Conflict, localizer[MessageKeys.AssignmentWarning], exception.Message),
+            StatusKindChangeWarningException => (StatusCodes.Status409Conflict, localizer[MessageKeys.StatusKindChangeWarning], exception.Message),
+            OpenTasksWarningException => (StatusCodes.Status409Conflict, localizer[MessageKeys.OpenTasksWarning], exception.Message),
+            ForbiddenException => (StatusCodes.Status403Forbidden, localizer[MessageKeys.Forbidden], exception.Message),
+            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, localizer[MessageKeys.Unauthorized], localizer[MessageKeys.UnauthorizedDetail]),
             // 499 is a de-facto standard for a client-cancelled request and has no StatusCodes constant.
-            OperationCanceledException => (499, "Client closed request", "The request was cancelled."),
-            _ => (StatusCodes.Status500InternalServerError, "Unexpected error",
-                "An unexpected error occurred. Reference the trace id when reporting this."),
+            OperationCanceledException => (499, localizer[MessageKeys.ClientClosedRequest], localizer[MessageKeys.ClientClosedRequestDetail]),
+            _ => (StatusCodes.Status500InternalServerError, localizer[MessageKeys.Unexpected],
+                localizer[MessageKeys.UnexpectedDetail]),
         };
 
         if (status >= StatusCodes.Status500InternalServerError)
