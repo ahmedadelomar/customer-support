@@ -3,6 +3,7 @@ using CustomerSupport.Application.Channels;
 using CustomerSupport.Application.Channels.Inbound;
 using CustomerSupport.Application.Channels.LiveChat;
 using CustomerSupport.Application.Channels.Outbound;
+using CustomerSupport.Application.Channels.Sms;
 using CustomerSupport.Application.Channels.WebForms;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Localization;
@@ -11,6 +12,7 @@ using CustomerSupport.Application.Tickets.Assignment;
 using CustomerSupport.Application.Workspace.QuickReplies;
 using CustomerSupport.Infrastructure.Channels;
 using CustomerSupport.Infrastructure.Channels.Email;
+using CustomerSupport.Infrastructure.Channels.Sms;
 using CustomerSupport.Infrastructure.Channels.WebForms;
 using CustomerSupport.Infrastructure.Identity;
 using CustomerSupport.Infrastructure.Jobs;
@@ -148,6 +150,11 @@ public static class DependencyInjection
         services.AddScoped<IWebFormTicketFactory, WebFormTicketFactory>();
         services.AddScoped<IWebFormSubmissionRetryService, WebFormSubmissionRetryService>();
         services.AddScoped<ICaptchaVerifier, LoggingCaptchaVerifier>();
+
+        // Communication Channels / SMS channel (CS-304). Reuses IInboundMessagePipeline (CS-301)
+        // unchanged, adding only its own outbound sender and outbox handler.
+        services.AddScoped<ISmsChannelSender, LoggingSmsChannelSender>();
+        services.AddScoped<IOutboxMessageHandler, SmsChannelOutboxHandler>();
 
         // Runtime configuration (Security & Administration / System configuration). These three read
         // through ISettingsProvider, which holds a DbContext, so they are scoped rather than

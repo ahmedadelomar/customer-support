@@ -75,6 +75,8 @@ public class ChannelAndContentConfiguration :
         b.Property(x => x.ProviderName).HasMaxLength(64);
         b.Property(x => x.ErrorCode).HasMaxLength(64);
         b.Property(x => x.ErrorMessage).HasMaxLength(2000);
+        // EstimatedCost's precision comes from AppDbContext.ApplyDecimalPrecision (18,4) — applied
+        // to every decimal property repo-wide, so it is not set again here.
 
         // Provider status webhooks look the row up by their own id.
         b.HasIndex(x => x.ProviderMessageId);

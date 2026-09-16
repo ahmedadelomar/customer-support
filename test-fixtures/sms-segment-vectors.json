@@ -1,0 +1,19 @@
+{
+  "description": "Shared SMS segment test vectors for CS-304 (SMS channel). Read by both the C# (SmsSegmentCalculatorTests) and TypeScript (sms-segment-calculator.spec.ts) test suites so the server and client implementations cannot silently drift apart. Each vector's `text` is either given literally, or built from `repeatChar` repeated `repeatCharTimes` times plus an optional `suffix`.",
+  "vectors": [
+    { "name": "gsm-short", "text": "Hello there, this is a short message.", "length": 37, "segments": 1, "encoding": "GSM-7" },
+    { "name": "gsm-exactly-one-segment", "repeatChar": "a", "repeatCharTimes": 160, "length": 160, "segments": 1, "encoding": "GSM-7" },
+    { "name": "gsm-one-over-one-segment", "repeatChar": "a", "repeatCharTimes": 161, "length": 161, "segments": 2, "encoding": "GSM-7" },
+    { "name": "gsm-exactly-two-concatenated", "repeatChar": "a", "repeatCharTimes": 306, "length": 306, "segments": 2, "encoding": "GSM-7" },
+    { "name": "gsm-one-over-two-concatenated", "repeatChar": "a", "repeatCharTimes": 307, "length": 307, "segments": 3, "encoding": "GSM-7" },
+    { "name": "ucs2-short-arabic", "text": "مرحبا", "length": 5, "segments": 1, "encoding": "UCS-2" },
+    { "name": "ucs2-exactly-one-segment", "repeatChar": "ا", "repeatCharTimes": 70, "length": 70, "segments": 1, "encoding": "UCS-2" },
+    { "name": "ucs2-one-over-one-segment", "repeatChar": "ا", "repeatCharTimes": 71, "length": 71, "segments": 2, "encoding": "UCS-2" },
+    { "name": "ucs2-exactly-two-concatenated", "repeatChar": "ا", "repeatCharTimes": 134, "length": 134, "segments": 2, "encoding": "UCS-2" },
+    { "name": "ucs2-one-over-two-concatenated", "repeatChar": "ا", "repeatCharTimes": 135, "length": 135, "segments": 3, "encoding": "UCS-2" },
+    { "name": "one-arabic-char-flips-whole-message-to-ucs2", "repeatChar": "a", "repeatCharTimes": 150, "suffix": "ا", "length": 151, "segments": 3, "encoding": "UCS-2" },
+    { "name": "extended-char-doubles-length-stays-in-one-segment", "repeatChar": "a", "repeatCharTimes": 158, "suffix": "€", "length": 160, "segments": 1, "encoding": "GSM-7" },
+    { "name": "extended-char-doubles-length-crosses-into-two-segments", "repeatChar": "a", "repeatCharTimes": 159, "suffix": "€", "length": 161, "segments": 2, "encoding": "GSM-7" },
+    { "name": "empty-string", "text": "", "length": 0, "segments": 1, "encoding": "GSM-7" }
+  ]
+}

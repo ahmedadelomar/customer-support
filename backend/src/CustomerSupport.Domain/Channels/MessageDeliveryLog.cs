@@ -29,4 +29,9 @@ public class MessageDeliveryLog : BaseEntity
     public DateTimeOffset? DeliveredAt { get; set; }
     public DateTimeOffset? ReadAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+
+    /// <summary>SMS only (CS-304) — how many provider-billed parts the message split into.</summary>
+    public int? SegmentCount { get; set; }
+    /// <summary>SMS only — <see cref="SegmentCount"/> times the configured per-segment cost, a reporting estimate rather than the provider's actual invoice.</summary>
+    public decimal? EstimatedCost { get; set; }
 }

@@ -36,6 +36,8 @@ public static class SettingKeys
     public const string LiveChatMaxConcurrentSessions = "livechat.maxConcurrentSessions";
     public const string LiveChatAbandonTimeoutMinutes = "livechat.abandonTimeoutMinutes";
     public const string LiveChatOfflineFallbackSeconds = "livechat.offlineFallbackSeconds";
+    public const string SmsMaxSegments = "sms.maxSegments";
+    public const string SmsCostPerSegment = "sms.costPerSegment";
 
     /// <summary>
     /// Settings safe to expose without authentication, for the portal's pre-sign-in shell. Anything
@@ -112,6 +114,16 @@ public static class SettingKeys
             "Offline fallback after (seconds)", "التحول لوضع عدم التوفر بعد (ثوانٍ)",
             "The widget offers the offline message form after waiting this long with no agent.",
             "تعرض الأداة نموذج ترك رسالة بعد هذه المدة من الانتظار دون توفر وكيل."),
+
+        new(SmsMaxSegments, "int", "Sms", "3",
+            "Maximum SMS segments per message", "الحد الأقصى لعدد أجزاء الرسالة النصية",
+            "A reply that would split into more segments than this is blocked before sending.",
+            "يُمنع إرسال أي رد يتجاوز هذا العدد من الأجزاء."),
+
+        new(SmsCostPerSegment, "string", "Sms", "0.02",
+            "Estimated cost per SMS segment", "التكلفة التقديرية لكل جزء من الرسالة النصية",
+            "Used only to estimate reporting cost, in the account's billing currency — not the provider's actual invoice.",
+            "تُستخدم فقط لتقدير التكلفة في التقارير بعملة الفوترة الخاصة بالحساب — وليست فاتورة المزود الفعلية."),
     ];
 
     public static SettingDefinition? Find(string key) =>

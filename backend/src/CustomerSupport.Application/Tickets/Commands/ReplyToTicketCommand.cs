@@ -1,7 +1,9 @@
 using CustomerSupport.Application.Channels.Outbound;
+using CustomerSupport.Application.Channels.Sms;
 using CustomerSupport.Application.Common.Exceptions;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Security;
+using CustomerSupport.Application.Common.Settings;
 using CustomerSupport.Application.Tickets;
 using CustomerSupport.Application.Workspace.Collaboration;
 using CustomerSupport.Domain.Enums;
@@ -44,6 +46,7 @@ public class ReplyToTicketCommandHandler(
     IInteractionRecorder interactions,
     ISlaEngine slaEngine,
     INotificationDispatcher notifications,
+    ISettingsProvider settings,
     IDateTimeProvider clock)
     : IRequestHandler<ReplyToTicketCommand, Guid>
 {
@@ -59,6 +62,21 @@ public class ReplyToTicketCommandHandler(
         var status = await db.TicketStatuses.FirstAsync(s => s.Id == ticket.StatusId, cancellationToken);
 
         TicketReadOnlyGuard.EnsureEditable(ticket, status.IsTerminal);
+
+        // Blocked before anything is written — a send above the cap must never surprise finance,
+        // and the agent needs the rejection before the reply is otherwise committed, not after.
+        if (ticket.Channel == ChannelKey.Sms)
+        {
+            var segments = SmsSegmentCalculator.Calculate(request.BodyText);
+            var maxSegments = await settings.GetAsync(SettingKeys.SmsMaxSegments, 3, ticket.BranchId, cancellationToken);
+
+            if (segments.SegmentCount > maxSegments)
+            {
+                throw new ConflictException(
+                    $"This reply would take {segments.SegmentCount} SMS segments ({segments.Encoding}), " +
+                    $"above the configured limit of {maxSegments}. Shorten the message and try again.");
+            }
+        }
 
         var message = new TicketMessage
         {
@@ -79,6 +97,10 @@ public class ReplyToTicketCommandHandler(
         if (ticket.Channel == ChannelKey.Email && ticket.ChannelAccountId is not null)
         {
             await QueueEmailReplyAsync(ticket, message, cancellationToken);
+        }
+        else if (ticket.Channel == ChannelKey.Sms && ticket.ChannelAccountId is not null)
+        {
+            await QueueSmsReplyAsync(ticket, message, cancellationToken);
         }
 
         ticket.LastAgentReplyAt = clock.UtcNow;
@@ -153,6 +175,29 @@ public class ReplyToTicketCommandHandler(
             message.Id, ticket.Id, account.Id, ticket.BranchId,
             customer.PrimaryEmail, account.Identifier, subject, message.BodyText, message.BodyHtml,
             customer.PreferredLanguage, messageId, lastInbound));
+    }
+
+    /// <summary>
+    /// Queues the reply through the outbox (Communication Channels / SMS channel, CS-304) — no
+    /// <c>AllowNotifications</c> check here: opt-out suppresses automated messages, never a direct
+    /// agent reply to a conversation the customer themselves started.
+    /// </summary>
+    private async Task QueueSmsReplyAsync(Ticket ticket, TicketMessage message, CancellationToken ct)
+    {
+        var customer = await db.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Id == ticket.CustomerId, ct);
+        if (string.IsNullOrWhiteSpace(customer?.PrimaryPhone))
+        {
+            return; // nothing to send to — the reply still lands in-app, just not by SMS
+        }
+
+        var account = await db.ChannelAccounts.AsNoTracking().FirstOrDefaultAsync(a => a.Id == ticket.ChannelAccountId, ct);
+        if (account is null)
+        {
+            return;
+        }
+
+        SmsChannelOutbox.Queue(db, clock, new SmsOutboundPayload(
+            message.Id, ticket.Id, account.Id, ticket.BranchId, customer.PrimaryPhone, account.Identifier, message.BodyText));
     }
 
     private static string Truncate(string text, int maxLength = 280) =>

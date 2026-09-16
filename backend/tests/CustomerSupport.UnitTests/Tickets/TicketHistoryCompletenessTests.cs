@@ -299,7 +299,7 @@ public class TicketHistoryCompletenessTests
         var handler = new ReplyToTicketCommandHandler(
             db, currentUser, new TicketEventRecorder(db, currentUser, FixedClock()),
             Substitute.For<IInteractionRecorder>(), Substitute.For<ISlaEngine>(),
-            Substitute.For<INotificationDispatcher>(), FixedClock());
+            Substitute.For<INotificationDispatcher>(), Substitute.For<ISettingsProvider>(), FixedClock());
 
         await handler.Handle(
             new ReplyToTicketCommand { TicketId = ticket.Id, BodyText = "Here is your answer" },
