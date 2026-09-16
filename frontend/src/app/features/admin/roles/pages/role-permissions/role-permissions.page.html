@@ -1,0 +1,76 @@
+<app-page-header titleKey="admin.roles.permissionsTitle" [subtitleKey]="null">
+  <button type="button" class="btn-secondary" (click)="back()">{{ 'common.back' | translate }}</button>
+  <button type="button" class="btn-primary" [disabled]="!dirty() || saving()" (click)="save()">
+    {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+  </button>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-96 animate-pulse"></div>
+} @else {
+  <div class="mb-4 flex flex-wrap items-center gap-2">
+    <span class="text-sm font-medium text-slate-900">{{ roleName() }}</span>
+    @if (role()?.isSystem) {
+      <span class="chip border-slate-200 bg-slate-50 text-xs text-slate-500">
+        {{ 'admin.roles.system' | translate }}
+      </span>
+    }
+  </div>
+
+  @if (errorMessage()) {
+    <p class="card mb-4 border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{{ errorMessage() }}</p>
+  }
+
+  <p class="card mb-4 border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+    {{ 'admin.roles.refreshNotice' | translate: { minutes: accessTokenMinutes } }}
+  </p>
+
+  <div class="space-y-3">
+    @for (category of categories(); track category.category) {
+      <div class="card p-0">
+        <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
+          <button type="button" class="flex items-center gap-2 text-start" (click)="toggleCategory(category.category)">
+            <span class="text-slate-400" aria-hidden="true">{{ isCollapsed(category.category) ? '▸' : '▾' }}</span>
+            <span class="text-sm font-medium text-slate-900">
+              {{ 'permissions.categories.' + category.category | translate }}
+            </span>
+            <span class="text-xs text-slate-500">
+              {{ grantedInCategory(category) }}/{{ category.permissions.length }}
+            </span>
+          </button>
+
+          <label class="flex items-center gap-2 text-xs text-slate-600">
+            <input
+              type="checkbox"
+              class="h-4 w-4 rounded border-slate-300"
+              [checked]="allInCategory(category)"
+              (change)="toggleAllInCategory(category)"
+            />
+            {{ 'admin.roles.selectAll' | translate }}
+          </label>
+        </div>
+
+        @if (!isCollapsed(category.category)) {
+          <ul class="grid gap-1 px-4 py-3 sm:grid-cols-2">
+            @for (permission of category.permissions; track permission.id) {
+              <li>
+                <label class="flex items-start gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-slate-50">
+                  <input
+                    type="checkbox"
+                    class="mt-0.5 h-4 w-4 rounded border-slate-300"
+                    [checked]="isGranted(permission.id)"
+                    (change)="toggle(permission.id)"
+                  />
+                  <span class="min-w-0">
+                    <span class="block truncate text-slate-800">{{ permissionName(permission) }}</span>
+                    <span class="block truncate font-mono text-[11px] text-slate-400">{{ permission.key }}</span>
+                  </span>
+                </label>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    }
+  </div>
+}

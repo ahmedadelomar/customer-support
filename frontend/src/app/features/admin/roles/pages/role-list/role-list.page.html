@@ -1,0 +1,122 @@
+<app-page-header titleKey="admin.roles.title" subtitleKey="admin.roles.subtitle">
+  <button
+    *hasPermission="permissions.administration.manageRoles"
+    type="button"
+    class="btn-primary"
+    (click)="openCreate()"
+  >
+    {{ 'admin.roles.create' | translate }}
+  </button>
+</app-page-header>
+
+<div class="card p-4">
+  @if (loading()) {
+    <div class="space-y-2">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="h-14 animate-pulse rounded-lg bg-slate-100"></div>
+      }
+    </div>
+  } @else if (roles().length === 0) {
+    <app-empty-state titleKey="admin.roles.empty" icon="⚿" />
+  } @else {
+    <ul class="divide-y divide-slate-100">
+      @for (role of roles(); track role.id) {
+        <li class="flex flex-wrap items-center justify-between gap-3 py-3">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="truncate text-sm font-medium text-slate-900">{{ roleName(role) }}</span>
+              @if (role.isSystem) {
+                <span class="chip border-slate-200 bg-slate-50 text-xs text-slate-500">
+                  {{ 'admin.roles.system' | translate }}
+                </span>
+              }
+            </div>
+            @if (role.description) {
+              <p class="mt-0.5 truncate text-xs text-slate-500">{{ role.description }}</p>
+            }
+            <p class="mt-1 text-xs text-slate-500">
+              {{ 'admin.roles.permissionCount' | translate: { count: role.permissionIds.length } }}
+              ·
+              {{ 'admin.roles.userCount' | translate: { count: role.userCount } }}
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              *hasPermission="permissions.administration.manageRoles"
+              type="button"
+              class="btn-secondary px-3 py-1.5 text-xs"
+              (click)="editPermissions(role)"
+            >
+              {{ 'admin.roles.editPermissions' | translate }}
+            </button>
+
+            @if (!role.isSystem) {
+              <button
+                *hasPermission="permissions.administration.manageRoles"
+                type="button"
+                class="btn-secondary px-3 py-1.5 text-xs"
+                (click)="openRename(role)"
+              >
+                {{ 'admin.roles.rename' | translate }}
+              </button>
+
+              <button
+                *hasPermission="permissions.administration.manageRoles"
+                type="button"
+                class="btn-secondary px-3 py-1.5 text-xs text-rose-600"
+                [disabled]="role.userCount > 0"
+                [attr.title]="role.userCount > 0 ? ('admin.roles.deleteBlocked' | translate) : null"
+                (click)="remove(role)"
+              >
+                {{ 'common.delete' | translate }}
+              </button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>
+
+<app-modal
+  [open]="formOpen()"
+  [titleKey]="editing() ? 'admin.roles.rename' : 'admin.roles.create'"
+  (closed)="closeForm()"
+>
+  <div class="space-y-3">
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+
+    @if (!editing()) {
+      <div>
+        <label class="form-label" for="role-name">{{ 'admin.roles.form.name' | translate }}</label>
+        <input id="role-name" class="form-control" [ngModel]="name()" (ngModelChange)="name.set($event)" />
+        <p class="mt-1 text-xs text-slate-500">{{ 'admin.roles.form.nameHint' | translate }}</p>
+      </div>
+    }
+
+    <div>
+      <label class="form-label" for="role-name-en">{{ 'admin.roles.form.displayNameEn' | translate }}</label>
+      <input id="role-name-en" class="form-control" [ngModel]="displayNameEn()" (ngModelChange)="displayNameEn.set($event)" />
+    </div>
+
+    <div>
+      <label class="form-label" for="role-name-ar">{{ 'admin.roles.form.displayNameAr' | translate }}</label>
+      <input id="role-name-ar" class="form-control" dir="rtl" [ngModel]="displayNameAr()" (ngModelChange)="displayNameAr.set($event)" />
+    </div>
+
+    <div>
+      <label class="form-label" for="role-description">{{ 'admin.roles.form.description' | translate }}</label>
+      <input id="role-description" class="form-control" [ngModel]="description()" (ngModelChange)="description.set($event)" />
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button type="button" class="btn-secondary" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
+      <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">
+        {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+      </button>
+    </div>
+  </div>
+</app-modal>

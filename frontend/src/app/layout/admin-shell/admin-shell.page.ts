@@ -63,6 +63,12 @@ export class AdminShellPage {
       route: '/admin/users',
       permissions: [PERMISSIONS.administration.viewUsers],
     },
+    {
+      labelKey: 'nav.roles',
+      icon: '⚖',
+      route: '/admin/roles',
+      permissions: [PERMISSIONS.administration.manageRoles],
+    },
   ];
 
   readonly navigation = computed<NavItem[]>(() => {

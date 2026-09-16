@@ -109,6 +109,12 @@ export const routes: Routes = [
         data: { titleKey: 'nav.users', permissions: [PERMISSIONS.administration.viewUsers] },
         loadChildren: () => import('./features/admin/users/users.routes').then((m) => m.USER_ROUTES),
       },
+      {
+        path: 'roles',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'admin.roles.title', permissions: [PERMISSIONS.administration.manageRoles] },
+        loadChildren: () => import('./features/admin/roles/roles.routes').then((m) => m.ROLE_ROUTES),
+      },
     ],
   },
 

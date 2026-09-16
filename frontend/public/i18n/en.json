@@ -43,6 +43,7 @@
     "customers": "Customers",
     "tasks": "Tasks & Reminders",
     "mentions": "Mentions",
+    "roles": "Roles & Permissions",
     "knowledgeBase": "Knowledge Base",
     "quickReplies": "Quick Replies",
     "reports": "Reports",
@@ -530,6 +531,32 @@
         "roleRequired": "A user must hold at least one role."
       }
     },
+    "roles": {
+      "title": "Roles & permissions",
+      "subtitle": "What each role may do. Permissions are defined in code; only the grants are editable.",
+      "create": "New role",
+      "rename": "Rename",
+      "created": "Role created.",
+      "updated": "Role updated.",
+      "deleted": "Role deleted.",
+      "empty": "No roles defined.",
+      "system": "System",
+      "editPermissions": "Edit permissions",
+      "permissionsTitle": "Role permissions",
+      "permissionsSaved": "Permissions updated.",
+      "permissionCount": "{{count}} permissions",
+      "userCount": "{{count}} users",
+      "deleteBlocked": "This role is still held by users.",
+      "selectAll": "Select all",
+      "refreshNotice": "Permission changes take effect the next time the affected users refresh their session (within {{minutes}} minutes) or sign in again.",
+      "form": {
+        "name": "Role key",
+        "nameHint": "Letters, digits and underscores only. Cannot be changed later.",
+        "displayNameEn": "Display name (English)",
+        "displayNameAr": "Display name (Arabic)",
+        "description": "Description"
+      }
+    },
     "categories": {
       "title": "Ticket categories",
       "addRoot": "Add top-level category",
@@ -778,6 +805,20 @@
     },
     "presence": {
       "viewing": "Also viewing this ticket"
+    }
+  },
+  "permissions": {
+    "categories": {
+      "Customers": "Customers",
+      "Tickets": "Tickets",
+      "Channels": "Channels",
+      "Workspace": "Workspace",
+      "Sla": "SLA & Automation",
+      "KnowledgeBase": "Knowledge Base",
+      "Ai": "AI",
+      "Reports": "Reports",
+      "Administration": "Administration",
+      "Integrations": "Integrations"
     }
   }
 }
