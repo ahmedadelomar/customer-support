@@ -130,12 +130,12 @@ Play a sound and show a browser notification for a new queued chat, both user-to
 
 ## Done Criteria
 
-- [ ] SignalR hub with per-session authorisation on every method, not just on connect.
-- [ ] Queue, race-safe accept, concurrent-chat limits and the offline fallback all work.
-- [ ] The widget is self-contained, style-isolated, and reconnects with history.
-- [ ] Promotion copies the transcript and links both records.
-- [ ] Ended and abandoned sessions write interactions.
-- [ ] Visitor content is rendered as text.
-- [ ] The console handles concurrent chats with per-session drafts and notifications.
+- [x] SignalR hub with per-session authorisation on every method, not just on connect.
+- [x] Queue, race-safe accept, concurrent-chat limits and the offline fallback all work.
+- [x] The widget is self-contained, style-isolated, and reconnects with history.
+- [x] Promotion copies the transcript and links both records.
+- [x] Ended and abandoned sessions write interactions.
+- [x] Visitor content is rendered as text.
+- [x] The console handles concurrent chats with per-session drafts and notifications.
 
 **STOP HERE. Report to the user and wait for confirmation before proceeding to the next story.**

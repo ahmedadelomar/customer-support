@@ -166,13 +166,13 @@ Show delivery state per outbound message as a small indicator (queued, sent, del
 
 ## Done Criteria
 
-- [ ] `IInboundMessagePipeline` exists and is general enough for WhatsApp, SMS and web forms.
-- [ ] Ingestion is idempotent by unique-index violation, not by check-then-insert.
-- [ ] Threading follows headers, then ticket number, and never subject text alone.
-- [ ] Unknown senders create customers; oversized attachments are skipped without losing the message.
-- [ ] Loop protection prevents auto-acknowledging automated mail.
-- [ ] Outbound sends go through the outbox and are logged, with bounces surfaced to the agent.
-- [ ] Inbound HTML is sanitised before rendering.
-- [ ] Mailbox health is visible in the admin UI.
+- [x] `IInboundMessagePipeline` exists and is general enough for WhatsApp, SMS and web forms.
+- [x] Ingestion is idempotent by unique-index violation, not by check-then-insert.
+- [x] Threading follows headers, then ticket number, and never subject text alone.
+- [x] Unknown senders create customers; oversized attachments are skipped without losing the message.
+- [x] Loop protection prevents auto-acknowledging automated mail.
+- [x] Outbound sends go through the outbox and are logged, with bounces surfaced to the agent.
+- [x] Inbound HTML is sanitised before rendering.
+- [x] Mailbox health is visible in the admin UI.
 
 **STOP HERE. Report to the user and wait for confirmation before proceeding to the next story.**
