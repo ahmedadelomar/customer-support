@@ -1,6 +1,7 @@
 using CustomerSupport.Application.Automation;
 using CustomerSupport.Application.Channels;
 using CustomerSupport.Application.Channels.Inbound;
+using CustomerSupport.Application.Channels.LiveChat;
 using CustomerSupport.Application.Channels.Outbound;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Localization;
@@ -135,6 +136,10 @@ public static class DependencyInjection
         services.AddScoped<IOutboxMessageHandler, EmailChannelOutboxHandler>();
         services.AddSingleton<IVirusScanner, NoOpVirusScanner>();
 
+        // Communication Channels / Live chat (CS-303). IChatRealtimeNotifier is registered in the Api
+        // project instead — it needs IHubContext<ChatHub>, an Api-layer type.
+        services.AddScoped<IChatVisitorTokenService, ChatVisitorTokenService>();
+
         // Runtime configuration (Security & Administration / System configuration). These three read
         // through ISettingsProvider, which holds a DbContext, so they are scoped rather than
         // singletons — a singleton depending on a scoped service is a captive dependency.
@@ -203,6 +208,15 @@ public static class DependencyInjection
                 .ForJob(outboxJobKey)
                 .WithIdentity($"{nameof(OutboxDispatcherJob)}-trigger")
                 .WithSimpleSchedule(s => s.WithIntervalInSeconds(30).RepeatForever()));
+
+            // Abandon stale chat sessions (Communication Channels / Live chat) — every 5 minutes, so
+            // a visitor who closed the tab without ending the chat does not sit in the queue forever.
+            var abandonChatJobKey = new JobKey(nameof(AbandonStaleChatSessionsJob));
+            q.AddJob<AbandonStaleChatSessionsJob>(opts => opts.WithIdentity(abandonChatJobKey));
+            q.AddTrigger(opts => opts
+                .ForJob(abandonChatJobKey)
+                .WithIdentity($"{nameof(AbandonStaleChatSessionsJob)}-trigger")
+                .WithSimpleSchedule(s => s.WithIntervalInMinutes(5).RepeatForever()));
         });
         services.AddQuartzHostedService(opts => opts.WaitForJobsToComplete = true);
 

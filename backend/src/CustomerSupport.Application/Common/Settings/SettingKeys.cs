@@ -33,6 +33,9 @@ public static class SettingKeys
     public const string AiEnabled = "ai.enabled";
     public const string CsatEnabled = "csat.enabled";
     public const string CsatSurveyExpiryDays = "csat.surveyExpiryDays";
+    public const string LiveChatMaxConcurrentSessions = "livechat.maxConcurrentSessions";
+    public const string LiveChatAbandonTimeoutMinutes = "livechat.abandonTimeoutMinutes";
+    public const string LiveChatOfflineFallbackSeconds = "livechat.offlineFallbackSeconds";
 
     /// <summary>
     /// Settings safe to expose without authentication, for the portal's pre-sign-in shell. Anything
@@ -94,6 +97,21 @@ public static class SettingKeys
             "Survey expiry (days)", "انتهاء صلاحية الاستبيان (أيام)",
             "How long a satisfaction survey link stays valid.",
             "المدة التي يبقى فيها رابط الاستبيان صالحًا."),
+
+        new(LiveChatMaxConcurrentSessions, "int", "LiveChat", "3",
+            "Max concurrent chats per agent", "الحد الأقصى للمحادثات المتزامنة لكل وكيل",
+            "An agent cannot accept another chat once this many are active.",
+            "لا يمكن للوكيل قبول محادثة أخرى بعد الوصول لهذا العدد من المحادثات النشطة."),
+
+        new(LiveChatAbandonTimeoutMinutes, "int", "LiveChat", "10",
+            "Abandon chat after inactivity (minutes)", "اعتبار المحادثة متروكة بعد عدم النشاط (دقائق)",
+            "A waiting or active chat with no activity for this long is marked abandoned.",
+            "تُعتبر المحادثة المنتظرة أو النشطة متروكة بعد هذه المدة دون أي نشاط."),
+
+        new(LiveChatOfflineFallbackSeconds, "int", "LiveChat", "60",
+            "Offline fallback after (seconds)", "التحول لوضع عدم التوفر بعد (ثوانٍ)",
+            "The widget offers the offline message form after waiting this long with no agent.",
+            "تعرض الأداة نموذج ترك رسالة بعد هذه المدة من الانتظار دون توفر وكيل."),
     ];
 
     public static SettingDefinition? Find(string key) =>

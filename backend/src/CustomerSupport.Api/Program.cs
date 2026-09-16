@@ -4,6 +4,7 @@ using CustomerSupport.Api.Hubs;
 using CustomerSupport.Api.Infrastructure;
 using CustomerSupport.Api.Services;
 using CustomerSupport.Application;
+using CustomerSupport.Application.Channels.LiveChat;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Infrastructure;
 using CustomerSupport.Infrastructure.Persistence;
@@ -31,6 +32,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUserService>();
 builder.Services.AddScoped<IAuditContextAccessor, AuditContextAccessor>();
 builder.Services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
+builder.Services.AddScoped<IChatRealtimeNotifier, SignalRChatNotifier>();
 
 // --- Authentication ----------------------------------------------------------------------------
 var jwtKey = builder.Configuration["Jwt:Key"]
@@ -155,6 +157,7 @@ app.UseMiddleware<MustChangePasswordMiddleware>();
 app.MapControllers();
 app.MapHub<CollaborationHub>("/hubs/collaboration");
 app.MapHub<NotificationsHub>("/hubs/notifications");
+app.MapHub<ChatHub>("/hubs/chat");
 app.MapHealthChecks("/health");
 
 // --- Migrate and seed --------------------------------------------------------------------------
