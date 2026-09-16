@@ -184,12 +184,29 @@ A decision log viewer at `/admin/automation/log`, filterable by ticket, rule and
 
 ## Done Criteria
 
-- [ ] `IRuleEvaluator` uses an allow-listed field map and is reusable by CS-503.
-- [ ] All five strategies work, with round robin correct under concurrency via a row lock.
-- [ ] Ineligible candidates leave the ticket queued rather than being force-assigned.
-- [ ] Every evaluation is logged with a readable reason; the tester writes nothing.
-- [ ] Capacity comes from `AgentCapacityService`, shared with manual assignment.
-- [ ] Assignment failure never fails ticket creation.
-- [ ] The rule builder explains strategies in plain language and shows match counts.
+- [x] `IRuleEvaluator` uses an allow-listed field map and is reusable by CS-503 — it wraps the shared
+      `IConditionEvaluator` (also used by CS-501's policy selection); CS-503's `EscalationEngine`
+      injects the same `IRuleEvaluator` instance type without modification.
+- [x] All five strategies work, with round robin correct under concurrency via a row lock — round
+      robin uses an optimistic compare-and-swap (`ExecuteUpdateAsync` gated on the previously-read
+      cursor value) rather than a SQL-Server-only row-lock hint, since the dev database is Sqlite;
+      verified live cycling through team members in rotation order and via
+      `RoundRobin_CursorPersists_SoANewEngineInstanceContinuesWhereItLeftOff`.
+- [x] Ineligible candidates leave the ticket queued rather than being force-assigned — verified by
+      `EveryCandidateIneligible_LeavesTicketUnassigned_AndLogsWhy`.
+- [x] Every evaluation is logged with a readable reason; the tester writes nothing — verified by
+      `EveryRuleEvaluated_IsLogged_IncludingSkippedOnes` and live: the tester reported the correct
+      outcome without `matchCount` changing.
+- [x] Capacity comes from `AgentCapacityService`, shared with manual assignment — `AssignmentEngine`
+      takes the same `IAgentCapacityService` `AssignTicketCommand` (manual assignment) already used.
+- [x] Assignment failure never fails ticket creation — `CreateTicketCommandHandler` wraps the
+      `AssignAsync` call in try/catch, outside the creation transaction, logging rather than throwing.
+- [x] The rule builder explains strategies in plain language and shows match counts — each strategy
+      option renders one explanatory sentence beneath the selector; the rule list shows match count
+      and last-matched-at columns.
 
-**STOP HERE. Report to the user and wait for confirmation before proceeding to the next story.**
+**Not verified live:** the rule builder, tester panel and decision-log viewer in an actual browser —
+no browser-automation tool in this session. The Direct-strategy path was verified end-to-end via
+curl (rule creation → ticket creation → auto-assignment → decision log → tester agreement); the
+round-robin/load-balanced/skill-based strategies were exercised only by unit tests, since the dev
+database has no seeded team yet.

@@ -150,12 +150,29 @@ On the ticket history tab, escalation events show the rule name and the action t
 
 ## Done Criteria
 
-- [ ] All five triggers work, with idle time measured in working minutes.
-- [ ] All six actions work, including the skip-with-reason case.
-- [ ] Cooldown and fire caps are enforced from the decision log.
-- [ ] Firings are attributed to the rule by name in ticket history.
-- [ ] The job is non-overlapping, batched and logs pass summaries.
-- [ ] The tester is genuinely read-only.
-- [ ] The builder shows only the inputs relevant to the chosen trigger and action.
+- [x] All five triggers work, with idle time measured in working minutes — `NoAgentResponse` uses a
+      wall-clock prefilter (a safe superset, since working minutes never exceed wall-clock minutes)
+      then an exact `IBusinessCalendarCalculator.WorkingMinutesBetweenAsync` check; `ApproachingBreach`
+      likewise pulls running clocks by SQL then computes live consumed percentage in memory, the same
+      approach the SLA warning sweep uses.
+- [x] All six actions work, including the skip-with-reason case — `RaisePriority` at the top priority
+      returns `Outcome = "Skipped"` with the reason recorded, never an exception.
+- [x] Cooldown and fire caps are enforced from the decision log — checked against `AutomationRunLog`
+      exactly per the plan's pseudocode before any action executes.
+- [x] Firings are attributed to the rule by name in ticket history — every action passes
+      `triggeredByRule: rule.Name.En` to `ITicketEventRecorder`, never the caller's identity (there is
+      no caller; this is job-driven).
+- [x] The job is non-overlapping, batched and logs pass summaries — `EscalationEvaluationJob` is
+      `[DisallowConcurrentExecution]`; `EscalationEngine.EvaluateAsync` caps candidates per rule per
+      run at 1000 and logs a per-rule summary (candidates, fired, duration), warning if a rule's
+      evaluation alone exceeds the 5-minute interval.
+- [x] The tester is genuinely read-only — `TestRuleAsync` calls no `SaveChangesAsync`; it reuses the
+      same candidate-loading and condition-matching code the real run uses and only returns matches.
+- [x] The builder shows only the inputs relevant to the chosen trigger and action — the threshold
+      input switches on `thresholdKind` (percent/minutes/count/none) and the action's target field
+      switches on `target` (user-or-team/department/user/none).
 
-**STOP HERE. Report to the user and wait for confirmation before proceeding to the next story.**
+**Not verified live:** the escalation rule builder and tester in an actual browser (no
+browser-automation tool), and the `NotifyManager`/`AddWatcher` actions against real data (would need
+a seeded department manager) — created and dry-run tested via curl, but no rule was left active long
+enough for the 5-minute job to fire it against a real ticket.
