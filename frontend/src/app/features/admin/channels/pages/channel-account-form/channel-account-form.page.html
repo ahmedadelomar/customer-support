@@ -1,0 +1,120 @@
+<app-page-header [titleKey]="isEdit ? 'channels.editTitle' : 'channels.newTitle'">
+  <a routerLink="/admin/channels" class="btn-secondary">{{ 'common.back' | translate }}</a>
+  <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">
+    {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+  </button>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-96 animate-pulse"></div>
+} @else {
+  <div class="space-y-4">
+    <div class="card space-y-4 p-4">
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="form-label" for="acct-channel">{{ 'channels.channel' | translate }}</label>
+          <select id="acct-channel" class="form-control" [ngModel]="channelId()" (ngModelChange)="channelId.set($event)" [disabled]="isEdit">
+            @for (c of channels(); track c.id) {
+              <option [value]="c.id">{{ channelName(c) }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="acct-name">{{ 'channels.name' | translate }}</label>
+          <input id="acct-name" class="form-control" [ngModel]="name()" (ngModelChange)="name.set($event)" />
+        </div>
+      </div>
+
+      <div>
+        <label class="form-label" for="acct-identifier">{{ 'channels.identifier' | translate }}</label>
+        <input id="acct-identifier" class="form-control" [ngModel]="identifier()" (ngModelChange)="identifier.set($event)" [placeholder]="'channels.identifierHint' | translate" />
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-3">
+        <div>
+          <label class="form-label" for="acct-department">{{ 'channels.defaultDepartment' | translate }}</label>
+          <select id="acct-department" class="form-control" [ngModel]="defaultDepartmentId()" (ngModelChange)="defaultDepartmentId.set($event)">
+            <option value="">{{ 'common.none' | translate }}</option>
+            @for (d of departments(); track d.id) {
+              <option [value]="d.id">{{ departmentName(d) }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="acct-category">{{ 'channels.defaultCategory' | translate }}</label>
+          <select id="acct-category" class="form-control" [ngModel]="defaultCategoryId()" (ngModelChange)="defaultCategoryId.set($event)">
+            <option value="">{{ 'common.none' | translate }}</option>
+            @for (c of categories(); track c.id) {
+              <option [value]="c.id">{{ categoryName(c) }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="acct-priority">{{ 'channels.defaultPriority' | translate }}</label>
+          <select id="acct-priority" class="form-control" [ngModel]="defaultPriorityId()" (ngModelChange)="defaultPriorityId.set($event)">
+            <option value="">{{ 'common.none' | translate }}</option>
+            @for (p of priorities(); track p.id) {
+              <option [value]="p.id">{{ priorityName(p) }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <label class="flex items-center gap-2 text-sm text-slate-700">
+        <input type="checkbox" [ngModel]="isActive()" (ngModelChange)="isActive.set($event)" />
+        {{ 'common.active' | translate }}
+      </label>
+    </div>
+
+    <div class="card space-y-4 p-4">
+      <h2 class="text-sm font-semibold text-slate-800">{{ 'channels.signatureTitle' | translate }}</h2>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="form-label" for="acct-sig-en">{{ 'channels.signatureEn' | translate }}</label>
+          <textarea id="acct-sig-en" rows="2" class="form-control" [ngModel]="signatureEn()" (ngModelChange)="signatureEn.set($event)"></textarea>
+        </div>
+        <div>
+          <label class="form-label" for="acct-sig-ar">{{ 'channels.signatureAr' | translate }}</label>
+          <textarea id="acct-sig-ar" rows="2" dir="rtl" class="form-control" [ngModel]="signatureAr()" (ngModelChange)="signatureAr.set($event)"></textarea>
+        </div>
+      </div>
+
+      <label class="flex items-center gap-2 text-sm text-slate-700">
+        <input type="checkbox" [ngModel]="sendAutoReply()" (ngModelChange)="sendAutoReply.set($event)" />
+        {{ 'channels.sendAutoReply' | translate }}
+      </label>
+
+      @if (sendAutoReply()) {
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="form-label" for="acct-auto-en">{{ 'channels.autoReplyEn' | translate }}</label>
+            <textarea id="acct-auto-en" rows="2" class="form-control" [ngModel]="autoReplyBodyEn()" (ngModelChange)="autoReplyBodyEn.set($event)"></textarea>
+          </div>
+          <div>
+            <label class="form-label" for="acct-auto-ar">{{ 'channels.autoReplyAr' | translate }}</label>
+            <textarea id="acct-auto-ar" rows="2" dir="rtl" class="form-control" [ngModel]="autoReplyBodyAr()" (ngModelChange)="autoReplyBodyAr.set($event)"></textarea>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="card space-y-3 p-4">
+      <h2 class="text-sm font-semibold text-slate-800">{{ 'channels.webhookTitle' | translate }}</h2>
+      <p class="text-xs text-slate-500">{{ 'channels.webhookHint' | translate }}</p>
+      <div>
+        <label class="form-label" for="acct-secret">{{ 'channels.webhookSecret' | translate }}</label>
+        <input
+          id="acct-secret" type="password" class="form-control" autocomplete="new-password"
+          [ngModel]="webhookSecret()" (ngModelChange)="webhookSecret.set($event)"
+          [placeholder]="(hasWebhookSecret() ? 'channels.webhookSecretSet' : 'channels.webhookSecretNotSet') | translate"
+        />
+      </div>
+
+      <div>
+        <label class="form-label" for="acct-settings">{{ 'channels.settingsJson' | translate }}</label>
+        <textarea id="acct-settings" rows="3" class="form-control font-mono text-xs" [ngModel]="settingsJson()" (ngModelChange)="settingsJson.set($event)"></textarea>
+        <p class="mt-1 text-xs text-slate-500">{{ 'channels.settingsJsonHint' | translate }}</p>
+      </div>
+    </div>
+  </div>
+}

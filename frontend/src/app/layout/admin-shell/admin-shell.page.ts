@@ -83,6 +83,12 @@ export class AdminShellPage {
       permissions: [PERMISSIONS.sla.manageEscalationRules],
     },
     {
+      labelKey: 'nav.channels',
+      icon: '✉',
+      route: '/admin/channels',
+      permissions: [PERMISSIONS.channels.manage],
+    },
+    {
       labelKey: 'nav.branches',
       icon: '🏬',
       route: '/admin/organization/branches',

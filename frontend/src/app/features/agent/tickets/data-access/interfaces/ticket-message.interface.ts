@@ -15,4 +15,7 @@ export interface TicketMessage {
   isInternalNote: boolean;
   sentAt: string;
   attachments: Attachment[];
+  /** The latest delivery attempt's status for an outbound channel message (email today); null otherwise. */
+  deliveryStatus: string | null;
+  deliveryError: string | null;
 }

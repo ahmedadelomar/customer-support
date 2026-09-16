@@ -1,0 +1,47 @@
+<app-page-header titleKey="channels.title" subtitleKey="channels.subtitle">
+  <a routerLink="/admin/channels/new" class="btn-primary">{{ 'channels.add' | translate }}</a>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-64 animate-pulse"></div>
+} @else if (accounts().length === 0) {
+  <div class="card p-8 text-center text-slate-500">{{ 'common.noResults' | translate }}</div>
+} @else {
+  <div class="card divide-y divide-slate-100">
+    @for (account of accounts(); track account.id) {
+      <div class="flex flex-wrap items-center gap-3 p-3" [class.opacity-50]="!account.isActive">
+        <span
+          class="h-2.5 w-2.5 shrink-0 rounded-full"
+          [class]="account.lastPollError ? 'bg-rose-500' : 'bg-emerald-500'"
+          [title]="account.lastPollError ?? ('channels.healthy' | translate)"
+        ></span>
+
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="font-medium text-slate-900">{{ account.name }}</span>
+            <span class="chip border-slate-200 bg-slate-100 text-slate-600">{{ account.channelNameEn }}</span>
+            @if (!account.isActive) {
+              <span class="chip border-slate-200 bg-slate-100 text-slate-500">{{ 'admin.categories.inactive' | translate }}</span>
+            }
+          </div>
+          <p class="mt-0.5 text-xs text-slate-500">{{ account.identifier }}</p>
+          @if (account.lastPollError) {
+            <p class="mt-0.5 text-xs text-rose-600">{{ account.lastPollError }}</p>
+          }
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button type="button" class="btn-secondary px-2 py-1 text-xs" [disabled]="testingId() === account.id" (click)="test(account)">
+            {{ 'channels.testConnection' | translate }}
+          </button>
+          <button type="button" class="btn-secondary px-2 py-1 text-xs" (click)="edit(account)">
+            {{ 'common.edit' | translate }}
+          </button>
+          <button type="button" class="btn-secondary px-2 py-1 text-xs text-rose-600" (click)="delete(account)">
+            {{ 'common.delete' | translate }}
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+}

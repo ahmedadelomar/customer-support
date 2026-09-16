@@ -43,7 +43,8 @@
     "updated": "تم التحديث.",
     "remove": "إزالة",
     "default": "افتراضي",
-    "notFound": "غير موجود."
+    "notFound": "غير موجود.",
+    "none": "بلا"
   },
   "nav": {
     "dashboard": "لوحة المعلومات",
@@ -343,7 +344,17 @@
     },
     "thread": {
       "internalNoteBadge": "ملاحظة داخلية",
-      "empty": "لا توجد رسائل بعد."
+      "empty": "لا توجد رسائل بعد.",
+      "viewOriginal": "عرض الأصل",
+      "viewFormatted": "عرض المنسق",
+      "delivery": {
+        "sent": "تم الإرسال",
+        "queued": "في قائمة الانتظار",
+        "delivered": "تم التسليم",
+        "read": "تمت القراءة",
+        "failed": "فشل",
+        "bounced": "مرتد"
+      }
     },
     "history": {
       "today": "اليوم",
@@ -1201,6 +1212,37 @@
       "rule": "القاعدة",
       "reason": "السبب"
     }
+  },
+  "channels": {
+    "title": "قنوات التواصل",
+    "subtitle": "ربط وتهيئة صناديق البريد وحسابات المراسلة التي تُنشأ منها التذاكر.",
+    "add": "إضافة حساب قناة",
+    "newTitle": "حساب قناة جديد",
+    "editTitle": "تعديل حساب القناة",
+    "channel": "القناة",
+    "name": "الاسم",
+    "identifier": "المعرّف",
+    "identifierHint": "مثال: support@company.com",
+    "defaultDepartment": "القسم الافتراضي",
+    "defaultCategory": "الفئة الافتراضية",
+    "defaultPriority": "الأولوية الافتراضية",
+    "signatureTitle": "التوقيع والرد التلقائي",
+    "signatureEn": "التوقيع (بالإنجليزية)",
+    "signatureAr": "التوقيع (بالعربية)",
+    "sendAutoReply": "إرسال إشعار استلام تلقائي للتذاكر الجديدة",
+    "autoReplyEn": "رسالة الرد التلقائي (بالإنجليزية)",
+    "autoReplyAr": "رسالة الرد التلقائي (بالعربية)",
+    "webhookTitle": "الويب هوك",
+    "webhookHint": "قم بتهيئة المزود لإرسال أحداث الرسائل الواردة وتحديثات حالة التسليم إلى رابط الويب هوك الخاص بهذا الحساب، موقّعة بالمفتاح السري أدناه.",
+    "webhookSecret": "المفتاح السري للويب هوك",
+    "webhookSecretSet": "تم تعيينه مسبقًا — اتركه فارغًا للإبقاء عليه",
+    "webhookSecretNotSet": "غير معيّن",
+    "settingsJson": "إعدادات متقدمة (JSON)",
+    "settingsJsonHint": "إعدادات اختيارية خاصة بالمزود، تُحفظ كما هي.",
+    "healthy": "سليم",
+    "testConnection": "اختبار الاتصال",
+    "testSuccess": "نجح اختبار الاتصال.",
+    "testFailed": "فشل اختبار الاتصال."
   },
   "notifications": {
     "bell": {

@@ -101,3 +101,13 @@ body {
     @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium;
   }
 }
+
+/*
+ * Sanitised inbound email HTML (Communication Channels / Email channel) is injected via
+ * `[innerHTML]`, so it never picks up Angular's per-component scoped styles — a global rule is the
+ * only way to constrain a customer's own <img> markup to the thread's width instead of overflowing it.
+ */
+.email-body img {
+  max-width: 100%;
+  height: auto;
+}

@@ -156,6 +156,12 @@ export const routes: Routes = [
         data: { titleKey: 'nav.slaAutomation', permissions: [PERMISSIONS.sla.view] },
         loadChildren: () => import('./features/admin/sla/sla.routes').then((m) => m.SLA_ROUTES),
       },
+      {
+        path: 'channels',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'nav.channels', permissions: [PERMISSIONS.channels.manage] },
+        loadChildren: () => import('./features/admin/channels/channels.routes').then((m) => m.CHANNELS_ROUTES),
+      },
     ],
   },
 

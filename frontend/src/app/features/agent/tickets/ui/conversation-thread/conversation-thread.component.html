@@ -51,8 +51,27 @@
                 <span class="font-medium text-slate-700">{{ row.message.authorDisplayName }}</span>
                 <span>·</span>
                 <span>{{ relativeTime(row.message.sentAt) }}</span>
+                @if (row.message.bodyHtml) {
+                  <button type="button" class="text-brand-600 hover:underline" (click)="toggleOriginal(row.message.id)">
+                    {{ (showsOriginal(row.message.id) ? 'tickets.thread.viewFormatted' : 'tickets.thread.viewOriginal') | translate }}
+                  </button>
+                }
+                @if (deliveryLabelKey(row.message); as labelKey) {
+                  <span
+                    class="ms-auto shrink-0"
+                    [class]="deliveryClasses(row.message)"
+                    [title]="row.message.deliveryError ?? ''"
+                  >
+                    {{ labelKey | translate }}
+                  </span>
+                }
               </div>
-              <p class="whitespace-pre-wrap text-sm text-slate-800">{{ row.message.bodyText }}</p>
+
+              @if (row.message.bodyHtml && !showsOriginal(row.message.id)) {
+                <div class="email-body max-w-full overflow-x-auto text-sm text-slate-800" [innerHTML]="row.message.bodyHtml"></div>
+              } @else {
+                <p class="whitespace-pre-wrap text-sm text-slate-800">{{ row.message.bodyText }}</p>
+              }
 
               @if (row.message.attachments.length) {
                 <div class="mt-2 flex flex-wrap gap-1.5">

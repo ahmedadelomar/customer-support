@@ -77,6 +77,18 @@ public class GetTicketMessagesQueryHandler(IAppDbContext db, ICurrentUser curren
             .GroupBy(a => a.OwnerId)
             .ToDictionary(g => g.Key, g => (IReadOnlyList<AttachmentDto>)g.Select(a => a.Dto).ToList());
 
+        // The most recent delivery attempt per message — an agent-facing indicator, so only the
+        // latest status (not the whole retry history) is worth carrying to the thread. Reduced
+        // client-side (like the attachment lookup above) rather than a GroupBy().First() query,
+        // which translates unevenly across the two relational providers this app supports.
+        var deliveryLogs = await db.MessageDeliveryLogs.AsNoTracking()
+            .Where(l => messageIds.Contains(l.TicketMessageId))
+            .ToListAsync(cancellationToken);
+
+        var deliveryByMessage = deliveryLogs
+            .GroupBy(l => l.TicketMessageId)
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(l => l.UpdatedAt).First());
+
         var items = rows.Select(m => new TicketMessageDto
         {
             Id = m.Id,
@@ -92,6 +104,8 @@ public class GetTicketMessagesQueryHandler(IAppDbContext db, ICurrentUser curren
             IsInternalNote = m.IsInternalNote,
             SentAt = m.SentAt,
             Attachments = attachmentLookup.TryGetValue(m.Id, out var list) ? list : [],
+            DeliveryStatus = deliveryByMessage.TryGetValue(m.Id, out var log) ? log.Status.ToString() : null,
+            DeliveryError = deliveryByMessage.TryGetValue(m.Id, out var errorLog) ? errorLog.ErrorMessage : null,
         }).ToList();
 
         return PagedResult<TicketMessageDto>.Create(items, request.Page, request.PageSize, totalCount);

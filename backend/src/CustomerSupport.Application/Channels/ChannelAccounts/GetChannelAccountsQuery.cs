@@ -52,3 +52,18 @@ public class GetChannelAccountsQueryHandler(IAppDbContext db) : IRequestHandler<
         }).ToList();
     }
 }
+
+public record ChannelLookupDto(Guid Id, int Key, string NameEn, string NameAr);
+
+/// <summary>Every channel this product defines — the picker for a new channel account. Not gated beyond `channels.manage`; it is a fixed, non-secret lookup table.</summary>
+[RequirePermission(Permissions.Channels.Manage)]
+public record GetChannelsLookupQuery : IRequest<IReadOnlyList<ChannelLookupDto>>;
+
+public class GetChannelsLookupQueryHandler(IAppDbContext db) : IRequestHandler<GetChannelsLookupQuery, IReadOnlyList<ChannelLookupDto>>
+{
+    public async Task<IReadOnlyList<ChannelLookupDto>> Handle(GetChannelsLookupQuery request, CancellationToken cancellationToken)
+        => await db.Channels.AsNoTracking()
+            .OrderBy(c => c.DisplayOrder)
+            .Select(c => new ChannelLookupDto(c.Id, (int)c.Key, c.Name.En, c.Name.Ar))
+            .ToListAsync(cancellationToken);
+}

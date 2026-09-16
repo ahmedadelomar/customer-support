@@ -43,7 +43,8 @@
     "updated": "Updated.",
     "remove": "Remove",
     "default": "Default",
-    "notFound": "Not found."
+    "notFound": "Not found.",
+    "none": "None"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -343,7 +344,17 @@
     },
     "thread": {
       "internalNoteBadge": "Internal note",
-      "empty": "No messages yet."
+      "empty": "No messages yet.",
+      "viewOriginal": "View original",
+      "viewFormatted": "View formatted",
+      "delivery": {
+        "sent": "Sent",
+        "queued": "Queued",
+        "delivered": "Delivered",
+        "read": "Read",
+        "failed": "Failed",
+        "bounced": "Bounced"
+      }
     },
     "history": {
       "today": "Today",
@@ -1201,6 +1212,37 @@
       "rule": "Rule",
       "reason": "Reason"
     }
+  },
+  "channels": {
+    "title": "Channels",
+    "subtitle": "Connect and configure the mailboxes and messaging accounts tickets are created from.",
+    "add": "Add channel account",
+    "newTitle": "New channel account",
+    "editTitle": "Edit channel account",
+    "channel": "Channel",
+    "name": "Name",
+    "identifier": "Identifier",
+    "identifierHint": "e.g. support@company.com",
+    "defaultDepartment": "Default department",
+    "defaultCategory": "Default category",
+    "defaultPriority": "Default priority",
+    "signatureTitle": "Signature & auto-reply",
+    "signatureEn": "Signature (English)",
+    "signatureAr": "Signature (Arabic)",
+    "sendAutoReply": "Send an automatic acknowledgement to new tickets",
+    "autoReplyEn": "Auto-reply message (English)",
+    "autoReplyAr": "Auto-reply message (Arabic)",
+    "webhookTitle": "Webhook",
+    "webhookHint": "Configure the provider to send inbound events and delivery status updates to this account's webhook URL, signed with the secret below.",
+    "webhookSecret": "Webhook secret",
+    "webhookSecretSet": "Already set — leave blank to keep it",
+    "webhookSecretNotSet": "Not set",
+    "settingsJson": "Advanced settings (JSON)",
+    "settingsJsonHint": "Optional provider-specific configuration, stored as-is.",
+    "healthy": "Healthy",
+    "testConnection": "Test connection",
+    "testSuccess": "Connection test passed.",
+    "testFailed": "Connection test failed."
   },
   "notifications": {
     "bell": {

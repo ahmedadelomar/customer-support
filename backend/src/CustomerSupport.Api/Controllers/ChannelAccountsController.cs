@@ -11,6 +11,12 @@ public class ChannelAccountsController : ApiControllerBase
     public async Task<ActionResult<IReadOnlyList<ChannelAccountDto>>> GetList(CancellationToken ct)
         => Ok(await Sender.Send(new GetChannelAccountsQuery(), ct));
 
+    /// <summary>Every channel this table can hold an account for — the picker for a new account.</summary>
+    [HttpGet("channels")]
+    [ProducesResponseType(typeof(IReadOnlyList<ChannelLookupDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<ChannelLookupDto>>> GetChannels(CancellationToken ct)
+        => Ok(await Sender.Send(new GetChannelsLookupQuery(), ct));
+
     [HttpPost]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

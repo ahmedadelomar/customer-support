@@ -143,6 +143,9 @@ public record TicketMessageDto
     public bool IsInternalNote { get; init; }
     public DateTimeOffset SentAt { get; init; }
     public IReadOnlyList<AttachmentDto> Attachments { get; init; } = Array.Empty<AttachmentDto>();
+    /// <summary>The latest delivery attempt's status for an outbound channel message (email today); null for anything not sent through a channel's outbox.</summary>
+    public string? DeliveryStatus { get; init; }
+    public string? DeliveryError { get; init; }
 }
 
 public record SavedTicketViewDto

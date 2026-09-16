@@ -90,6 +90,9 @@ export class ConversationThreadComponent implements OnChanges {
   readonly mentionCandidates = signal<MentionableUser[]>([]);
   readonly mentionActiveIndex = signal(0);
 
+  /** Message ids currently showing the plain-text original instead of the rendered HTML — empty means "rendered" for all. */
+  readonly showingOriginal = signal<ReadonlySet<string>>(new Set());
+
   readonly locale = computed(() => this.#language.locale());
 
   /** Colleagues mentioned in the current draft who would not see the ticket — a warning, not a block. */
@@ -367,6 +370,43 @@ export class ConversationThreadComponent implements OnChanges {
 
   noteSegments(bodyText: string) {
     return parseMentionSegments(bodyText);
+  }
+
+  /**
+   * Untrusted inbound HTML (Communication Channels / Email channel) is bound via `[innerHTML]`
+   * with no `bypassSecurityTrustHtml` — Angular's own sanitizer strips `<script>`, event-handler
+   * attributes, `<iframe>`/`<object>` and `<style>`/`<link>` (so no external CSS can load) before
+   * it ever reaches the DOM. No hand-rolled sanitisation needed or wanted here.
+   */
+  showsOriginal(messageId: string): boolean {
+    return this.showingOriginal().has(messageId);
+  }
+
+  toggleOriginal(messageId: string): void {
+    this.showingOriginal.update((current) => {
+      const next = new Set(current);
+      if (next.has(messageId)) next.delete(messageId);
+      else next.add(messageId);
+      return next;
+    });
+  }
+
+  deliveryLabelKey(message: TicketMessage): string | null {
+    if (!message.deliveryStatus) return null;
+    return `tickets.thread.delivery.${message.deliveryStatus.toLowerCase()}`;
+  }
+
+  deliveryClasses(message: TicketMessage): string {
+    switch (message.deliveryStatus) {
+      case 'Delivered':
+      case 'Read':
+        return 'text-emerald-600';
+      case 'Failed':
+      case 'Bounced':
+        return 'text-rose-600';
+      default:
+        return 'text-slate-400';
+    }
   }
 
   /** Sends `StartComposing`/`StopComposing` only on an actual state change, not on every keystroke. */
