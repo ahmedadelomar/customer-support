@@ -27,6 +27,13 @@ export const routes: Routes = [
   },
 
   {
+    // Fully public, no shell and no auth guard — a form's key resolves here directly, or inside
+    // an embedding site's iframe (Communication Channels / Web forms, CS-305).
+    path: 'forms/:key',
+    loadComponent: () => import('./features/public/web-forms/pages/public-form/public-form.page').then((m) => m.PublicFormPage),
+  },
+
+  {
     path: 'change-password',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -174,6 +181,12 @@ export const routes: Routes = [
         canActivate: [permissionGuard],
         data: { titleKey: 'nav.channels', permissions: [PERMISSIONS.channels.manage] },
         loadChildren: () => import('./features/admin/channels/channels.routes').then((m) => m.CHANNELS_ROUTES),
+      },
+      {
+        path: 'web-forms',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'nav.webForms', permissions: [PERMISSIONS.channels.manageWebForms] },
+        loadChildren: () => import('./features/admin/web-forms/web-forms.routes').then((m) => m.WEB_FORMS_ROUTES),
       },
     ],
   },

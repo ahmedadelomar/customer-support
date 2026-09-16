@@ -1,0 +1,74 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+  @for (field of fields(); track field.key) {
+    <div>
+      @if (field.type !== 'checkbox') {
+        <label class="form-label" [for]="field.key">
+          {{ label(field) }}
+          @if (field.required) {
+            <span class="text-rose-500">*</span>
+          }
+        </label>
+      }
+
+      @switch (field.type) {
+        @case ('textarea') {
+          <textarea [id]="field.key" rows="4" class="form-control" [formControl]="control(field.key)" [placeholder]="placeholder(field)"></textarea>
+        }
+        @case ('select') {
+          <select [id]="field.key" class="form-control" [formControl]="control(field.key)">
+            <option value="" disabled>{{ 'webForms.dynamicForm.choose' | translate }}</option>
+            @for (option of field.options; track option.value) {
+              <option [value]="option.value">{{ optionLabel(option) }}</option>
+            }
+          </select>
+        }
+        @case ('multiselect') {
+          <select [id]="field.key" multiple class="form-control" [formControl]="control(field.key)">
+            @for (option of field.options; track option.value) {
+              <option [value]="option.value">{{ optionLabel(option) }}</option>
+            }
+          </select>
+        }
+        @case ('checkbox') {
+          <label class="flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" [id]="field.key" [formControl]="control(field.key)" />
+            {{ label(field) }}
+          </label>
+        }
+        @case ('date') {
+          <input type="date" [id]="field.key" class="form-control" [formControl]="control(field.key)" />
+        }
+        @case ('number') {
+          <input type="number" [id]="field.key" class="form-control" [formControl]="control(field.key)" [placeholder]="placeholder(field)" />
+        }
+        @case ('email') {
+          <input type="email" [id]="field.key" class="form-control" [formControl]="control(field.key)" [placeholder]="placeholder(field)" />
+        }
+        @case ('phone') {
+          <input type="tel" [id]="field.key" class="form-control" [formControl]="control(field.key)" [placeholder]="placeholder(field)" />
+        }
+        @default {
+          <input type="text" [id]="field.key" class="form-control" [formControl]="control(field.key)" [placeholder]="placeholder(field)" />
+        }
+      }
+
+      @if (hasError(field)) {
+        <p class="mt-1 text-xs text-rose-600">
+          @if (errorMessage(field); as message) {
+            {{ message }}
+          } @else if (control(field.key).errors?.['required']) {
+            {{ 'webForms.dynamicForm.required' | translate }}
+          } @else if (control(field.key).errors?.['maxlength']) {
+            {{ 'webForms.dynamicForm.tooLong' | translate }}
+          } @else if (control(field.key).errors?.['pattern']) {
+            {{ 'webForms.dynamicForm.invalidFormat' | translate }}
+          }
+        </p>
+      }
+    </div>
+  }
+
+  <button type="submit" class="btn-primary w-full" [disabled]="submitting()">
+    {{ submitting() ? ('common.saving' | translate) : submitLabel() }}
+  </button>
+</form>

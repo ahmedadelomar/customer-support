@@ -1,0 +1,45 @@
+<app-page-header titleKey="webForms.admin.submissionsTitle">
+  <a routerLink="/admin/web-forms" class="btn-secondary">{{ 'common.back' | translate }}</a>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-64 animate-pulse"></div>
+} @else if (submissions().length === 0) {
+  <app-empty-state titleKey="webForms.admin.noSubmissions" icon="📥" />
+} @else {
+  <div class="card divide-y divide-slate-100">
+    @for (submission of submissions(); track submission.id) {
+      <div class="space-y-2 p-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span [class]="statusClasses(submission.status)">{{ submission.status }}</span>
+              <span class="font-medium text-slate-900">{{ submission.submitterName || submission.submitterEmail || ('webForms.admin.anonymous' | translate) }}</span>
+              @if (submission.ticketNumber) {
+                <span class="text-xs text-slate-500">{{ submission.ticketNumber }}</span>
+              }
+            </div>
+            <p class="mt-0.5 text-xs text-slate-500">{{ submission.submittedAt }}</p>
+            @if (submission.failureReason) {
+              <p class="mt-0.5 text-xs text-rose-600">{{ submission.failureReason }}</p>
+            }
+          </div>
+          <div class="flex shrink-0 items-center gap-1">
+            <button type="button" class="btn-secondary px-2 py-1 text-xs" (click)="toggleExpanded(submission)">
+              {{ (expandedId() === submission.id ? 'webForms.admin.hidePayload' : 'webForms.admin.viewPayload') | translate }}
+            </button>
+            @if (submission.status === 'Failed') {
+              <button type="button" class="btn-primary px-2 py-1 text-xs" [disabled]="retryingId() === submission.id" (click)="retry(submission)">
+                {{ 'webForms.admin.retry' | translate }}
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (expandedId() === submission.id) {
+          <pre class="max-h-64 overflow-auto rounded-lg bg-slate-900 p-3 text-xs text-slate-100">{{ formattedPayload(submission) }}</pre>
+        }
+      </div>
+    }
+  </div>
+}

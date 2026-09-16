@@ -132,6 +132,12 @@ export class AgentShellPage {
           permissions: [PERMISSIONS.channels.view],
         },
         {
+          labelKey: 'nav.webForms',
+          icon: '📝',
+          route: '/admin/web-forms',
+          permissions: [PERMISSIONS.channels.manageWebForms],
+        },
+        {
           labelKey: 'nav.users',
           icon: '⚿',
           route: '/admin/users',

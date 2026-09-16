@@ -89,6 +89,12 @@ export class AdminShellPage {
       permissions: [PERMISSIONS.channels.manage],
     },
     {
+      labelKey: 'nav.webForms',
+      icon: '📝',
+      route: '/admin/web-forms',
+      permissions: [PERMISSIONS.channels.manageWebForms],
+    },
+    {
       labelKey: 'nav.branches',
       icon: '🏬',
       route: '/admin/organization/branches',

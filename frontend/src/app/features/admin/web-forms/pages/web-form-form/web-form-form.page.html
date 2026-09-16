@@ -1,0 +1,211 @@
+<app-page-header [titleKey]="isEdit ? 'webForms.admin.editTitle' : 'webForms.admin.newTitle'">
+  <a routerLink="/admin/web-forms" class="btn-secondary">{{ 'common.back' | translate }}</a>
+  <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">
+    {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+  </button>
+</app-page-header>
+
+@if (loading()) {
+  <div class="card h-96 animate-pulse"></div>
+} @else {
+  <div class="grid gap-4 lg:grid-cols-2">
+    <div class="space-y-4">
+      <div class="card space-y-4 p-4">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="form-label" for="wf-key">{{ 'webForms.admin.key' | translate }}</label>
+            <input id="wf-key" class="form-control" [ngModel]="key()" (ngModelChange)="key.set($event)" [placeholder]="'webForms.admin.keyHint' | translate" [disabled]="isEdit" />
+          </div>
+          <label class="mt-6 flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" [ngModel]="isActive()" (ngModelChange)="isActive.set($event)" />
+            {{ 'common.active' | translate }}
+          </label>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="form-label" for="wf-title-en">{{ 'webForms.admin.titleEn' | translate }}</label>
+            <input id="wf-title-en" class="form-control" [ngModel]="titleEn()" (ngModelChange)="titleEn.set($event)" />
+          </div>
+          <div>
+            <label class="form-label" for="wf-title-ar">{{ 'webForms.admin.titleAr' | translate }}</label>
+            <input id="wf-title-ar" dir="rtl" class="form-control" [ngModel]="titleAr()" (ngModelChange)="titleAr.set($event)" />
+          </div>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="form-label" for="wf-desc-en">{{ 'webForms.admin.descriptionEn' | translate }}</label>
+            <textarea id="wf-desc-en" rows="2" class="form-control" [ngModel]="descriptionEn()" (ngModelChange)="descriptionEn.set($event)"></textarea>
+          </div>
+          <div>
+            <label class="form-label" for="wf-desc-ar">{{ 'webForms.admin.descriptionAr' | translate }}</label>
+            <textarea id="wf-desc-ar" dir="rtl" rows="2" class="form-control" [ngModel]="descriptionAr()" (ngModelChange)="descriptionAr.set($event)"></textarea>
+          </div>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="form-label" for="wf-submit-en">{{ 'webForms.admin.submitLabelEn' | translate }}</label>
+            <input id="wf-submit-en" class="form-control" [ngModel]="submitButtonLabelEn()" (ngModelChange)="submitButtonLabelEn.set($event)" />
+          </div>
+          <div>
+            <label class="form-label" for="wf-submit-ar">{{ 'webForms.admin.submitLabelAr' | translate }}</label>
+            <input id="wf-submit-ar" dir="rtl" class="form-control" [ngModel]="submitButtonLabelAr()" (ngModelChange)="submitButtonLabelAr.set($event)" />
+          </div>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="form-label" for="wf-thanks-en">{{ 'webForms.admin.thankYouEn' | translate }}</label>
+            <textarea id="wf-thanks-en" rows="2" class="form-control" [ngModel]="thankYouMessageEn()" (ngModelChange)="thankYouMessageEn.set($event)"></textarea>
+          </div>
+          <div>
+            <label class="form-label" for="wf-thanks-ar">{{ 'webForms.admin.thankYouAr' | translate }}</label>
+            <textarea id="wf-thanks-ar" dir="rtl" rows="2" class="form-control" [ngModel]="thankYouMessageAr()" (ngModelChange)="thankYouMessageAr.set($event)"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card space-y-4 p-4">
+        <h2 class="text-sm font-semibold text-slate-800">{{ 'webForms.admin.routing' | translate }}</h2>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div>
+            <label class="form-label" for="wf-category">{{ 'webForms.admin.defaultCategory' | translate }}</label>
+            <select id="wf-category" class="form-control" [ngModel]="defaultCategoryId()" (ngModelChange)="defaultCategoryId.set($event)">
+              <option value="">{{ 'common.none' | translate }}</option>
+              @for (c of categories(); track c.id) {
+                <option [value]="c.id">{{ categoryName(c) }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="wf-priority">{{ 'webForms.admin.defaultPriority' | translate }}</label>
+            <select id="wf-priority" class="form-control" [ngModel]="defaultPriorityId()" (ngModelChange)="defaultPriorityId.set($event)">
+              <option value="">{{ 'common.none' | translate }}</option>
+              @for (p of priorities(); track p.id) {
+                <option [value]="p.id">{{ priorityName(p) }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="wf-department">{{ 'webForms.admin.defaultDepartment' | translate }}</label>
+            <select id="wf-department" class="form-control" [ngModel]="defaultDepartmentId()" (ngModelChange)="defaultDepartmentId.set($event)">
+              <option value="">{{ 'common.none' | translate }}</option>
+              @for (d of departments(); track d.id) {
+                <option [value]="d.id">{{ departmentName(d) }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card space-y-3 p-4">
+        <h2 class="text-sm font-semibold text-slate-800">{{ 'webForms.admin.security' | translate }}</h2>
+        <label class="flex items-center gap-2 text-sm text-slate-700">
+          <input type="checkbox" [ngModel]="requireCaptcha()" (ngModelChange)="requireCaptcha.set($event)" />
+          {{ 'webForms.admin.requireCaptcha' | translate }}
+        </label>
+        <div>
+          <label class="form-label" for="wf-rate-limit">{{ 'webForms.admin.rateLimit' | translate }}</label>
+          <input id="wf-rate-limit" type="number" min="0" class="form-control w-32" [ngModel]="rateLimitPerHour()" (ngModelChange)="rateLimitPerHour.set($event)" />
+          <p class="mt-1 text-xs text-slate-500">{{ 'webForms.admin.rateLimitHint' | translate }}</p>
+        </div>
+      </div>
+
+      <div class="card space-y-3 p-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-slate-800">{{ 'webForms.admin.fields' | translate }}</h2>
+          <button type="button" class="btn-secondary px-2 py-1 text-xs" (click)="addField()">{{ 'webForms.admin.addField' | translate }}</button>
+        </div>
+
+        @for (field of fields(); track $index) {
+          <div class="space-y-3 rounded-lg border border-slate-200 p-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-slate-400">#{{ $index + 1 }}</span>
+              <div class="flex gap-1">
+                <button type="button" class="btn-secondary px-2 py-0.5 text-xs" [disabled]="$index === 0" (click)="moveField($index, -1)">↑</button>
+                <button type="button" class="btn-secondary px-2 py-0.5 text-xs" [disabled]="$index === fields().length - 1" (click)="moveField($index, 1)">↓</button>
+                <button type="button" class="btn-secondary px-2 py-0.5 text-xs text-rose-600" (click)="removeField($index)">{{ 'common.remove' | translate }}</button>
+              </div>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label class="form-label">{{ 'webForms.admin.fieldKey' | translate }}</label>
+                <input class="form-control" [ngModel]="field.key" (ngModelChange)="updateField($index, { key: $event })" />
+              </div>
+              <div>
+                <label class="form-label">{{ 'webForms.admin.fieldType' | translate }}</label>
+                <select class="form-control" [ngModel]="field.type" (ngModelChange)="updateField($index, { type: $event })">
+                  @for (type of FIELD_TYPES; track type) {
+                    <option [value]="type">{{ type }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label class="form-label">{{ 'webForms.admin.fieldLabelEn' | translate }}</label>
+                <input class="form-control" [ngModel]="field.labelEn" (ngModelChange)="updateField($index, { labelEn: $event })" />
+              </div>
+              <div>
+                <label class="form-label">{{ 'webForms.admin.fieldLabelAr' | translate }}</label>
+                <input dir="rtl" class="form-control" [ngModel]="field.labelAr" (ngModelChange)="updateField($index, { labelAr: $event })" />
+              </div>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-3">
+              <label class="mt-6 flex items-center gap-2 text-sm text-slate-700">
+                <input type="checkbox" [ngModel]="field.required" (ngModelChange)="updateField($index, { required: $event })" />
+                {{ 'webForms.admin.fieldRequired' | translate }}
+              </label>
+              <div>
+                <label class="form-label">{{ 'webForms.admin.fieldMaxLength' | translate }}</label>
+                <input type="number" min="0" class="form-control" [ngModel]="field.maxLength" (ngModelChange)="updateField($index, { maxLength: $event || null })" />
+              </div>
+              <div>
+                <label class="form-label">{{ 'webForms.admin.fieldMapTo' | translate }}</label>
+                <select class="form-control" [ngModel]="field.mapTo ?? ''" (ngModelChange)="updateField($index, { mapTo: $event || null })">
+                  @for (option of MAP_TO_OPTIONS; track option) {
+                    <option [value]="option">{{ option || ('webForms.admin.mapToNone' | translate) }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="form-label">{{ 'webForms.admin.fieldPattern' | translate }}</label>
+              <input class="form-control font-mono text-xs" [ngModel]="field.pattern ?? ''" (ngModelChange)="updateField($index, { pattern: $event || null })" placeholder="^ORD-\d{4}$" />
+            </div>
+
+            @if (field.type === 'select' || field.type === 'multiselect') {
+              <div class="space-y-2 rounded-lg bg-slate-50 p-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-medium text-slate-500">{{ 'webForms.admin.options' | translate }}</span>
+                  <button type="button" class="btn-secondary px-2 py-0.5 text-xs" (click)="addOption($index)">{{ 'webForms.admin.addOption' | translate }}</button>
+                </div>
+                @for (option of field.options; track $index; let optionIndex = $index) {
+                  <div class="grid grid-cols-[1fr_1fr_1fr_auto] gap-2">
+                    <input class="form-control text-xs" [ngModel]="option.value" (ngModelChange)="updateOption($index, optionIndex, { value: $event })" [placeholder]="'webForms.admin.optionValue' | translate" />
+                    <input class="form-control text-xs" [ngModel]="option.labelEn" (ngModelChange)="updateOption($index, optionIndex, { labelEn: $event })" [placeholder]="'webForms.admin.optionLabelEn' | translate" />
+                    <input dir="rtl" class="form-control text-xs" [ngModel]="option.labelAr" (ngModelChange)="updateOption($index, optionIndex, { labelAr: $event })" [placeholder]="'webForms.admin.optionLabelAr' | translate" />
+                    <button type="button" class="btn-secondary px-2 text-xs text-rose-600" (click)="removeOption($index, optionIndex)">✕</button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="lg:sticky lg:top-4 lg:self-start">
+      <div class="card p-4">
+        <h2 class="mb-3 text-sm font-semibold text-slate-800">{{ 'webForms.admin.preview' | translate }}</h2>
+        <app-dynamic-form [fields]="fields()" submitLabel="Send" />
+      </div>
+    </div>
+  </div>
+}
