@@ -126,12 +126,12 @@ Show an opt-out badge on the contact in the customer panel and in the contact li
 
 ## Done Criteria
 
-- [ ] Segment calculation is correct for GSM-7, GSM extended and UCS-2, and identical on client and server.
-- [ ] The composer shows length, segments and encoding live, and warns on the encoding flip.
-- [ ] Sends above the cap are blocked.
-- [ ] STOP and START in English and Arabic are handled, with one confirmation each.
-- [ ] Opt-out suppresses automated messages but never agent replies.
-- [ ] Quiet hours are respected for notifications.
-- [ ] Segment count and cost are logged for reporting.
+- [x] Segment calculation is correct for GSM-7, GSM extended and UCS-2, and identical on client and server.
+- [x] The composer shows length, segments and encoding live, and warns on the encoding flip.
+- [x] Sends above the cap are blocked.
+- [x] STOP and START in English and Arabic are handled, with one confirmation each.
+- [x] Opt-out suppresses automated messages but never agent replies.
+- [x] Quiet hours are respected for notifications.
+- [x] Segment count and cost are logged for reporting.
 
 **STOP HERE. Report to the user and wait for confirmation before proceeding to the next story.**
