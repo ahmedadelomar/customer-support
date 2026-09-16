@@ -3,6 +3,7 @@ using CustomerSupport.Application.Channels;
 using CustomerSupport.Application.Channels.Inbound;
 using CustomerSupport.Application.Channels.LiveChat;
 using CustomerSupport.Application.Channels.Outbound;
+using CustomerSupport.Application.Channels.WebForms;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Localization;
 using CustomerSupport.Application.Files;
@@ -10,6 +11,7 @@ using CustomerSupport.Application.Tickets.Assignment;
 using CustomerSupport.Application.Workspace.QuickReplies;
 using CustomerSupport.Infrastructure.Channels;
 using CustomerSupport.Infrastructure.Channels.Email;
+using CustomerSupport.Infrastructure.Channels.WebForms;
 using CustomerSupport.Infrastructure.Identity;
 using CustomerSupport.Infrastructure.Jobs;
 using CustomerSupport.Infrastructure.Localization;
@@ -140,6 +142,13 @@ public static class DependencyInjection
         // project instead — it needs IHubContext<ChatHub>, an Api-layer type.
         services.AddScoped<IChatVisitorTokenService, ChatVisitorTokenService>();
 
+        // Communication Channels / Web forms (CS-305). IWebFormValidator is Singleton so its compiled
+        // regex cache survives across requests instead of rebuilding per submission.
+        services.AddSingleton<IWebFormValidator, WebFormValidator>();
+        services.AddScoped<IWebFormTicketFactory, WebFormTicketFactory>();
+        services.AddScoped<IWebFormSubmissionRetryService, WebFormSubmissionRetryService>();
+        services.AddScoped<ICaptchaVerifier, LoggingCaptchaVerifier>();
+
         // Runtime configuration (Security & Administration / System configuration). These three read
         // through ISettingsProvider, which holds a DbContext, so they are scoped rather than
         // singletons — a singleton depending on a scoped service is a captive dependency.
@@ -217,6 +226,15 @@ public static class DependencyInjection
                 .ForJob(abandonChatJobKey)
                 .WithIdentity($"{nameof(AbandonStaleChatSessionsJob)}-trigger")
                 .WithSimpleSchedule(s => s.WithIntervalInMinutes(5).RepeatForever()));
+
+            // Web form submission retry (Communication Channels / Web forms) — every 10 minutes; see
+            // the job's own remarks for why this has no per-row backoff.
+            var webFormRetryJobKey = new JobKey(nameof(WebFormSubmissionRetryJob));
+            q.AddJob<WebFormSubmissionRetryJob>(opts => opts.WithIdentity(webFormRetryJobKey));
+            q.AddTrigger(opts => opts
+                .ForJob(webFormRetryJobKey)
+                .WithIdentity($"{nameof(WebFormSubmissionRetryJob)}-trigger")
+                .WithSimpleSchedule(s => s.WithIntervalInMinutes(10).RepeatForever()));
         });
         services.AddQuartzHostedService(opts => opts.WaitForJobsToComplete = true);
 

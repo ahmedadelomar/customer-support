@@ -42,4 +42,11 @@ public static class MessageKeys
     public const string UnexpectedDetail = "error.unexpectedDetail";
     public const string PasswordChangeRequired = "error.passwordChangeRequired";
     public const string PasswordChangeRequiredDetail = "error.passwordChangeRequiredDetail";
+
+    // Web form field validation (Communication Channels / Web forms) — the only per-field messages
+    // in this registry; the field's own bilingual label is prefixed client-side, so these stay generic.
+    public const string FieldRequired = "validation.fieldRequired";
+    public const string FieldTooLong = "validation.fieldTooLong";
+    public const string FieldInvalidFormat = "validation.fieldInvalidFormat";
+    public const string FieldInvalidOption = "validation.fieldInvalidOption";
 }

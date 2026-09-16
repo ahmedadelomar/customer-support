@@ -93,6 +93,19 @@ builder.Services.AddRateLimiter(options =>
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0,
             }));
+
+    // Coarse per-IP ceiling across every public form combined — the precise per-form limit is the
+    // database check inside SubmitWebFormCommand; this just stops one address from hammering the
+    // endpoint before that query even runs.
+    options.AddPolicy(RateLimitPolicies.WebFormSubmit, context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 20,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+            }));
 });
 
 // --- CORS: the Angular dev server and the deployed front end ------------------------------------

@@ -37,6 +37,10 @@ public class MessageLocalizer : IMessageLocalizer
         [MessageKeys.PasswordChangeRequiredDetail] = (
             "يجب تغيير كلمة المرور قبل استخدام التطبيق.",
             "You must change your password before using the application."),
+        [MessageKeys.FieldRequired] = ("هذا الحقل مطلوب.", "This field is required."),
+        [MessageKeys.FieldTooLong] = ("القيمة أطول من الحد المسموح.", "The value is longer than allowed."),
+        [MessageKeys.FieldInvalidFormat] = ("القيمة غير صالحة.", "The value is not in a valid format."),
+        [MessageKeys.FieldInvalidOption] = ("القيمة المختارة غير متاحة.", "The selected value is not a valid option."),
     };
 
     public string this[string key] => For(key, CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
