@@ -222,6 +222,20 @@ public class TicketsController : ApiControllerBase
         return CreatedAtAction(nameof(GetMessages), new { id = result.TicketId }, result);
     }
 
+    /// <summary>
+    /// Moves the ticket to another department. Clears the assignee and leaves the SLA clock running.
+    /// </summary>
+    [HttpPost("{id:guid}/transfer")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Transfer(
+        Guid id, [FromBody] TransferTicketCommand command, CancellationToken ct)
+    {
+        await Sender.Send(command with { TicketId = id }, ct);
+        return NoContent();
+    }
+
     /// <summary>Manually escalates the ticket. Requires a reason; notifies the department manager and existing watchers.</summary>
     [HttpPost("{id:guid}/escalate")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

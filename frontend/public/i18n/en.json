@@ -62,7 +62,9 @@
       "knowledge": "Knowledge",
       "insights": "Insights",
       "administration": "Administration"
-    }
+    },
+    "departments": "Departments",
+    "teams": "Teams"
   },
   "auth": {
     "signIn": "Sign in",
@@ -266,10 +268,17 @@
       "created": "Created"
     },
     "assignment": {
-      "mine": "My tickets",
-      "team": "My team",
-      "unassigned": "Unassigned",
-      "all": "All"
+      "assign": "Assign",
+      "assigned": "Ticket assigned.",
+      "claim": "Claim",
+      "claimed": "Ticket claimed.",
+      "unassign": "Unassign",
+      "unassigned": "Ticket unassigned.",
+      "confirmWarning": "Assign to {{name}} anyway?",
+      "confirmAssign": "Assign anyway",
+      "noCandidates": "No candidate agents were found for this ticket's team or department.",
+      "handoverNote": "Handover note (optional)",
+      "handoverNotePlaceholder": "Context for the new assignee — recorded as an internal note."
     },
     "kpis": {
       "open": "Open",
@@ -443,19 +452,6 @@
     "errors": {
       "customerBlocked": "This customer is blocked and cannot raise new tickets."
     },
-    "assignment": {
-      "assign": "Assign",
-      "assigned": "Ticket assigned.",
-      "claim": "Claim",
-      "claimed": "Ticket claimed.",
-      "unassign": "Unassign",
-      "unassigned": "Ticket unassigned.",
-      "confirmWarning": "Assign to {{name}} anyway?",
-      "confirmAssign": "Assign anyway",
-      "noCandidates": "No candidate agents were found for this ticket's team or department.",
-      "handoverNote": "Handover note (optional)",
-      "handoverNotePlaceholder": "Context for the new assignee — recorded as an internal note."
-    },
     "bulkAssign": {
       "title": "Bulk assign",
       "action": "Assign",
@@ -471,6 +467,19 @@
       "description": "Closing this ticket will leave the following tasks open unless you complete them now.",
       "closeAnyway": "Close anyway",
       "closeAndComplete": "Close and complete tasks"
+    },
+    "transfer": {
+      "action": "Transfer",
+      "title": "Transfer ticket",
+      "done": "Ticket transferred.",
+      "department": "Destination department",
+      "selectDepartment": "Select a department…",
+      "team": "Team (optional)",
+      "noTeam": "No specific team",
+      "reason": "Reason (optional)",
+      "reasonPlaceholder": "Why is this moving?",
+      "clearsAssignee": "The current assignee will be cleared — the receiving department picks its own owner.",
+      "slaUnaffected": "SLA due dates are not affected by a transfer."
     }
   },
   "admin": {
@@ -675,6 +684,61 @@
       "usage": "{{count}} ticket(s) currently in this status",
       "kindChangeWarning": "{{count}} ticket(s) are currently in this status. Changing its kind changes their SLA and reporting behaviour immediately.",
       "kindChangeConfirm": "Change kind anyway"
+    },
+    "departments": {
+      "title": "Departments",
+      "subtitle": "How support work is divided, and which queue a ticket lands in.",
+      "create": "New department",
+      "edit": "Edit department",
+      "created": "Department created.",
+      "updated": "Department updated.",
+      "activated": "Department activated.",
+      "deactivated": "Department deactivated.",
+      "empty": "No departments defined.",
+      "inactive": "Inactive",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "teamCount": "{{count}} teams",
+      "openTicketCount": "{{count}} open tickets",
+      "form": {
+        "code": "Code",
+        "codeHint": "Short identifier, e.g. BILL. Cannot be changed later.",
+        "nameEn": "Name (English)",
+        "nameAr": "Name (Arabic)",
+        "description": "Description"
+      }
+    },
+    "teams": {
+      "title": "Teams",
+      "subtitle": "Who handles a queue, in what order, and how much each can carry.",
+      "create": "New team",
+      "edit": "Edit team",
+      "created": "Team created.",
+      "updated": "Team updated.",
+      "membersSaved": "Team members saved.",
+      "empty": "No teams defined.",
+      "inactive": "Inactive",
+      "members": "Members",
+      "memberCount": "{{count}} members",
+      "noMembers": "No members yet.",
+      "addMember": "Add member",
+      "selectAgent": "Select an agent…",
+      "capacity": "Capacity",
+      "lead": "Lead",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "rotationHint": "The order here is the round-robin rotation order used by automatic assignment.",
+      "columns": {
+        "department": "Department"
+      },
+      "filters": {
+        "allDepartments": "All departments"
+      },
+      "form": {
+        "nameEn": "Name (English)",
+        "nameAr": "Name (Arabic)",
+        "active": "Active"
+      }
     }
   },
   "validation": {

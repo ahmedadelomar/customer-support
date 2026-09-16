@@ -1,0 +1,224 @@
+<app-page-header titleKey="admin.teams.title" subtitleKey="admin.teams.subtitle">
+  <button
+    *hasPermission="permissions.administration.manageTeams"
+    type="button"
+    class="btn-primary"
+    (click)="openCreate()"
+  >
+    {{ 'admin.teams.create' | translate }}
+  </button>
+</app-page-header>
+
+@if (errorMessage(); as message) {
+  <p class="card mb-4 border-rose-200 bg-rose-50 p-3 text-sm text-rose-700" role="alert">{{ message }}</p>
+}
+
+<div class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+  <div class="min-w-48">
+    <label class="form-label" for="team-department">{{ 'admin.teams.columns.department' | translate }}</label>
+    <select
+      id="team-department"
+      class="form-control"
+      [ngModel]="departmentFilter()"
+      (ngModelChange)="departmentFilter.set($event); load()"
+    >
+      <option value="">{{ 'admin.teams.filters.allDepartments' | translate }}</option>
+      @for (department of departments(); track department.id) {
+        <option [value]="department.id">{{ departmentName(department) }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<div class="card p-4">
+  @if (loading()) {
+    <div class="space-y-2">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="h-14 animate-pulse rounded-lg bg-slate-100"></div>
+      }
+    </div>
+  } @else if (teams().length === 0) {
+    <app-empty-state titleKey="admin.teams.empty" icon="👥" />
+  } @else {
+    <ul class="divide-y divide-slate-100">
+      @for (team of teams(); track team.id) {
+        <li class="flex flex-wrap items-center justify-between gap-3 py-3">
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="truncate text-sm font-medium text-slate-900">{{ teamName(team) }}</span>
+              @if (!team.isActive) {
+                <span class="chip border-slate-200 bg-slate-100 text-[11px] text-slate-500">
+                  {{ 'admin.teams.inactive' | translate }}
+                </span>
+              }
+            </div>
+            <p class="mt-0.5 text-xs text-slate-500">
+              {{ lang() === 'ar' ? team.departmentNameAr : team.departmentNameEn }}
+              ·
+              {{ 'admin.teams.memberCount' | translate: { count: team.members.length } }}
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2" *hasPermission="permissions.administration.manageTeams">
+            <button type="button" class="btn-secondary px-3 py-1.5 text-xs" (click)="openMembers(team)">
+              {{ 'admin.teams.members' | translate }}
+            </button>
+            <button type="button" class="btn-secondary px-3 py-1.5 text-xs" (click)="openEdit(team)">
+              {{ 'common.edit' | translate }}
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>
+
+<app-modal
+  [open]="formOpen()"
+  [titleKey]="editing() ? 'admin.teams.edit' : 'admin.teams.create'"
+  (closed)="closeForm()"
+>
+  <div class="space-y-3">
+    @if (!editing()) {
+      <div>
+        <label class="form-label" for="team-form-department">{{ 'admin.teams.columns.department' | translate }}</label>
+        <select
+          id="team-form-department"
+          class="form-control"
+          [ngModel]="departmentId()"
+          (ngModelChange)="departmentId.set($event)"
+        >
+          @for (department of departments(); track department.id) {
+            <option [value]="department.id">{{ departmentName(department) }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    <div>
+      <label class="form-label" for="team-name-en">{{ 'admin.teams.form.nameEn' | translate }}</label>
+      <input id="team-name-en" class="form-control" [ngModel]="nameEn()" (ngModelChange)="nameEn.set($event)" />
+    </div>
+
+    <div>
+      <label class="form-label" for="team-name-ar">{{ 'admin.teams.form.nameAr' | translate }}</label>
+      <input id="team-name-ar" class="form-control" dir="rtl" [ngModel]="nameAr()" (ngModelChange)="nameAr.set($event)" />
+    </div>
+
+    @if (editing()) {
+      <label class="flex items-center gap-2 text-sm text-slate-700">
+        <input
+          type="checkbox"
+          class="h-4 w-4 rounded border-slate-300"
+          [checked]="isActive()"
+          (change)="isActive.set(!isActive())"
+        />
+        {{ 'admin.teams.form.active' | translate }}
+      </label>
+    }
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button type="button" class="btn-secondary" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
+      <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">
+        {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+      </button>
+    </div>
+  </div>
+</app-modal>
+
+<app-modal [open]="membersOpen()" titleKey="admin.teams.members" (closed)="closeMembers()">
+  <div class="space-y-3">
+    <p class="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
+      {{ 'admin.teams.rotationHint' | translate }}
+    </p>
+
+    <div class="flex items-end gap-2">
+      <div class="flex-1">
+        <label class="form-label" for="team-add-agent">{{ 'admin.teams.addMember' | translate }}</label>
+        <select
+          id="team-add-agent"
+          class="form-control"
+          [ngModel]="agentToAdd()"
+          (ngModelChange)="agentToAdd.set($event)"
+        >
+          <option value="">{{ 'admin.teams.selectAgent' | translate }}</option>
+          @for (agent of addableAgents(); track agent.id) {
+            <option [value]="agent.id">{{ agentName(agent.id) }}</option>
+          }
+        </select>
+      </div>
+      <button type="button" class="btn-secondary" [disabled]="!agentToAdd()" (click)="addMember()">
+        {{ 'common.add' | translate }}
+      </button>
+    </div>
+
+    @if (draftMembers().length === 0) {
+      <p class="py-4 text-center text-sm text-slate-500">{{ 'admin.teams.noMembers' | translate }}</p>
+    } @else {
+      <ul class="divide-y divide-slate-100">
+        @for (member of draftMembers(); track member.userId; let i = $index) {
+          <li class="flex flex-wrap items-center gap-2 py-2">
+            <span class="w-6 text-center text-xs text-slate-400">{{ i + 1 }}</span>
+            <span class="min-w-32 flex-1 truncate text-sm text-slate-800">{{ agentName(member.userId) }}</span>
+
+            <label class="flex items-center gap-1 text-xs text-slate-600">
+              {{ 'admin.teams.capacity' | translate }}
+              <input
+                type="number"
+                min="0"
+                class="form-control w-20 px-2 py-1 text-xs"
+                [ngModel]="member.maxConcurrentTickets"
+                (ngModelChange)="setCapacity(member.userId, $event)"
+              />
+            </label>
+
+            <label class="flex items-center gap-1 text-xs text-slate-600">
+              <input
+                type="radio"
+                name="team-lead"
+                class="h-3.5 w-3.5"
+                [checked]="member.isLead"
+                (change)="setLead(member.userId)"
+              />
+              {{ 'admin.teams.lead' | translate }}
+            </label>
+
+            <button
+              type="button"
+              class="rounded px-2 py-1 text-xs text-slate-500 hover:bg-slate-100"
+              [attr.aria-label]="'admin.teams.moveUp' | translate"
+              [disabled]="i === 0"
+              (click)="move(i, -1)"
+            >
+              ↑
+            </button>
+            <button
+              type="button"
+              class="rounded px-2 py-1 text-xs text-slate-500 hover:bg-slate-100"
+              [attr.aria-label]="'admin.teams.moveDown' | translate"
+              [disabled]="i === draftMembers().length - 1"
+              (click)="move(i, 1)"
+            >
+              ↓
+            </button>
+            <button
+              type="button"
+              class="rounded px-2 py-1 text-xs text-rose-600 hover:bg-rose-50"
+              [attr.aria-label]="'common.delete' | translate"
+              (click)="removeMember(member.userId)"
+            >
+              ✕
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button type="button" class="btn-secondary" (click)="closeMembers()">{{ 'common.cancel' | translate }}</button>
+      <button type="button" class="btn-primary" [disabled]="saving()" (click)="saveMembers()">
+        {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+      </button>
+    </div>
+  </div>
+</app-modal>

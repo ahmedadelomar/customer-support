@@ -19,6 +19,11 @@
 
     <div class="flex flex-wrap items-center gap-2">
       <app-presence-bar [ticketId]="t.id" />
+      @if (t.canAssign && !t.isTerminal && !t.mergedIntoTicketId) {
+        <button type="button" class="btn-secondary" (click)="openTransferDialog()">
+          {{ 'tickets.transfer.action' | translate }}
+        </button>
+      }
       @if (t.canMerge && !t.mergedIntoTicketId) {
         <button type="button" class="btn-secondary" (click)="openMergeDialog()">
           {{ 'tickets.merge.action' | translate }}
@@ -124,6 +129,15 @@
     [departmentName]="t.departmentNameEn"
     (closed)="closeEscalateDialog()"
     (escalated)="onEscalated()"
+  />
+
+  <app-transfer-dialog
+    [open]="transferDialogOpen()"
+    [ticketId]="t.id"
+    [currentDepartmentId]="t.departmentId"
+    [hasAssignee]="!!t.assignedAgentId"
+    (closed)="closeTransferDialog()"
+    (transferred)="onTransferred()"
   />
 
   <app-open-tasks-warning-dialog

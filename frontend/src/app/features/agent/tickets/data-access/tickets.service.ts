@@ -104,6 +104,14 @@ export class TicketsService {
     return this.#http.post<void>(`${this.#baseUrl}/${id}/escalate`, request);
   }
 
+  /** Moves the ticket to another department. Clears the assignee; leaves the SLA clock running. */
+  transfer(
+    id: string,
+    request: { departmentId: string; teamId?: string; reason?: string },
+  ): Observable<void> {
+    return this.#http.post<void>(`${this.#baseUrl}/${id}/transfer`, request);
+  }
+
   history(id: string, query: TicketHistoryQuery): Observable<TicketHistoryPage> {
     return this.#http.get<TicketHistoryPage>(`${this.#baseUrl}/${id}/history`, { params: this.#toParams(query) });
   }

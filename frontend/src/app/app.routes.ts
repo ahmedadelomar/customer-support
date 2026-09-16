@@ -128,6 +128,13 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/admin/settings/settings.routes').then((m) => m.SETTINGS_ROUTES),
       },
+      {
+        path: 'organization',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'admin.departments.title', permissions: [PERMISSIONS.tickets.view] },
+        loadChildren: () =>
+          import('./features/admin/organization/organization.routes').then((m) => m.ORGANIZATION_ROUTES),
+      },
     ],
   },
 

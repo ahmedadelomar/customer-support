@@ -58,6 +58,18 @@ export class AdminShellPage {
       permissions: [PERMISSIONS.tickets.manageStatuses],
     },
     {
+      labelKey: 'nav.departments',
+      icon: '🏢',
+      route: '/admin/organization/departments',
+      permissions: [PERMISSIONS.administration.manageDepartments],
+    },
+    {
+      labelKey: 'nav.teams',
+      icon: '👥',
+      route: '/admin/organization/teams',
+      permissions: [PERMISSIONS.administration.manageTeams],
+    },
+    {
       labelKey: 'nav.users',
       icon: '⚿',
       route: '/admin/users',

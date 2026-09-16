@@ -1,0 +1,63 @@
+<app-modal [open]="open()" titleKey="tickets.transfer.title" (closed)="close()">
+  <div class="space-y-3">
+    @if (errorMessage(); as message) {
+      <p class="form-error" role="alert">{{ message }}</p>
+    }
+
+    <div>
+      <label class="form-label" for="transfer-department">{{ 'tickets.transfer.department' | translate }}</label>
+      <select
+        id="transfer-department"
+        class="form-control"
+        [ngModel]="departmentId()"
+        (ngModelChange)="onDepartmentChange($event)"
+      >
+        <option value="">{{ 'tickets.transfer.selectDepartment' | translate }}</option>
+        @for (department of departments(); track department.id) {
+          <option [value]="department.id">{{ name(department) }}</option>
+        }
+      </select>
+    </div>
+
+    @if (availableTeams().length > 0) {
+      <div>
+        <label class="form-label" for="transfer-team">{{ 'tickets.transfer.team' | translate }}</label>
+        <select id="transfer-team" class="form-control" [ngModel]="teamId()" (ngModelChange)="teamId.set($event)">
+          <option value="">{{ 'tickets.transfer.noTeam' | translate }}</option>
+          @for (team of availableTeams(); track team.id) {
+            <option [value]="team.id">{{ name(team) }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    <div>
+      <label class="form-label" for="transfer-reason">{{ 'tickets.transfer.reason' | translate }}</label>
+      <textarea
+        id="transfer-reason"
+        rows="2"
+        class="form-control"
+        [placeholder]="'tickets.transfer.reasonPlaceholder' | translate"
+        [ngModel]="reason()"
+        (ngModelChange)="reason.set($event)"
+      ></textarea>
+    </div>
+
+    @if (hasAssignee()) {
+      <p class="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+        {{ 'tickets.transfer.clearsAssignee' | translate }}
+      </p>
+    }
+
+    <p class="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
+      {{ 'tickets.transfer.slaUnaffected' | translate }}
+    </p>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button type="button" class="btn-secondary" (click)="close()">{{ 'common.cancel' | translate }}</button>
+      <button type="button" class="btn-primary" [disabled]="saving() || !departmentId()" (click)="submit()">
+        {{ (saving() ? 'common.saving' : 'tickets.transfer.action') | translate }}
+      </button>
+    </div>
+  </div>
+</app-modal>

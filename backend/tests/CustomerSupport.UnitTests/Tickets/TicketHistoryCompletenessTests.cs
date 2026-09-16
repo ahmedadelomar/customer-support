@@ -4,6 +4,7 @@ using CustomerSupport.Application.Tickets.Commands;
 using CustomerSupport.Domain.Common;
 using CustomerSupport.Domain.Customers;
 using CustomerSupport.Domain.Enums;
+using CustomerSupport.Domain.Organization;
 using CustomerSupport.Domain.Tickets;
 using CustomerSupport.Infrastructure.Persistence;
 using CustomerSupport.Infrastructure.Services;
@@ -365,13 +366,58 @@ public class TicketHistoryCompletenessTests
     }
 
     /// <summary>
-    /// "Transfer" (moving a ticket to another department) is CS-1203's <c>DepartmentChanged</c> event.
-    /// No command in the codebase writes it yet — CS-1203 (department administration) is not built.
-    /// Left as a visible skip, not silently omitted, so this test file still lists the gap.
+    /// Transfer is CS-1203's <c>DepartmentChanged</c> event. Also pins the two rules that make a
+    /// transfer more than a reassignment: the assignee is cleared, and the SLA due dates are left
+    /// exactly as they were — restarting the clock on an internal routing change would hide breaches.
     /// </summary>
-    [Fact(Skip = "CS-1203 (department transfer) is not implemented yet; no command records DepartmentChanged.")]
-    public void Transfer_RecordsDepartmentChangedEvent()
+    [Fact]
+    public async Task Transfer_RecordsDepartmentChangedEvent()
     {
+        await using var db = CreateContext();
+        var customer = NewCustomer();
+        var category = NewCategory("general");
+        var priority = NewPriority("normal");
+        var status = NewStatus("open");
+        var fromDepartment = new Department { Code = "BILL", Name = new LocalizedText("Billing", "الفواتير") };
+        var toDepartment = new Department { Code = "TECH", Name = new LocalizedText("Technical", "الدعم الفني") };
+
+        db.AddRange(customer, category, priority, status, fromDepartment, toDepartment);
+
+        var ticket = NewTicket(customer, category, priority, status);
+        ticket.DepartmentId = fromDepartment.Id;
+        ticket.AssignedAgentId = Guid.NewGuid();
+        ticket.AssignedAt = DateTimeOffset.UtcNow;
+        ticket.FirstResponseDueAt = DateTimeOffset.UtcNow.AddHours(4);
+        ticket.ResolutionDueAt = DateTimeOffset.UtcNow.AddDays(2);
+        db.Tickets.Add(ticket);
+        await db.SaveChangesAsync();
+
+        var firstResponseDueBefore = ticket.FirstResponseDueAt;
+        var resolutionDueBefore = ticket.ResolutionDueAt;
+
+        var currentUser = AdminUser();
+        var handler = new TransferTicketCommandHandler(
+            db, currentUser, new TicketEventRecorder(db, currentUser, FixedClock()),
+            Substitute.For<INotificationDispatcher>());
+
+        await handler.Handle(
+            new TransferTicketCommand
+            {
+                TicketId = ticket.Id,
+                DepartmentId = toDepartment.Id,
+                Reason = "Needs a technical specialist",
+            },
+            CancellationToken.None);
+
+        var evt = LastEventOfType(db, ticket.Id, TicketEventType.DepartmentChanged);
+        evt.OldDisplayValue.Should().Be("Billing");
+        evt.NewDisplayValue.Should().Be("Technical");
+        evt.MetadataJson.Should().Contain("Needs a technical specialist");
+
+        ticket.DepartmentId.Should().Be(toDepartment.Id);
+        ticket.AssignedAgentId.Should().BeNull("the receiving department picks its own owner");
+        ticket.FirstResponseDueAt.Should().Be(firstResponseDueBefore, "a transfer must not restart the SLA clock");
+        ticket.ResolutionDueAt.Should().Be(resolutionDueBefore, "a transfer must not restart the SLA clock");
     }
 
     private static IReferenceNumberGenerator FakeReferenceNumbers()

@@ -20,6 +20,7 @@ import { EscalateDialogComponent } from '../../ui/escalate-dialog/escalate-dialo
 import { HistoryTabComponent } from '../../ui/history-tab/history-tab.component';
 import { TasksPanelComponent } from '../../ui/tasks-panel/tasks-panel.component';
 import { OpenTasksWarningDialogComponent } from '../../ui/open-tasks-warning-dialog/open-tasks-warning-dialog.component';
+import { TransferDialogComponent } from '../../ui/transfer-dialog/transfer-dialog.component';
 
 /**
  * Ticket detail screen: customer panel, conversation thread and properties panel — the three-column
@@ -42,6 +43,7 @@ import { OpenTasksWarningDialogComponent } from '../../ui/open-tasks-warning-dia
     TasksPanelComponent,
     OpenTasksWarningDialogComponent,
     PresenceBarComponent,
+    TransferDialogComponent,
   ],
   templateUrl: './ticket-detail.page.html',
 })
@@ -65,6 +67,7 @@ export class TicketDetailPage {
   readonly resolveDialogOpen = signal(false);
   readonly resolveStatusId = signal('');
   readonly escalateDialogOpen = signal(false);
+  readonly transferDialogOpen = signal(false);
   readonly openTasksWarningOpen = signal(false);
   readonly openTasksWarningStatusId = signal('');
   readonly openTasksWarningTasks = signal<OpenTaskSummary[]>([]);
@@ -174,6 +177,19 @@ export class TicketDetailPage {
 
   onEscalated(): void {
     this.escalateDialogOpen.set(false);
+    this.load();
+  }
+
+  openTransferDialog(): void {
+    this.transferDialogOpen.set(true);
+  }
+
+  closeTransferDialog(): void {
+    this.transferDialogOpen.set(false);
+  }
+
+  onTransferred(): void {
+    this.transferDialogOpen.set(false);
     this.load();
   }
 
