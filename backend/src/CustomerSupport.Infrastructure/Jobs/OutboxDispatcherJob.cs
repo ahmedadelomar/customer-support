@@ -1,6 +1,4 @@
-using System.Text.Json;
 using CustomerSupport.Application.Common.Interfaces;
-using CustomerSupport.Domain.Enums;
 using CustomerSupport.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -9,15 +7,17 @@ using Quartz;
 namespace CustomerSupport.Infrastructure.Jobs;
 
 /// <summary>
-/// Delivers queued external notifications (SLA and Automation / Alerts and notifications). Runs
-/// every 30 seconds over the <c>IX_OutboxMessage_Dispatch</c> index, oldest first, in batches of 100.
-/// Scoped to <c>notification.*</c> rows — the other outbox consumers (webhooks, ERP sync) belong to
-/// their own features once those are built.
+/// The one generic outbox dispatcher every outbox producer shares — notifications (CS-504) and
+/// customer-facing email replies (CS-301) today, WhatsApp/SMS (CS-302/304) next. Runs every 30
+/// seconds over the <c>IX_OutboxMessage_Dispatch</c> index, oldest first, in batches of 100. Delivery
+/// itself is delegated to whichever registered <see cref="IOutboxMessageHandler"/> claims a row's
+/// <c>Type</c> — this job only owns claiming, backoff and abandonment, which is identical no matter
+/// what is being sent.
 /// </summary>
 [DisallowConcurrentExecution]
 public class OutboxDispatcherJob(
     AppDbContext db,
-    IExternalNotificationSender sender,
+    IEnumerable<IOutboxMessageHandler> handlers,
     IDateTimeProvider clock,
     ILogger<OutboxDispatcherJob> logger) : IJob
 {
@@ -31,29 +31,21 @@ public class OutboxDispatcherJob(
         TimeSpan.FromHours(1), TimeSpan.FromHours(6),
     ];
 
-    /// <summary>More than this many pending same-type events for one user within the window collapse into one.</summary>
-    private const int DigestThreshold = 5;
-    private static readonly TimeSpan DigestWindow = TimeSpan.FromMinutes(10);
-
-    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
-
-    private record Payload(
-        Guid NotificationId, Guid UserId, string Channel, string? RecipientEmail, string? RecipientPhone,
-        string Language, string Title, string Body, string EventType, string? Link);
-
     public async Task Execute(IJobExecutionContext context)
     {
         var ct = context.CancellationToken;
         var now = clock.UtcNow;
 
-        await CollapseDigestsAsync(now, ct);
+        foreach (var handler in handlers)
+        {
+            await handler.CollapseAsync(now, ct);
+        }
 
         var due = await db.OutboxMessages
-            .Where(o => o.ProcessedAt == null && o.Type.StartsWith("notification.")
-                && (o.NextAttemptAt == null || o.NextAttemptAt <= now))
+            .Where(o => o.ProcessedAt == null && (o.NextAttemptAt == null || o.NextAttemptAt <= now))
             .OrderBy(o => o.OccurredAt)
             .Take(BatchSize)
-            .Select(o => new { o.Id, o.NextAttemptAt })
+            .Select(o => new { o.Id, o.Type, o.NextAttemptAt })
             .ToListAsync(ct);
 
         var sent = 0;
@@ -62,9 +54,9 @@ public class OutboxDispatcherJob(
         foreach (var row in due)
         {
             // Claim by pushing the due time forward, conditioned on it still matching what we just
-            // read — exactly the compare-and-swap the reminder job uses via ExecuteUpdateAsync, so an
-            // overlapping run (another instance, since DisallowConcurrentExecution only covers this
-            // one) can never send the same message twice.
+            // read — the same compare-and-swap the reminder job and round-robin assignment use, so
+            // an overlapping run (another instance; DisallowConcurrentExecution only covers this one)
+            // can never send the same message twice.
             var claimed = await db.OutboxMessages
                 .Where(o => o.Id == row.Id && o.ProcessedAt == null && o.NextAttemptAt == row.NextAttemptAt)
                 .ExecuteUpdateAsync(s => s.SetProperty(o => o.NextAttemptAt, now.AddMinutes(2)), ct);
@@ -75,28 +67,20 @@ public class OutboxDispatcherJob(
             }
 
             var message = await db.OutboxMessages.FirstAsync(o => o.Id == row.Id, ct);
+            var handler = handlers.FirstOrDefault(h => h.CanHandle(message.Type));
 
-            Payload? payload;
-            try
-            {
-                payload = JsonSerializer.Deserialize<Payload>(message.PayloadJson, JsonOptions);
-            }
-            catch (JsonException)
-            {
-                payload = null;
-            }
-
-            if (payload is null || !Enum.TryParse<NotificationChannel>(payload.Channel, true, out var channel))
+            if (handler is null)
             {
                 message.ProcessedAt = now;
-                message.Error = "Malformed payload — abandoned without sending.";
+                message.Error = $"No handler registered for outbox type '{message.Type}'.";
                 await db.SaveChangesAsync(ct);
+                logger.LogError("Outbox message {Id} abandoned: no handler for type {Type}.", message.Id, message.Type);
                 continue;
             }
 
             try
             {
-                await sender.SendAsync(channel, payload.RecipientEmail, payload.RecipientPhone, payload.Title, payload.Body, payload.Link, ct);
+                await handler.HandleAsync(message, ct);
                 message.ProcessedAt = now;
                 sent++;
             }
@@ -125,72 +109,6 @@ public class OutboxDispatcherJob(
         if (sent > 0 || abandoned > 0)
         {
             logger.LogInformation("Outbox dispatch: {Sent} sent, {Abandoned} abandoned.", sent, abandoned);
-        }
-    }
-
-    /// <summary>
-    /// Collapses a burst of same-type, same-user pending notifications into one. Rewrites the
-    /// earliest row's payload into a summary and marks the rest processed (merged), so they are
-    /// skipped by the claim loop above rather than each sent individually.
-    /// </summary>
-    private async Task CollapseDigestsAsync(DateTimeOffset now, CancellationToken ct)
-    {
-        var pending = await db.OutboxMessages
-            .Where(o => o.ProcessedAt == null && o.Type.StartsWith("notification.") && o.OccurredAt >= now - DigestWindow)
-            .ToListAsync(ct);
-
-        if (pending.Count <= DigestThreshold)
-        {
-            return; // cheapest possible exit for the common case (no burst at all)
-        }
-
-        var parsed = pending
-            .Select(o => (Row: o, Payload: TryParse(o.PayloadJson)))
-            .Where(x => x.Payload is not null)
-            .ToList();
-
-        var changed = false;
-
-        foreach (var group in parsed.GroupBy(x => (x.Payload!.UserId, x.Payload.EventType, x.Row.Type)))
-        {
-            var rows = group.OrderBy(x => x.Row.OccurredAt).ToList();
-            if (rows.Count <= DigestThreshold)
-            {
-                continue;
-            }
-
-            var keep = rows[0];
-            foreach (var extra in rows.Skip(1))
-            {
-                extra.Row.ProcessedAt = now;
-                extra.Row.Error = "Merged into a digest notification.";
-            }
-
-            var digestPayload = keep.Payload! with
-            {
-                Title = $"{rows.Count} new {group.Key.EventType} notifications",
-                Body = $"You have {rows.Count} new notifications you haven't seen yet.",
-                Link = "/agent/dashboard",
-            };
-            keep.Row.PayloadJson = JsonSerializer.Serialize(digestPayload);
-            changed = true;
-        }
-
-        if (changed)
-        {
-            await db.SaveChangesAsync(ct);
-        }
-    }
-
-    private static Payload? TryParse(string json)
-    {
-        try
-        {
-            return JsonSerializer.Deserialize<Payload>(json, JsonOptions);
-        }
-        catch (JsonException)
-        {
-            return null;
         }
     }
 }

@@ -1,9 +1,14 @@
 using CustomerSupport.Application.Automation;
+using CustomerSupport.Application.Channels;
+using CustomerSupport.Application.Channels.Inbound;
+using CustomerSupport.Application.Channels.Outbound;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Localization;
 using CustomerSupport.Application.Files;
 using CustomerSupport.Application.Tickets.Assignment;
 using CustomerSupport.Application.Workspace.QuickReplies;
+using CustomerSupport.Infrastructure.Channels;
+using CustomerSupport.Infrastructure.Channels.Email;
 using CustomerSupport.Infrastructure.Identity;
 using CustomerSupport.Infrastructure.Jobs;
 using CustomerSupport.Infrastructure.Localization;
@@ -118,7 +123,16 @@ public static class DependencyInjection
         // SLA and Automation / Alerts and notifications (CS-504). The real email/SMS/push senders
         // are CS-301/302/304's job; this logs instead until those land.
         services.AddScoped<IExternalNotificationSender, LoggingExternalNotificationSender>();
+        services.AddScoped<IOutboxMessageHandler, NotificationOutboxHandler>();
         services.AddSingleton<IFileStorage, LocalFileStorage>();
+
+        // Communication Channels / Email channel (CS-301). IInboundMessagePipeline is built general
+        // enough for CS-302 (WhatsApp) and CS-304 (SMS) to reuse unchanged.
+        services.AddScoped<IInboundMessagePipeline, InboundMessagePipeline>();
+        services.AddScoped<IChannelWebhookSecrets, ChannelWebhookSecrets>();
+        services.AddScoped<IEmailChannelSender, LoggingEmailChannelSender>();
+        services.AddScoped<IEmailTemplateRenderer, EmailTemplateRenderer>();
+        services.AddScoped<IOutboxMessageHandler, EmailChannelOutboxHandler>();
         services.AddSingleton<IVirusScanner, NoOpVirusScanner>();
 
         // Runtime configuration (Security & Administration / System configuration). These three read

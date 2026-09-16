@@ -34,6 +34,7 @@ public static class NotificationEventTypes
         new("ticket.escalated", NotificationArea.Sla, DefaultViaEmail: true, DefaultViaSms: false, DefaultViaPush: false),
         new("sla.warning", NotificationArea.Sla, DefaultViaEmail: false, DefaultViaSms: false, DefaultViaPush: false),
         new("sla.breached", NotificationArea.Sla, DefaultViaEmail: true, DefaultViaSms: false, DefaultViaPush: false),
+        new("ticket.emailBounced", NotificationArea.Tickets, DefaultViaEmail: true, DefaultViaSms: false, DefaultViaPush: false),
         new("task.assigned", NotificationArea.Tasks, DefaultViaEmail: false, DefaultViaSms: false, DefaultViaPush: false),
         new("reminder.due", NotificationArea.Tasks, DefaultViaEmail: false, DefaultViaSms: false, DefaultViaPush: false),
     ];

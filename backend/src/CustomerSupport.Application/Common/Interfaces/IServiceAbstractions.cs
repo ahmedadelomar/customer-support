@@ -187,6 +187,28 @@ public interface IRealtimeNotifier
     Task NotifyAsync(Guid userId, RealtimeNotification notification, CancellationToken ct = default);
 }
 
+/// <summary>
+/// One kind of outbox row the generic dispatcher (<c>OutboxDispatcherJob</c>) knows how to deliver.
+/// Registered as a collection — the job claims a due row, finds the handler whose
+/// <see cref="CanHandle"/> matches its <c>Type</c> prefix, and calls <see cref="HandleAsync"/>.
+/// A row whose type matches no handler is abandoned immediately with a clear error rather than
+/// retried forever. Introduced by CS-301 (email) so CS-302/304's WhatsApp/SMS sends and CS-504's
+/// notification fan-out share one claim/backoff/abandon loop instead of one job each.
+/// </summary>
+public interface IOutboxMessageHandler
+{
+    bool CanHandle(string type);
+
+    /// <summary>Delivers one row. Must not call <c>SaveChangesAsync</c> — the job persists whatever this adds/changes together with the row's own status.</summary>
+    Task HandleAsync(Domain.Integrations.OutboxMessage message, CancellationToken ct);
+
+    /// <summary>
+    /// Optional whole-table pass run once per tick before any row is claimed (for example CS-504's
+    /// digest collapsing). Most handlers have nothing to do here.
+    /// </summary>
+    Task CollapseAsync(DateTimeOffset now, CancellationToken ct) => Task.CompletedTask;
+}
+
 /// <summary>Fan-out for alerts: writes the in-app row then dispatches to the opted-in channels.</summary>
 public interface INotificationDispatcher
 {

@@ -70,6 +70,7 @@ Thumbs.db
 *.dev.db-wal
 api.log
 api.err.log
+backend/src/CustomerSupport.Api/App_Data/
 web.log
 web.err.log
 

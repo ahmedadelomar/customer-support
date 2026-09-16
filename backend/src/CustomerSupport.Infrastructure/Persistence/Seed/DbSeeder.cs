@@ -304,7 +304,12 @@ public class DbSeeder(
 
         var policy = new SlaPolicy
         {
-            BranchId = branchId,
+            // Global (no branch), not scoped to the seed branch: this is the documented
+            // no-other-policy-matches fallback, and a ticket with no branch of its own (an
+            // anonymous inbound channel's first-time sender, for example) must still be able to
+            // reach it — see SlaEngine.SelectPolicyAsync's (BranchId == null || BranchId == ticket.BranchId)
+            // filter, which a branch-scoped "default" would silently fail for a branchless ticket.
+            BranchId = null,
             Name = new LocalizedText("Standard SLA", "اتفاقية الخدمة القياسية"),
             BusinessCalendarId = calendar.Id,
             EvaluationOrder = 100,

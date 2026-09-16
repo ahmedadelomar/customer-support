@@ -1,3 +1,4 @@
+using CustomerSupport.Application.Channels.Outbound;
 using CustomerSupport.Application.Common.Exceptions;
 using CustomerSupport.Application.Common.Interfaces;
 using CustomerSupport.Application.Common.Security;
@@ -75,6 +76,11 @@ public class ReplyToTicketCommandHandler(
 
         db.TicketMessages.Add(message);
 
+        if (ticket.Channel == ChannelKey.Email && ticket.ChannelAccountId is not null)
+        {
+            await QueueEmailReplyAsync(ticket, message, cancellationToken);
+        }
+
         ticket.LastAgentReplyAt = clock.UtcNow;
 
         if (status.Kind == TicketStatusKind.New)
@@ -109,6 +115,44 @@ public class ReplyToTicketCommandHandler(
         await slaEngine.OnFirstAgentReplyAsync(ticket.Id, cancellationToken);
 
         return message.Id;
+    }
+
+    /// <summary>
+    /// Queues the reply through the outbox (Communication Channels / Email channel, CS-301) —
+    /// generates and stores this message's own <c>Message-ID</c> so the customer's next reply
+    /// threads back onto it, and prefixes the subject with the ticket number the same way every
+    /// outbound reply on this channel does.
+    /// </summary>
+    private async Task QueueEmailReplyAsync(Ticket ticket, TicketMessage message, CancellationToken ct)
+    {
+        var customer = await db.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Id == ticket.CustomerId, ct);
+        if (string.IsNullOrWhiteSpace(customer?.PrimaryEmail))
+        {
+            return; // nothing to send to — the reply still lands in-app, just not by email
+        }
+
+        var account = await db.ChannelAccounts.AsNoTracking().FirstOrDefaultAsync(a => a.Id == ticket.ChannelAccountId, ct);
+        if (account is null)
+        {
+            return;
+        }
+
+        var lastInbound = await db.TicketMessages.AsNoTracking()
+            .Where(m => m.TicketId == ticket.Id && m.Direction == MessageDirection.Inbound && m.ExternalMessageId != null)
+            .OrderByDescending(m => m.SentAt)
+            .Select(m => m.ExternalMessageId)
+            .FirstOrDefaultAsync(ct);
+
+        var messageId = EmailChannelOutbox.NewMessageId(account.Identifier);
+        message.ExternalMessageId = messageId;
+        message.InReplyToExternalId = lastInbound;
+
+        var subject = $"[{ticket.Number}] {ticket.Subject}";
+
+        EmailChannelOutbox.Queue(db, clock, new EmailOutboundPayload(
+            message.Id, ticket.Id, account.Id, ticket.BranchId,
+            customer.PrimaryEmail, account.Identifier, subject, message.BodyText, message.BodyHtml,
+            customer.PreferredLanguage, messageId, lastInbound));
     }
 
     private static string Truncate(string text, int maxLength = 280) =>
