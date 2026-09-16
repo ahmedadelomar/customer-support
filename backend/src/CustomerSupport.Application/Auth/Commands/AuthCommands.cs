@@ -1,5 +1,6 @@
 using CustomerSupport.Application.Auth.Dtos;
 using CustomerSupport.Application.Common.Interfaces;
+using CustomerSupport.Domain.Enums;
 using FluentValidation;
 using MediatR;
 
@@ -21,10 +22,35 @@ public class LoginCommandValidator : AbstractValidator<LoginCommand>
     }
 }
 
-public class LoginCommandHandler(ITokenService tokens) : IRequestHandler<LoginCommand, AuthResultDto>
+public class LoginCommandHandler(ITokenService tokens, IAuditRecorder audit)
+    : IRequestHandler<LoginCommand, AuthResultDto>
 {
-    public Task<AuthResultDto> Handle(LoginCommand request, CancellationToken cancellationToken) =>
-        tokens.LoginAsync(request.UserName, request.Password, request.IpAddress, cancellationToken);
+    public async Task<AuthResultDto> Handle(LoginCommand request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await tokens.LoginAsync(
+                request.UserName, request.Password, request.IpAddress, cancellationToken);
+
+            await audit.RecordAsync(
+                AuditAction.Login, "User", result.User.Id.ToString(),
+                userName: result.User.UserName, ct: cancellationToken);
+
+            return result;
+        }
+        catch (Exception)
+        {
+            // Records WHO was attempted and never the password. ICurrentUser is empty here — nobody
+            // is authenticated yet — so the attempted username is passed explicitly.
+            await audit.RecordAsync(
+                AuditAction.LoginFailed, "User",
+                metadata: new { request.IpAddress },
+                userName: request.UserName,
+                ct: cancellationToken);
+
+            throw;
+        }
+    }
 }
 
 /// <summary>Exchanges a refresh token for a new pair, rotating the old one.</summary>
@@ -46,10 +72,21 @@ public class RefreshTokenCommandHandler(ITokenService tokens)
 /// <summary>Revokes the presented refresh token.</summary>
 public record LogoutCommand(string RefreshToken) : IRequest;
 
-public class LogoutCommandHandler(ITokenService tokens) : IRequestHandler<LogoutCommand>
+public class LogoutCommandHandler(ITokenService tokens, IAuditRecorder audit, ICurrentUser currentUser)
+    : IRequestHandler<LogoutCommand>
 {
-    public Task Handle(LogoutCommand request, CancellationToken cancellationToken) =>
-        tokens.LogoutAsync(request.RefreshToken, cancellationToken);
+    public async Task Handle(LogoutCommand request, CancellationToken cancellationToken)
+    {
+        await tokens.LogoutAsync(request.RefreshToken, cancellationToken);
+
+        // Sign-out is anonymous-capable (the endpoint takes only a refresh token), so there may be no
+        // authenticated caller to attribute this to; the entry is still worth having.
+        if (currentUser.UserId is not null)
+        {
+            await audit.RecordAsync(
+                AuditAction.Logout, "User", currentUser.UserId.ToString(), ct: cancellationToken);
+        }
+    }
 }
 
 /// <summary>

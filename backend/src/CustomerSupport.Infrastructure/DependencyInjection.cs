@@ -96,6 +96,7 @@ public static class DependencyInjection
         services.AddSingleton<IFileStorage, LocalFileStorage>();
         services.AddSingleton<IAttachmentPolicyProvider, AttachmentPolicyProvider>();
         services.AddSingleton<IAutoCloseSettingsProvider, AutoCloseSettingsProvider>();
+        services.AddSingleton<IAuditRetentionSettings, AuditRetentionSettings>();
         services.AddSingleton<IVirusScanner, NoOpVirusScanner>();
         services.AddScoped<DbSeeder>();
 
@@ -120,6 +121,15 @@ public static class DependencyInjection
                 .ForJob(reminderJobKey)
                 .WithIdentity($"{nameof(ReminderDispatchJob)}-trigger")
                 .WithSimpleSchedule(s => s.WithIntervalInMinutes(1).RepeatForever()));
+
+            // Audit retention (Security & Administration / Audit logs) — nightly at 03:00, when the
+            // batched deletes are least likely to compete with agents for the database.
+            var auditJobKey = new JobKey(nameof(AuditRetentionJob));
+            q.AddJob<AuditRetentionJob>(opts => opts.WithIdentity(auditJobKey));
+            q.AddTrigger(opts => opts
+                .ForJob(auditJobKey)
+                .WithIdentity($"{nameof(AuditRetentionJob)}-trigger")
+                .WithCronSchedule("0 0 3 * * ?"));
         });
         services.AddQuartzHostedService(opts => opts.WaitForJobsToComplete = true);
 

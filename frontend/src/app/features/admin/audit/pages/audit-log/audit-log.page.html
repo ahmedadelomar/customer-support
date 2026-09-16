@@ -1,0 +1,94 @@
+<app-page-header titleKey="admin.audit.title" subtitleKey="admin.audit.subtitle">
+  <button type="button" class="btn-secondary" [disabled]="exporting()" (click)="export()">
+    {{ (exporting() ? 'common.saving' : 'admin.audit.export') | translate }}
+  </button>
+</app-page-header>
+
+<div class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+  <div class="min-w-48 flex-1">
+    <label class="form-label" for="audit-search">{{ 'common.search' | translate }}</label>
+    <app-search-input
+      [value]="searchTerm()"
+      placeholderKey="admin.audit.searchPlaceholder"
+      (search)="onSearch($event)"
+    />
+  </div>
+
+  <div class="min-w-36">
+    <label class="form-label" for="audit-from">{{ 'admin.audit.filters.from' | translate }}</label>
+    <input
+      id="audit-from"
+      type="date"
+      class="form-control"
+      [ngModel]="fromFilter()"
+      (ngModelChange)="fromFilter.set($event); onFilterChange()"
+    />
+  </div>
+
+  <div class="min-w-36">
+    <label class="form-label" for="audit-to">{{ 'admin.audit.filters.to' | translate }}</label>
+    <input
+      id="audit-to"
+      type="date"
+      class="form-control"
+      [ngModel]="toFilter()"
+      (ngModelChange)="toFilter.set($event); onFilterChange()"
+    />
+  </div>
+
+  <div class="min-w-40">
+    <label class="form-label" for="audit-entity">{{ 'admin.audit.columns.entityType' | translate }}</label>
+    <select
+      id="audit-entity"
+      class="form-control"
+      [ngModel]="entityTypeFilter()"
+      (ngModelChange)="entityTypeFilter.set($event); onFilterChange()"
+    >
+      <option value="">{{ 'admin.audit.filters.allEntities' | translate }}</option>
+      @for (type of entityTypes(); track type) {
+        <option [value]="type">{{ type }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="min-w-40">
+    <label class="form-label" for="audit-action">{{ 'admin.audit.columns.action' | translate }}</label>
+    <select
+      id="audit-action"
+      class="form-control"
+      [ngModel]="actionFilter()"
+      (ngModelChange)="actionFilter.set($event); onFilterChange()"
+    >
+      <option value="">{{ 'admin.audit.filters.allActions' | translate }}</option>
+      @for (option of actionOptions; track option.value) {
+        <option [value]="option.value">{{ option.labelKey | translate }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<ng-template #actionCell let-row>
+  <span class="chip" [class]="actionClasses(row.action)">{{ 'enums.auditAction.' + row.action | translate }}</span>
+</ng-template>
+
+<div class="card p-0">
+  <app-data-table
+    [columns]="columns()"
+    [rows]="rows()"
+    [loading]="loading()"
+    [skeletonRows]="10"
+    emptyMessageKey="admin.audit.empty"
+    (rowClick)="openDetail($event)"
+  />
+
+  <div class="px-4">
+    <app-pagination
+      [page]="page()"
+      [pageSize]="pageSize()"
+      [totalCount]="totalCount()"
+      (pageChange)="onPageChange($event)"
+    />
+  </div>
+</div>
+
+<app-audit-detail-panel [entryId]="selectedId()" (closed)="closeDetail()" />

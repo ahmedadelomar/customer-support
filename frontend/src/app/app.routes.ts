@@ -115,6 +115,12 @@ export const routes: Routes = [
         data: { titleKey: 'admin.roles.title', permissions: [PERMISSIONS.administration.manageRoles] },
         loadChildren: () => import('./features/admin/roles/roles.routes').then((m) => m.ROLE_ROUTES),
       },
+      {
+        path: 'audit',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'admin.audit.title', permissions: [PERMISSIONS.administration.viewAuditLogs] },
+        loadChildren: () => import('./features/admin/audit/audit.routes').then((m) => m.AUDIT_ROUTES),
+      },
     ],
   },
 

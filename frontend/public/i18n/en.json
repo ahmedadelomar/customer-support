@@ -44,6 +44,7 @@
     "tasks": "Tasks & Reminders",
     "mentions": "Mentions",
     "roles": "Roles & Permissions",
+    "auditLogs": "Audit Log",
     "knowledgeBase": "Knowledge Base",
     "quickReplies": "Quick Replies",
     "reports": "Reports",
@@ -557,6 +558,35 @@
         "description": "Description"
       }
     },
+    "audit": {
+      "title": "Audit log",
+      "subtitle": "Every security-relevant change, append-only.",
+      "empty": "No audit entries match these filters.",
+      "searchPlaceholder": "Search actor, entity or IP…",
+      "export": "Export CSV",
+      "detailTitle": "Audit entry",
+      "changes": "Changed fields",
+      "noChanges": "This entry records an event rather than a field change.",
+      "field": "Field",
+      "oldValue": "Before",
+      "newValue": "After",
+      "correlationId": "Correlation id",
+      "userAgent": "User agent",
+      "columns": {
+        "timestamp": "When",
+        "actor": "Actor",
+        "action": "Action",
+        "entityType": "Entity",
+        "entityId": "Entity id",
+        "ip": "IP address"
+      },
+      "filters": {
+        "from": "From",
+        "to": "To",
+        "allEntities": "All entities",
+        "allActions": "All actions"
+      }
+    },
     "categories": {
       "title": "Ticket categories",
       "addRoot": "Add top-level category",
@@ -639,6 +669,18 @@
     "unexpected": "Something went wrong. Please try again."
   },
   "enums": {
+    "auditAction": {
+      "0": "Created",
+      "1": "Updated",
+      "2": "Deleted",
+      "3": "Read",
+      "4": "Signed in",
+      "5": "Sign-in failed",
+      "6": "Signed out",
+      "7": "Permissions changed",
+      "8": "Exported",
+      "9": "Configuration changed"
+    },
     "customerType": {
       "0": "Individual",
       "1": "Company",

@@ -182,6 +182,17 @@ public interface IAutoCloseSettingsProvider
 }
 
 /// <summary>
+/// Source of the audit retention window (<c>audit.retentionDays</c>), read by the nightly retention
+/// job. Same shape and reasoning as <see cref="IAutoCloseSettingsProvider"/>: async so that backing
+/// it with a <c>SystemSetting</c> row once CS-1004 lands is a configuration change, not a signature
+/// change. Zero means keep forever.
+/// </summary>
+public interface IAuditRetentionSettings
+{
+    Task<int> GetRetentionDaysAsync(CancellationToken ct = default);
+}
+
+/// <summary>
 /// Scans a saved file before it becomes downloadable. The default implementation is a no-op that
 /// reports <c>"skipped"</c> — shipping the hook now means wiring a real scanner later is
 /// configuration, not a schema or call-site change.
