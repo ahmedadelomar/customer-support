@@ -1,0 +1,140 @@
+<app-page-header [titleKey]="isNew() ? 'admin.users.create' : 'admin.users.edit'" />
+
+@if (loading()) {
+  <div class="card h-96 animate-pulse"></div>
+} @else {
+  <div class="card space-y-4 p-4">
+    @if (fieldErrors('').length) {
+      <div class="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        @for (message of fieldErrors(''); track message) {
+          <p>{{ message }}</p>
+        }
+      </div>
+    }
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <label class="form-label" for="user-username">{{ 'admin.users.form.userName' | translate }}</label>
+        <input
+          id="user-username"
+          class="form-control"
+          [disabled]="!isNew()"
+          [ngModel]="userName()"
+          (ngModelChange)="userName.set($event)"
+        />
+        @if (!isNew()) {
+          <p class="mt-1 text-xs text-slate-500">{{ 'admin.users.form.userNameImmutable' | translate }}</p>
+        }
+      </div>
+
+      <div>
+        <label class="form-label" for="user-email">{{ 'admin.users.form.email' | translate }}</label>
+        <input id="user-email" type="email" class="form-control" [ngModel]="email()" (ngModelChange)="email.set($event)" />
+      </div>
+
+      @if (isNew()) {
+        <div class="sm:col-span-2">
+          <label class="form-label" for="user-password">{{ 'admin.users.form.password' | translate }}</label>
+          <input
+            id="user-password"
+            type="password"
+            class="form-control"
+            autocomplete="new-password"
+            [ngModel]="password()"
+            (ngModelChange)="password.set($event)"
+          />
+          <p class="mt-1 text-xs text-slate-500">{{ 'admin.users.form.passwordHint' | translate }}</p>
+        </div>
+      }
+
+      <div>
+        <label class="form-label" for="user-name-en">{{ 'admin.users.form.displayNameEn' | translate }}</label>
+        <input id="user-name-en" class="form-control" [ngModel]="displayNameEn()" (ngModelChange)="displayNameEn.set($event)" />
+      </div>
+
+      <div>
+        <label class="form-label" for="user-name-ar">{{ 'admin.users.form.displayNameAr' | translate }}</label>
+        <input id="user-name-ar" class="form-control" dir="rtl" [ngModel]="displayNameAr()" (ngModelChange)="displayNameAr.set($event)" />
+      </div>
+
+      <div>
+        <label class="form-label" for="user-job-title">{{ 'admin.users.form.jobTitle' | translate }}</label>
+        <input id="user-job-title" class="form-control" [ngModel]="jobTitle()" (ngModelChange)="jobTitle.set($event)" />
+      </div>
+
+      <div>
+        <label class="form-label" for="user-language">{{ 'admin.users.form.preferredLanguage' | translate }}</label>
+        <select
+          id="user-language"
+          class="form-control"
+          [ngModel]="preferredLanguage()"
+          (ngModelChange)="preferredLanguage.set($event)"
+        >
+          <option value="ar">العربية</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="form-label" for="user-branch">{{ 'admin.users.form.branch' | translate }}</label>
+        <select id="user-branch" class="form-control" [ngModel]="branchId()" (ngModelChange)="branchId.set($event)">
+          <option value="">{{ 'admin.users.form.noBranch' | translate }}</option>
+          @for (branch of branches(); track branch.id) {
+            <option [value]="branch.id">{{ scopeName(branch) }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label class="form-label" for="user-department">{{ 'admin.users.form.department' | translate }}</label>
+        <select id="user-department" class="form-control" [ngModel]="departmentId()" (ngModelChange)="departmentId.set($event)">
+          <option value="">{{ 'admin.users.form.noDepartment' | translate }}</option>
+          @for (department of departments(); track department.id) {
+            <option [value]="department.id">{{ scopeName(department) }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label class="form-label" for="user-capacity">{{ 'admin.users.form.maxConcurrentTickets' | translate }}</label>
+        <input
+          id="user-capacity"
+          type="number"
+          min="0"
+          class="form-control"
+          [ngModel]="maxConcurrentTickets()"
+          (ngModelChange)="maxConcurrentTickets.set($event)"
+        />
+        <p class="mt-1 text-xs text-slate-500">{{ 'admin.users.form.maxConcurrentTicketsHint' | translate }}</p>
+      </div>
+    </div>
+
+    <div>
+      <p class="form-label">{{ 'admin.users.form.roles' | translate }}</p>
+      <div class="mt-1 flex flex-wrap gap-2">
+        @for (role of roles(); track role.id) {
+          <button
+            type="button"
+            class="chip"
+            [class.border-brand-500]="roleIds().includes(role.id)"
+            [class.bg-brand-50]="roleIds().includes(role.id)"
+            [class.text-brand-700]="roleIds().includes(role.id)"
+            (click)="toggleRole(role.id)"
+          >
+            {{ roleName(role) }}
+          </button>
+        }
+      </div>
+      @for (message of fieldErrors('roleIds'); track message) {
+        <p class="form-error mt-1">{{ message | translate }}</p>
+      }
+    </div>
+
+    <div class="flex justify-end gap-2 border-t border-slate-200 pt-4">
+      <button type="button" class="btn-secondary" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+      <button type="button" class="btn-primary" [disabled]="saving()" (click)="save()">
+        {{ (saving() ? 'common.saving' : 'common.save') | translate }}
+      </button>
+    </div>
+  </div>
+}

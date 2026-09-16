@@ -50,6 +50,16 @@ export class AuthService {
       .pipe(tap((result) => this.#applySession(result)));
   }
 
+  /**
+   * Changes the signed-in user's password. The server returns a fresh session because the old
+   * access token still carries `must_change_password`, which the API refuses every other call for.
+   */
+  changePassword(currentPassword: string, newPassword: string): Observable<AuthResult> {
+    return this.#http
+      .post<AuthResult>(`${this.#config.apiUrl}/api/auth/change-password`, { currentPassword, newPassword })
+      .pipe(tap((result) => this.#applySession(result)));
+  }
+
   logout(redirect = true): void {
     this.#user.set(null);
     this.#accessToken.set(null);

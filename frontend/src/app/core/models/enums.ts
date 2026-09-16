@@ -3,6 +3,26 @@
  * so these must stay in lockstep with the C# definitions — the ordinal is the contract.
  */
 
+export enum UserType {
+  Agent = 0,
+  Customer = 1,
+  ServiceAccount = 2,
+}
+
+/** Mirrors `AuditAction`; the audit viewer renders one chip style per value. */
+export enum AuditAction {
+  Create = 0,
+  Update = 1,
+  Delete = 2,
+  Read = 3,
+  Login = 4,
+  LoginFailed = 5,
+  Logout = 6,
+  PermissionChanged = 7,
+  Export = 8,
+  ConfigChanged = 9,
+}
+
 export enum TicketStatusKind {
   New = 0,
   Open = 1,

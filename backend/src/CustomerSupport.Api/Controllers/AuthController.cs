@@ -1,7 +1,9 @@
+using CustomerSupport.Api.Infrastructure;
 using CustomerSupport.Application.Auth.Commands;
 using CustomerSupport.Application.Auth.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace CustomerSupport.Api.Controllers;
 
@@ -15,6 +17,7 @@ public class AuthController : ApiControllerBase
     /// <summary>Signs in and returns an access token, a refresh token and the user profile.</summary>
     [HttpPost("login")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Login)]
     [ProducesResponseType(typeof(AuthResultDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -43,9 +46,22 @@ public class AuthController : ApiControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Changes the caller's own password and returns a fresh session. Reachable while
+    /// <c>MustChangePassword</c> is set — it is the way out of that state.
+    /// </summary>
+    [HttpPost("change-password")]
+    [ProducesResponseType(typeof(AuthResultDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<AuthResultDto>> ChangePassword(
+        [FromBody] ChangePasswordRequest request, CancellationToken ct)
+        => Ok(await Sender.Send(new ChangePasswordCommand(request.CurrentPassword, request.NewPassword), ct));
+
     private string? ClientIp => HttpContext.Connection.RemoteIpAddress?.ToString();
 }
 
 public record LoginRequest(string UserName, string Password);
 
 public record RefreshRequest(string RefreshToken);
+
+public record ChangePasswordRequest(string CurrentPassword, string NewPassword);

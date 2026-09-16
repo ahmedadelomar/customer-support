@@ -1,4 +1,5 @@
 using System.Text;
+using System.Threading.RateLimiting;
 using CustomerSupport.Api.Hubs;
 using CustomerSupport.Api.Infrastructure;
 using CustomerSupport.Api.Services;
@@ -73,6 +74,24 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+// --- Rate limiting --------------------------------------------------------------------------------
+// Sign-in only: 10 attempts per IP per minute. Enough for a person mistyping a password, not enough
+// for credential stuffing. Queue limit 0 — a refused attempt fails fast rather than waiting in line.
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy(RateLimitPolicies.Login, context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+            }));
+});
+
 // --- CORS: the Angular dev server and the deployed front end ------------------------------------
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
     ?? ["http://localhost:4200"];
@@ -125,8 +144,12 @@ else
 app.UseHttpsRedirection();
 app.UseRequestLocalization();
 app.UseCors();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// After authentication so the claim is available; before the endpoints so no handler can forget it.
+app.UseMiddleware<MustChangePasswordMiddleware>();
 
 app.MapControllers();
 app.MapHub<CollaborationHub>("/hubs/collaboration");

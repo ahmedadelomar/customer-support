@@ -20,6 +20,13 @@ export const routes: Routes = [
   },
 
   {
+    path: 'change-password',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/auth/change-password.page').then((m) => m.ChangePasswordPage),
+  },
+
+  {
     path: 'agent',
     canActivate: [authGuard],
     loadComponent: () => import('./layout/agent-shell/agent-shell.page').then((m) => m.AgentShellPage),
@@ -95,6 +102,12 @@ export const routes: Routes = [
         data: { titleKey: 'nav.ticketStatuses', permissions: [PERMISSIONS.tickets.manageStatuses] },
         loadChildren: () =>
           import('./features/admin/statuses/statuses.routes').then((m) => m.STATUS_ROUTES),
+      },
+      {
+        path: 'users',
+        canActivate: [permissionGuard],
+        data: { titleKey: 'nav.users', permissions: [PERMISSIONS.administration.viewUsers] },
+        loadChildren: () => import('./features/admin/users/users.routes').then((m) => m.USER_ROUTES),
       },
     ],
   },

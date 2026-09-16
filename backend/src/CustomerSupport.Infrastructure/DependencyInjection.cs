@@ -83,6 +83,8 @@ public static class DependencyInjection
         services.AddScoped<IInteractionRecorder, InteractionRecorder>();
         services.AddScoped<IUserDisplayNameResolver, UserDisplayNameResolver>();
         services.AddScoped<IAgentDirectory, AgentDirectory>();
+        services.AddScoped<IUserAdminService, UserAdminService>();
+        services.AddScoped<IRoleAdminService, RoleAdminService>();
         services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
         services.AddScoped<IAgentCapacityService, AgentCapacityService>();
         services.AddScoped<IPlaceholderResolver, PlaceholderResolver>();

@@ -1,0 +1,82 @@
+<app-page-header titleKey="admin.users.title" subtitleKey="admin.users.subtitle">
+  <a *hasPermission="permissions.administration.manageUsers" class="btn-primary" routerLink="/admin/users/new">
+    {{ 'admin.users.create' | translate }}
+  </a>
+</app-page-header>
+
+<div class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+  <div class="min-w-56 flex-1">
+    <label class="form-label" for="user-search">{{ 'common.search' | translate }}</label>
+    <app-search-input
+      [value]="searchTerm()"
+      placeholderKey="admin.users.searchPlaceholder"
+      (search)="onSearch($event)"
+    />
+  </div>
+
+  <div class="min-w-40">
+    <label class="form-label" for="user-role">{{ 'admin.users.columns.roles' | translate }}</label>
+    <select
+      id="user-role"
+      class="form-control"
+      [ngModel]="roleFilter()"
+      (ngModelChange)="roleFilter.set($event); onFilterChange()"
+    >
+      <option value="">{{ 'admin.users.filters.allRoles' | translate }}</option>
+      @for (role of roles(); track role.id) {
+        <option [value]="role.id">{{ roleName(role) }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="min-w-40">
+    <label class="form-label" for="user-department">{{ 'admin.users.columns.department' | translate }}</label>
+    <select
+      id="user-department"
+      class="form-control"
+      [ngModel]="departmentFilter()"
+      (ngModelChange)="departmentFilter.set($event); onFilterChange()"
+    >
+      <option value="">{{ 'admin.users.filters.allDepartments' | translate }}</option>
+      @for (department of departments(); track department.id) {
+        <option [value]="department.id">{{ scopeName(department) }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="min-w-40">
+    <label class="form-label" for="user-status">{{ 'admin.users.columns.status' | translate }}</label>
+    <select
+      id="user-status"
+      class="form-control"
+      [ngModel]="activeFilter()"
+      (ngModelChange)="activeFilter.set($event); onFilterChange()"
+    >
+      <option value="">{{ 'admin.users.filters.allStatuses' | translate }}</option>
+      <option value="true">{{ 'admin.users.filters.active' | translate }}</option>
+      <option value="false">{{ 'admin.users.filters.inactive' | translate }}</option>
+    </select>
+  </div>
+</div>
+
+<div class="card p-0">
+  <app-data-table
+    [columns]="columns()"
+    [rows]="rows()"
+    [loading]="loading()"
+    [sort]="sort()"
+    [statusConfig]="statusConfig"
+    [skeletonRows]="pageSize()"
+    emptyMessageKey="admin.users.empty"
+    (sortChange)="onSortChange($event)"
+  />
+
+  <div class="px-4">
+    <app-pagination
+      [page]="page()"
+      [pageSize]="pageSize()"
+      [totalCount]="totalCount()"
+      (pageChange)="onPageChange($event)"
+    />
+  </div>
+</div>

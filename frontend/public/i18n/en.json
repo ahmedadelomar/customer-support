@@ -67,7 +67,16 @@
     "userName": "Username",
     "password": "Password",
     "logout": "Sign out",
-    "invalidCredentials": "The username or password is incorrect."
+    "invalidCredentials": "The username or password is incorrect.",
+    "changePassword": {
+      "title": "Change your password",
+      "subtitle": "Your account requires a new password before you can continue.",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "mismatch": "The two passwords do not match.",
+      "submit": "Change password"
+    }
   },
   "dashboard": {
     "title": "Dashboard",
@@ -461,6 +470,66 @@
     }
   },
   "admin": {
+    "users": {
+      "title": "Users & roles",
+      "subtitle": "Agent accounts, their roles and their scope.",
+      "create": "New user",
+      "edit": "Edit user",
+      "created": "User created.",
+      "updated": "User updated.",
+      "activated": "User activated.",
+      "deactivated": "User deactivated.",
+      "empty": "No users match these filters.",
+      "searchPlaceholder": "Search name, username or email…",
+      "columns": {
+        "name": "Name",
+        "userName": "Username",
+        "email": "Email",
+        "roles": "Roles",
+        "department": "Department",
+        "branch": "Branch",
+        "availability": "Availability",
+        "status": "Status"
+      },
+      "filters": {
+        "allRoles": "All roles",
+        "allDepartments": "All departments",
+        "allStatuses": "All statuses",
+        "active": "Active",
+        "inactive": "Deactivated"
+      },
+      "actions": {
+        "activate": "Activate",
+        "deactivate": "Deactivate"
+      },
+      "availability": {
+        "available": "Available",
+        "busy": "Busy",
+        "away": "Away",
+        "offline": "Offline"
+      },
+      "form": {
+        "userName": "Username",
+        "userNameImmutable": "The username cannot be changed — it identifies this user in audit and ticket history.",
+        "email": "Email",
+        "password": "Initial password",
+        "passwordHint": "The user must change this password the first time they sign in.",
+        "displayNameEn": "Display name (English)",
+        "displayNameAr": "Display name (Arabic)",
+        "jobTitle": "Job title",
+        "preferredLanguage": "Preferred language",
+        "branch": "Branch",
+        "noBranch": "No branch",
+        "department": "Department",
+        "noDepartment": "No department",
+        "maxConcurrentTickets": "Ticket capacity",
+        "maxConcurrentTicketsHint": "0 means no cap. Used by assignment to warn before overloading an agent.",
+        "roles": "Roles"
+      },
+      "validation": {
+        "roleRequired": "A user must hold at least one role."
+      }
+    },
     "categories": {
       "title": "Ticket categories",
       "addRoot": "Add top-level category",
