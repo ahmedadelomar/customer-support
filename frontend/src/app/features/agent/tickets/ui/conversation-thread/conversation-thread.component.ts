@@ -2,18 +2,20 @@ import { Component, ElementRef, type OnChanges, computed, inject, input, output,
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../../../../core/auth/auth.service';
-import { MessageDirection, TicketEventType } from '../../../../../core/models/enums';
+import { ChannelKey, MessageDirection, TicketEventType } from '../../../../../core/models/enums';
 import { LanguageService } from '../../../../../core/services/language.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { EmptyStateComponent } from '../../../../../shared/ui/empty-state/empty-state.component';
 import { parseMentionSegments } from '../../../../../shared/utils/mention-segments';
 import { relativeTime } from '../../../../../shared/utils/relative-time';
+import { calculateSmsSegments } from '../../../../../shared/utils/sms-segment-calculator';
 import { ticketEventIcon, ticketEventSentence } from '../../../../../shared/utils/ticket-event-sentence';
 import { CollaborationHubService } from '../../../collaboration/data-access/collaboration-hub.service';
 import { CollaborationService } from '../../../collaboration/data-access/collaboration.service';
 import type { MentionableUser } from '../../../collaboration/data-access/interfaces/collaboration.interface';
 import { QuickRepliesService } from '../../../quick-replies/data-access/quick-replies.service';
 import type { QuickReply, QuickReplyRenderResult } from '../../../quick-replies/data-access/interfaces/quick-reply.interface';
+import { SmsService } from '../../data-access/sms.service';
 import { TicketsService } from '../../data-access/tickets.service';
 import type { TicketEvent } from '../../data-access/interfaces/ticket-event.interface';
 import type { TicketMessage } from '../../data-access/interfaces/ticket-message.interface';
@@ -60,11 +62,16 @@ export class ConversationThreadComponent implements OnChanges {
   readonly #language = inject(LanguageService);
   readonly #toast = inject(ToastService);
   readonly #translate = inject(TranslateService);
+  readonly #sms = inject(SmsService);
 
   readonly ticketId = input.required<string>();
+  readonly channel = input<ChannelKey | null>(null);
+  readonly customerOptedOutOfSms = input(false);
   readonly canReply = input(false);
   readonly canAddInternalNote = input(false);
   readonly isTerminal = input(false);
+
+  readonly ChannelKey = ChannelKey;
 
   /** Lets the parent refresh header fields (status may leave New on a reply). */
   readonly sent = output<void>();
@@ -92,6 +99,11 @@ export class ConversationThreadComponent implements OnChanges {
 
   /** Message ids currently showing the plain-text original instead of the rendered HTML — empty means "rendered" for all. */
   readonly showingOriginal = signal<ReadonlySet<string>>(new Set());
+
+  /** Fetched once per ticket (not per keystroke) — the live counter itself uses the local TS mirror for responsiveness. */
+  readonly smsMaxSegments = signal(3);
+
+  readonly smsSegments = computed(() => calculateSmsSegments(this.body()));
 
   readonly locale = computed(() => this.#language.locale());
 
@@ -172,6 +184,10 @@ export class ConversationThreadComponent implements OnChanges {
     this.#isComposingSent = false;
     this.load();
     this.#loadShortcutIndex();
+
+    if (this.channel() === ChannelKey.Sms) {
+      this.#sms.segments('').subscribe((result) => this.smsMaxSegments.set(result.maxSegments));
+    }
   }
 
   load(): void {
@@ -451,9 +467,14 @@ export class ConversationThreadComponent implements OnChanges {
     }
   }
 
+  /** True once the draft would take more segments than the configured cap — mirrors the server's own refusal, so the agent sees it before submitting rather than after a 409. */
+  smsOverCap(): boolean {
+    return this.channel() === ChannelKey.Sms && this.mode() === 'reply' && this.smsSegments().segmentCount > this.smsMaxSegments();
+  }
+
   send(): void {
     const text = this.body().trim();
-    if (!text || this.sending()) {
+    if (!text || this.sending() || this.smsOverCap()) {
       return;
     }
 

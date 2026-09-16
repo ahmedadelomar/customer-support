@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CollaborationHubService } from '../../../collaboration/data-access/collaboration-hub.service';
 import { PresenceBarComponent } from '../../../collaboration/ui/presence-bar/presence-bar.component';
-import { TicketStatusKind } from '../../../../../core/models/enums';
+import { ContactType, TicketStatusKind } from '../../../../../core/models/enums';
 import { PERMISSIONS } from '../../../../../core/permissions';
 import { LanguageService } from '../../../../../core/services/language.service';
 import { ToastService } from '../../../../../core/services/toast.service';
@@ -85,6 +85,12 @@ export class TicketDetailPage {
     const t = this.ticket();
     if (!t) return '';
     return this.#language.pick({ en: t.customer.displayNameEn, ar: t.customer.displayNameAr });
+  });
+
+  /** SMS channel only (CS-304) — the composer banner explaining suppressed automated messages. */
+  readonly customerOptedOutOfSms = computed(() => {
+    const t = this.ticket();
+    return t?.customer.contacts.some((c) => c.type === ContactType.Mobile && !c.allowNotifications) ?? false;
   });
 
   constructor() {

@@ -93,6 +93,12 @@
     </p>
   } @else if (canReply() || canAddInternalNote()) {
     <div class="border-t border-slate-200 pt-3">
+      @if (channel() === ChannelKey.Sms && customerOptedOutOfSms()) {
+        <p class="mb-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
+          {{ 'tickets.composer.sms.optedOutBanner' | translate }}
+        </p>
+      }
+
       <div class="mb-2 inline-flex rounded-lg border border-slate-200 bg-white p-1">
         @if (canReply()) {
           <button
@@ -184,12 +190,31 @@
         }
       </div>
 
+      @if (channel() === ChannelKey.Sms && mode() === 'reply') {
+        <div
+          class="mt-1 flex flex-wrap items-center gap-2 text-xs"
+          [class.text-slate-500]="smsSegments().segmentCount < 3 && !smsOverCap()"
+          [class.text-amber-600]="smsSegments().segmentCount >= 3 && !smsOverCap()"
+          [class.text-rose-600]="smsOverCap()"
+        >
+          <span>
+            {{ 'tickets.composer.sms.counter' | translate: { length: smsSegments().length, maxLength: smsSegments().maxLength, segments: smsSegments().segmentCount, encoding: smsSegments().encoding } }}
+          </span>
+          @if (smsSegments().encoding === 'UCS-2') {
+            <span class="chip border-amber-300 bg-amber-50 text-amber-700">{{ 'tickets.composer.sms.ucs2Warning' | translate }}</span>
+          }
+          @if (smsOverCap()) {
+            <span class="font-medium">{{ 'tickets.composer.sms.overCap' | translate: { max: smsMaxSegments() } }}</span>
+          }
+        </div>
+      }
+
       <div class="mt-2 flex justify-end">
         <button
           type="button"
           class="btn-primary"
           [class.bg-amber-600]="mode() === 'note'"
-          [disabled]="sending() || !body().trim()"
+          [disabled]="sending() || !body().trim() || smsOverCap()"
           (click)="send()"
         >
           {{ (mode() === 'reply' ? 'tickets.composer.send' : 'tickets.composer.sendNote') | translate }}

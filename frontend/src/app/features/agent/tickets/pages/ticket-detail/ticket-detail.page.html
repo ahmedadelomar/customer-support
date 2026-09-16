@@ -72,6 +72,8 @@
         @case ('conversation') {
           <app-conversation-thread
             [ticketId]="t.id"
+            [channel]="t.channel"
+            [customerOptedOutOfSms]="customerOptedOutOfSms()"
             [canReply]="t.canReply"
             [canAddInternalNote]="t.canAddInternalNote"
             [isTerminal]="t.isTerminal"

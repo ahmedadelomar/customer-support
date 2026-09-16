@@ -344,7 +344,13 @@
       "replyPlaceholder": "Write a reply to the customer…",
       "notePlaceholder": "Write a note visible to agents only…",
       "send": "Send",
-      "sendNote": "Add note"
+      "sendNote": "Add note",
+      "sms": {
+        "counter": "{{length}}/{{maxLength}} · {{segments}} segment(s) · {{encoding}}",
+        "ucs2Warning": "Arabic switches the whole message to UCS-2",
+        "overCap": "Above the {{max}}-segment limit — shorten the message",
+        "optedOutBanner": "This customer opted out of automated SMS messages. Automated notifications are suppressed, but you can still reply manually."
+      }
     },
     "thread": {
       "internalNoteBadge": "Internal note",
